@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<title>Face recognizer</title>
+<h1>Check for matching pictures</h1>
+
+
+<form method="POST" enctype="multipart/form-data"> 
+		Class image
+		<input type="file" name='file' accept="image/*;capture=camera">
+		<input type="submit" value="Upload">
+</form>
+{% endblock %}
