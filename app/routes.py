@@ -5,7 +5,7 @@ import face_recognition
 import os
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Student,Course,TA,Attendance,TA_Courses,Prof_Courses,Stud_Courses
+from app.models import User,Student,Course,TA,Attendance,Prof
 from app.email import send_password_reset_email
 
 @APP.route('/Home_TA')
@@ -19,7 +19,7 @@ def TAhome(username):
 
 @APP.route('/Home_stud')
 @login_required
-def studhome():
+def studhome(username):
 	if current_user.is_authenticated is False:
 		flash("Error login first")
 		return redirect(url_for('loginstud'))
@@ -37,10 +37,10 @@ def profhome(username):
 @APP.route('/login_TA',methods={'GET','POST'})
 def loginTA():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('TAhome'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data).first()
+		user = TA.query.filter_by(username=form.username.data).first()
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('loginTA'))
@@ -57,10 +57,10 @@ def loginTA():
 @APP.route('/login_faculty',methods={'GET','POST'})
 def loginprof():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('profhome'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data).first()
+		user = Prof.query.filter_by(username=form.username.data).first()
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('loginprof'))
@@ -77,10 +77,10 @@ def loginprof():
 @APP.route('/login_stud',methods={'GET','POST'})
 def loginstud():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('studhome'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data).first()
+		user = Student.query.filter_by(username=form.username.data).first()
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('loginstud'))
