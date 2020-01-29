@@ -1,4 +1,4 @@
-from app import db,login,loginprof,loginTA,loginstud,APP
+from app import db,login,APP
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin
 from time import time
@@ -8,7 +8,7 @@ import jwt
 def load_user(id):
 	return User.query.get(int(id))
 
-@loginstud.user_loader
+'''@loginstud.user_loader
 def load_stud(stud_id):
 	return Student.query.get(int(stud_id))
 
@@ -18,7 +18,7 @@ def load_TA(TA_id):
 
 @loginprof.user_loader
 def load_prof(prof_id):
-	return Prof.query.get(int(prof_id))
+	return Prof.query.get(int(prof_id))'''
 
 
 class User(UserMixin,db.Model):
@@ -48,17 +48,6 @@ class User(UserMixin,db.Model):
 			return
 		return User.query.get(id)
 
-stud_courses = 	db.Table('stud_courses',
-				db.Column('stud_id',db.Integer,db.ForeignKey('student.stud_id')),
-				db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
-				)
-
-ta_courses = db.Table('ta_courses',
-			 db.Column('ta_id',db.Integer,db.ForeignKey('TA.TA_id')),
-			 db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
-			 )
-
-
 class Student(UserMixin,db.Model):
 	stud_id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(64), index=True, unique=True)
@@ -67,11 +56,6 @@ class Student(UserMixin,db.Model):
 	year = db.Column(db.String(64), index=True)
 	Dept = db.Column(db.String(20), index=True)
 	email = db.Column(db.String(120), index=True, unique=True)
-	opted = db.relationship('Course',
-			secondary=stud_courses,
-			primaryjoin = (stud_courses.c.stud_id == stud_id),
-			backref = db.backref('studied_by',lazy='dynamic'),
-			lazy = 'dynamic')
 
 	password_hash = db.Column(db.String(128))
 
@@ -105,12 +89,6 @@ class TA(UserMixin,db.Model):
 	Dept = db.Column(db.String(20), index= True)
 	password_hash = db.Column(db.String(128))
 
-	tutoring = db.relationship('Course',
-			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.ta_id == TA_id),
-			backref = db.backref('tutored_by',lazy='dynamic'),
-			lazy = 'dynamic')
-
 	def __repr__(self):
 		return '<Professor ' +  str(fname) + ' '+ str(lname)  + 'Department ' + str(Dept)+ ' >'   
 	def set_password(self, password):
@@ -135,20 +113,6 @@ class Course(db.Model):
 	Course_ID = db.Column(db.Integer, primary_key=True)
 	Course_name = db.Column(db.String(64))
 	Classes_held = db.Column(db.DateTime)
-
-	tutors = db.relationship('TA',
-			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.course_id == Course_ID),
-			secondaryjoin = (ta_courses.c.ta_id == TA.TA_id),
-			backref = db.backref('tutoring',lazy='dynamic'),
-			lazy = 'dynamic')
-
-	students = db.relationship('Student',
-			secondary = stud_courses,
-			primaryjoin = (stud_courses.c.course_id == Course_ID),
-			secondaryjoin = (stud_courses.c.stud_id == Student.stud_id),
-			backref = db.backref('tutoring',lazy='dynamic'),
-			lazy = 'dynamic')
 
 class Prof(UserMixin,db.Model):
 	prof_id = db.Column(db.Integer, primary_key=True)
@@ -188,3 +152,37 @@ class Attendance(db.Model):
 #	faculty_id = db.Column('Faculty',db.Integer,db.ForeignKey('prof_courses.prof_id'))
 #	TA_id = db.Column('TA',db.Integer,db.ForeignKey('assist_courses.TA_id'))
 	
+'''stud_courses = 	db.Table('stud_courses',
+				db.Column('stud_id',db.Integer,db.ForeignKey('student.stud_id')),
+				db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+				)
+
+ta_courses = db.Table('ta_courses',
+			 db.Column('ta_id',db.Integer,db.ForeignKey('TA.TA_id')),
+			 db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+			 )
+'''
+'''opted = db.relationship('Course',
+			secondary=stud_courses,
+			primaryjoin = (stud_courses.c.stud_id == stud_id),
+			backref = db.backref('studied_by',lazy='dynamic'),
+			lazy = 'dynamic') '''
+'''	tutoring = db.relationship('Course',
+			secondary=ta_courses,
+			primaryjoin = (ta_courses.c.ta_id == TA_id),
+			backref = db.backref('tutored_by',lazy='dynamic'),
+			lazy = 'dynamic') '''
+
+'''	tutors = db.relationship('TA',
+			secondary=ta_courses,
+			primaryjoin = (ta_courses.c.course_id == Course_ID),
+			secondaryjoin = (ta_courses.c.ta_id == TA.TA_id),
+			backref = db.backref('tutoring',lazy='dynamic'),
+			lazy = 'dynamic')
+
+	students = db.relationship('Student',
+			secondary = stud_courses,
+			primaryjoin = (stud_courses.c.course_id == Course_ID),
+			secondaryjoin = (stud_courses.c.stud_id == Student.stud_id),
+			backref = db.backref('tutoring',lazy='dynamic'),
+			lazy = 'dynamic')'''

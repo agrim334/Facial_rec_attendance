@@ -5,7 +5,7 @@ import face_recognition
 import os
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Student,Course,TA,Attendance,Prof
+from app.models import User,Student,Course,TA,Prof
 from app.email import send_password_reset_email
 
 @APP.route('/Home_TA')

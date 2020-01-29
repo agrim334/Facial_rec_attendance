@@ -14,7 +14,7 @@ db = SQLAlchemy(APP)
 migrate = Migrate(APP,db)
 login = LoginManager(APP)
 login.login_view = 'login'
-
+'''
 loginstud = LoginManager(APP)
 loginstud.login_view = 'loginstud'
 
@@ -22,7 +22,7 @@ loginTA = LoginManager(APP)
 loginTA.login_view = 'loginTA'
 
 loginprof = LoginManager(APP)
-loginprof.login_view = 'loginprof'
+loginprof.login_view = 'loginprof'''
 
 mail = Mail(APP)
 
