@@ -5,102 +5,23 @@ import face_recognition
 import os
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Student,Course,TA,Prof
+from app.models import User,Course,Attendance
 from app.email import send_password_reset_email
 
-@APP.route('/Home_TA')
+
+@APP.route('/index')
+@APP.route('/')
 @login_required
-def TAhome(username):
-	if current_user.is_authenticated is False:
-		flash("Error login first")
-		return redirect(url_for('loginTA'))
-
-	return render_template('Home_TA.html')
-
-@APP.route('/Home_stud')
-@login_required
-def studhome(username):
-	if current_user.is_authenticated is False:
-		flash("Error login first")
-		return redirect(url_for('loginstud'))
-
-	return render_template('Home_stud.html')
-
-@APP.route('/Home_prof')
-@login_required
-def profhome(username):
-	if current_user.is_authenticated is False:
-		flash("Error login first")
-		return redirect(url_for('loginprof'))
-	return render_template('Home_prof.html')
-
-@APP.route('/login_TA',methods={'GET','POST'})
-def loginTA():
-	if current_user.is_authenticated:
-		return redirect(url_for('TAhome'))
-	form = LoginForm()
-	if form.validate_on_submit():
-		user = TA.query.filter_by(username=form.username.data).first()
-		if user is None or not user.check_password(form.password.data):
-			flash('Invalid username or password')
-			return redirect(url_for('loginTA'))
-		login_user(user, remember=form.remember_me.data)
-		next_page = request.args.get('next')
-		
-		if not next_page or url_parse(next_page).netloc != '':
-			next_page = url_for('index')
-		
-		return redirect(next_page)
-		
-	return render_template('login.html', title='Sign In', form=form)
-
-@APP.route('/login_faculty',methods={'GET','POST'})
-def loginprof():
-	if current_user.is_authenticated:
-		return redirect(url_for('profhome'))
-	form = LoginForm()
-	if form.validate_on_submit():
-		user = Prof.query.filter_by(username=form.username.data).first()
-		if user is None or not user.check_password(form.password.data):
-			flash('Invalid username or password')
-			return redirect(url_for('loginprof'))
-		login_user(user, remember=form.remember_me.data)
-		next_page = request.args.get('next')
-		
-		if not next_page or url_parse(next_page).netloc != '':
-			next_page = url_for('index')
-		
-		return redirect(next_page)
-		
-	return render_template('login.html', title='Sign In', form=form)
-
-@APP.route('/login_stud',methods={'GET','POST'})
-def loginstud():
-	if current_user.is_authenticated:
-		return redirect(url_for('studhome'))
-	form = LoginForm()
-	if form.validate_on_submit():
-		user = Student.query.filter_by(username=form.username.data).first()
-		if user is None or not user.check_password(form.password.data):
-			flash('Invalid username or password')
-			return redirect(url_for('loginstud'))
-		login_user(user, remember=form.remember_me.data)
-		next_page = request.args.get('next')
-		
-		if not next_page or url_parse(next_page).netloc != '':
-			next_page = url_for('index')
-		
-		return redirect(next_page)
-		
-	return render_template('login.html', title='Sign In', form=form)
+def home():
+	return render_template('home.html', title='Home',user = user)
 
 @APP.route('/login',methods={'GET','POST'})
 def login():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('home'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data).first()
+		user = User.query.filter_by(username=form.username.data,role=form.role.data).first()
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('login'))
@@ -108,23 +29,33 @@ def login():
 		next_page = request.args.get('next')
 		
 		if not next_page or url_parse(next_page).netloc != '':
-			next_page = url_for('index')
-		
+			next_page = url_for('home',user = user)
+
 		return redirect(next_page)
-		
+
 	return render_template('login.html', title='Sign In', form=form)
+
+@APP.route('/register',methods=['GET','POST'])
+def register():
+	if current_user.is_authenticated:
+		form = RegistrationForm()
+		if form.validate_on_submit():
+			user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
+			user.set_password(form.password.data)
+			db.session.add(user)
+			db.session.commit()
+			flash('User has been added')
+			return redirect(url_for('home'))
+		return render_template('register.html', title='Register', form=form)
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
 
 @APP.route('/user/<username>')
 @login_required
 def user(username):
 	user = User.query.filter_by(username=username).first_or_404()
 	return render_template('user.html', user=user)
-
-@APP.route('/index')
-@APP.route('/')
-@login_required
-def index():
-	return render_template('index.html', title='Home')
 
 @APP.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -155,7 +86,7 @@ def change_password():
 				current_user.set_password(form.newpassword.data)
 				db.session.commit()
 				flash('Your changes have been saved.')
-				return redirect(url_for('index'))
+				return redirect(url_for('home'))
 			else :
 				flash('Old password incorrect')
 			return redirect(url_for('change_password'))
@@ -164,26 +95,12 @@ def change_password():
 @APP.route('/logout')
 def logout():
 	logout_user()
-	return redirect(url_for('index'))
-
-@APP.route('/register',methods=['GET','POST'])
-def register():
-	if current_user.is_authenticated:
-		return redirect(url_for('index'))
-	form = RegistrationForm()
-	if form.validate_on_submit():
-		user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data)
-		user.set_password(form.password.data)
-		db.session.add(user)
-		db.session.commit()
-		flash('Congratulations, you are now a registered user!')
-		return redirect(url_for('loginprof'))
-	return render_template('register.html', title='Register', form=form)
+	return redirect(url_for('home'))
 
 @APP.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('home'))
 	form = ResetPasswordRequestForm()
 	if form.validate_on_submit():
 		#method = form.choice.data
@@ -202,10 +119,10 @@ def reset_password_request():
 @APP.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('home'))
 	user = User.verify_reset_password_token(token)
 	if not user:
-		return redirect(url_for('index'))
+		return redirect(url_for('home'))
 	form = ResetPasswordForm()
 	if form.validate_on_submit():
 		user.set_password(form.password.data)
@@ -221,7 +138,7 @@ def checkattd():
 	form =CheckAttendanceForm()
 	if form.validate_on_submit():
 		course = form.courseID.data
-		attd = db.session.query(Attendance).join(Course).join(Student).join(Prof).join(TA).filter(Course.c.Course_ID == course)
+#		attd = db.session.query(Attendance).join(Course).join(Student).join(Prof).join(TA).filter(Course.c.Course_ID == course)
 		if attd is False:
 			flash('Incorrect course code')
 			return redirect(url_for('checkattd'))

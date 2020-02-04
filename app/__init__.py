@@ -14,16 +14,6 @@ db = SQLAlchemy(APP)
 migrate = Migrate(APP,db)
 login = LoginManager(APP)
 login.login_view = 'login'
-'''
-loginstud = LoginManager(APP)
-loginstud.login_view = 'loginstud'
-
-loginTA = LoginManager(APP)
-loginTA.login_view = 'loginTA'
-
-loginprof = LoginManager(APP)
-loginprof.login_view = 'loginprof'''
-
 mail = Mail(APP)
 
 if not APP.debug:
@@ -51,4 +41,4 @@ if not APP.debug:
 	APP.logger.setLevel(logging.INFO)
 	APP.logger.info('Microblog startup')
 
-from app import routes, models,errors
+from app import routes,models

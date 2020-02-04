@@ -43,6 +43,26 @@
 
 		</p>
 		<p>
+			{{ form.dept.label }}<br>
+			{{ form.dept(size=64) }}<br>
+
+			{% for error in form.dept.errors %}
+				<span style="color: red;"> [{{ error }}] </span>
+			{% endfor %}
+
+		</p>
+
+		<p>
+			{{ form.role.label }}<br>
+			{{ form.role(size=64) }}<br>
+
+			{% for error in form.role.errors %}
+				<span style="color: red;"> [{{ error }}] </span>
+			{% endfor %}
+
+		</p>
+
+		<p>
 			{{ form.password.label }}<br>
 			{{ form.password(size=32) }}<br>
 

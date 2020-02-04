@@ -1,11 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from app.models import User
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])
+	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')])
 	remember_me = BooleanField('Remember Me')
 	submit = SubmitField('Sign In')
 
@@ -14,6 +15,8 @@ class RegistrationForm(FlaskForm):
 	fname =	StringField('First name', validators=[DataRequired()])
 	lname = StringField('Last name', validators=[DataRequired()])
 	email = StringField('Email', validators=[DataRequired(), Email()])
+	dept = StringField('Department', validators=[DataRequired()])
+	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')] )
 	password = PasswordField('Password', validators=[DataRequired()])
 	password2 = PasswordField(
 		'Repeat Password', validators=[DataRequired(), EqualTo('password')])

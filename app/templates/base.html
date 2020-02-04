@@ -9,12 +9,9 @@
 	<body>
 	<div>
 	Microblog:
-		<a href="{{ url_for('index') }}">Home</a>
+		<a href="{{ url_for('home') }}">Home</a>
 		{% if current_user.is_anonymous %}
 			<a href="{{ url_for('login') }}">Login</a>
-			<a href="{{ url_for('loginstud') }}">Login as Student</a>
-			<a href="{{ url_for('loginprof') }}">Login as Faculty</a>
-			<a href="{{ url_for('loginTA') }}">Login as TA</a>
 		{% else %}
 			<a href="{{ url_for('user', username=current_user.username) }}">Profile</a>
 			<a href="{{ url_for('logout') }}">Logout</a>

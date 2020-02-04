@@ -5,8 +5,12 @@
 		<tr valign="top">
 			<td>User: {{ user.username }} </td>
 		</tr>
-		<tr>
-			<td>Email: {{ user.email }} </td>
+		<tr> 
+			{% if user.email %}
+				<td>Email: {{ user.email }} </td>
+			{% else %}
+				<td>Email : </td>
+			{% endif %}
 		</tr>
 		<tr>
 			<td>Name: {{ user.fname }} {{user.lname }} </td>
