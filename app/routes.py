@@ -7,7 +7,7 @@ from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
 from app.models import User,Course,Attendance
 from app.email import send_password_reset_email
-
+import numpy as np
 
 @APP.route('/index')
 @APP.route('/')
@@ -151,9 +151,8 @@ def allowed_file(filename):
 	return '.' in filename and \
 		   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @APP.route('/faces', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def upload_image():
 
 	if request.method == 'POST':
@@ -174,36 +173,51 @@ def upload_image():
 
 
 def detect_faces_in_image(file_stream):
-	known_dir = "/home/agrim/known"
+	known_dir = "/home/agrim/Downloads/known/"
 
-	known_encodings = []
-	for img in os.listdir(known_dir):
-		img_dat = face_recognition.load_image_file(known_dir+'/'+img)
-		known_encodings.append(face_recognition.face_encodings(img_dat)[0])
+	known_face_encd = []
+	known_face_name = {}
+	for image in os.listdir(known_dir):
+		temp = face_recognition.load_image_file(known_dir+image)
+#		try:
+#			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
 
-	un_img = face_recognition.load_image_file(file_stream)
-	unknown_face_encodings = face_recognition.face_encodings(un_img)
+#		except RuntimeError:
+		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
+
+		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
+		known_face_encd.append(encd)
+		known_face_name[str(encd)] = image
+
+	un_image = face_recognition.load_image_file(file_stream)
+
+	try:
+		face_locations = face_recognition.face_locations(un_image,model = "cnn")
+	except RuntimeError:
+		face_locations = face_recognition.face_locations(un_image,model = "hog")
+
+	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
 	face_found = False
-	is_obama = False
 
-	if len(unknown_face_encodings) > 0:
-		face_found = True
-		for encodings in known_encodings:
+	if len(un_face_encodings) > 0:
+		result = []
+		num = 0
+		for face_encoding in un_face_encodings:
+			num = num + 1
+			matches = face_recognition.compare_faces(known_face_encd, face_encoding)
+			name = "Unknown"
 
-			match_results = face_recognition.compare_faces([encodings], unknown_face_encodings[0])
-			if match_results[0]:
-				is_obama = True
+			face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
+			best_match_index = np.argmin(face_distances)
 
-				result = {
-					"face_found_in_image": face_found,
-					"is_picture_of_obama": is_obama
-					}
-				return jsonify(result)
-				break
-	result = {
+			if matches[best_match_index]:
+				im = known_face_encd[best_match_index]
+				name = known_face_name[str(im)]
+			result.append(("Face number " + str(num),name))
+		return jsonify(result)
+	else:
+		result = {
 			"face_found_in_image": face_found,
-			"is_picture_of_obama": is_obama
 		}
-
-	return jsonify(result)
+		return jsonify(result)

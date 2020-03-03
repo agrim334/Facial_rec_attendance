@@ -1,85 +1,11 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
-{% block content %}
-	<h1>Register</h1>
-
-	<form action="" method="post">
-		{{ form.hidden_tag() }}
-		<p>
-			{{ form.username.label }}<br>
-			{{ form.username(size=32) }}<br>
-
-			{% for error in form.username.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-		<p>
-			{{ form.fname.label }}<br>
-			{{ form.fname(size=64) }}<br>
-
-			{% for error in form.fname.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-		<p>
-			{{ form.lname.label }}<br>
-			{{ form.lname(size=64) }}<br>
-
-			{% for error in form.lname.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-
-		<p>
-			{{ form.email.label }}<br>
-			{{ form.email(size=64) }}<br>
-
-			{% for error in form.email.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-		<p>
-			{{ form.dept.label }}<br>
-			{{ form.dept(size=64) }}<br>
-
-			{% for error in form.dept.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-
-		<p>
-			{{ form.role.label }}<br>
-			{{ form.role(size=64) }}<br>
-
-			{% for error in form.role.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-
-		<p>
-			{{ form.password.label }}<br>
-			{{ form.password(size=32) }}<br>
-
-			{% for error in form.password.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-		<p>
-			{{ form.password2.label }}<br>
-			{{ form.password2(size=32) }}<br>
-
-			{% for error in form.password2.errors %}
-				<span style="color: red;"> [{{ error }}] </span>
-			{% endfor %}
-
-		</p>
-		<p>{{ form.submit() }}</p>
-	</form>
+{% block app_content %}
+    <h1>Register</h1>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
 {% endblock %}
