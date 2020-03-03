@@ -152,7 +152,7 @@ def allowed_file(filename):
 		   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @APP.route('/faces', methods=['GET', 'POST'])
-#@login_required
+@login_required
 def upload_image():
 
 	if request.method == 'POST':
@@ -198,7 +198,6 @@ def detect_faces_in_image(file_stream):
 
 	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
-	face_found = False
 
 	if len(un_face_encodings) > 0:
 		result = []
@@ -218,6 +217,6 @@ def detect_faces_in_image(file_stream):
 		return jsonify(result)
 	else:
 		result = {
-			"face_found_in_image": face_found,
+			"face_found_in_image": False,
 		}
 		return jsonify(result)

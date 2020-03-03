@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			{% for message in messages %}
+			<div class="alert alert-info" role="alert">{{ message }}</div>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
+
 	<h1>Hi, {{ current_user.username }}!</h1>
-	{% if current_user.role == 'Faculty' or current_user.role == 'TA' %}
-		<a href="{{ url_for('upload_image') }}">Mark attendance</a>
-	{% elif current_user.role == 'Student' %}
-		<a href="{{ url_for('checkattd') }}">Check attendance</a>
-	{% else %}
-		<a href="{{ url_for('register') }}"> Add User </a>
-	{% endif %}
+	<div class="row">
+		<div class="col-md-4">
+			{% if current_user.role == 'Faculty' or current_user.role == 'TA' %}
+				<a href="{{ url_for('upload_image') }}"> Mark attendance </a>
+			{% elif current_user.role == 'Student' %}
+				<a href="{{ url_for('checkattd') }}">Check attendance</a>
+			{% else %}
+				<a href="{{ url_for('register') }}"> Add User </a>
+			{% endif %}
+		</div>
+	</div>
 {% endblock %}
