@@ -191,10 +191,10 @@ def detect_faces_in_image(file_stream):
 
 	un_image = face_recognition.load_image_file(file_stream)
 
-	try:
-		face_locations = face_recognition.face_locations(un_image,model = "cnn")
-	except RuntimeError:
-		face_locations = face_recognition.face_locations(un_image,model = "hog")
+#	try:
+#		face_locations = face_recognition.face_locations(un_image,model = "cnn")
+#	except RuntimeError:
+	face_locations = face_recognition.face_locations(un_image,model = "hog")
 
 	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
