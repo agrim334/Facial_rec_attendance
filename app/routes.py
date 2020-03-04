@@ -118,9 +118,9 @@ def reset_password_request():
 		if user:
 			send_password_reset_email(user,user.email)
 			flash('Check your email for the instructions to reset your password')
-			return redirect(url_for('loginprof'))
+			return redirect(url_for('login'))
 		else:
-			flash('Error couldnot send email as User not registered or no email entered for this user')
+			flash('Error could not send email as User not registered or no email entered for this user')
 			return redirect(url_for('reset_password_request'))
 
 	return render_template('reset_password_request.html',title='Reset Password', form=form)
@@ -131,13 +131,14 @@ def reset_password(token):
 		return redirect(url_for('home'))
 	user = User.verify_reset_password_token(token)
 	if not user:
+		flash('Time expired.')
 		return redirect(url_for('home'))
 	form = ResetPasswordForm()
 	if form.validate_on_submit():
 		user.set_password(form.password.data)
 		db.session.commit()
 		flash('Your password has been reset.')
-		return redirect(url_for('loginprof'))
+		return redirect(url_for('login'))
 	return render_template('reset_password.html', form=form)
 
 
