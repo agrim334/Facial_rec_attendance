@@ -1,5 +1,5 @@
-from app import APP,db
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for
+from app import APP,db,errors
+from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
 from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,CheckAttendanceForm
 import face_recognition
 import os
@@ -8,6 +8,11 @@ from flask_login import current_user, login_user,logout_user,login_required
 from app.models import User,Course,Attendance
 from app.email import send_password_reset_email
 import numpy as np
+
+@APP.after_request
+def after_request(response):
+	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	return response
 
 @APP.route('/index')
 @APP.route('/')
@@ -94,8 +99,12 @@ def change_password():
 
 @APP.route('/logout')
 def logout():
-	logout_user()
-	return redirect(url_for('home'))
+	if not current_user.is_anonymous:
+		logout_user()
+		flash('You have logged out')
+	else:
+		flash('Error.Not logged in')
+	return redirect(url_for('login'))
 
 @APP.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
@@ -186,7 +195,7 @@ def detect_faces_in_image(file_stream):
 		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
 
 		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
-		known_face_encd.append(encd)
+		known_face_encd.APPend(encd)
 		known_face_name[str(encd)] = image
 
 	un_image = face_recognition.load_image_file(file_stream)
@@ -213,7 +222,7 @@ def detect_faces_in_image(file_stream):
 			if matches[best_match_index]:
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
-			result.append(("Face number " + str(num),name))
+			result.APPend(("Face number " + str(num),name))
 		return jsonify(result)
 	else:
 		result = {
