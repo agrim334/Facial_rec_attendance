@@ -196,7 +196,7 @@ def detect_faces_in_image(file_stream):
 		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
 
 		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
-		known_face_encd.APPend(encd)
+		known_face_encd.append(encd)
 		known_face_name[str(encd)] = image
 
 	un_image = face_recognition.load_image_file(file_stream)
@@ -223,7 +223,7 @@ def detect_faces_in_image(file_stream):
 			if matches[best_match_index]:
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
-			result.APPend(("Face number " + str(num),name))
+			result.append(("Face number " + str(num),name))
 		return jsonify(result)
 	else:
 		result = {
