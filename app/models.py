@@ -91,14 +91,12 @@ class User(UserMixin,db.Model):
 		return User.query.get(id)
 
 class Attendance(db.Model):
-	record_id = db.Column('Attd_ID',db.Integer,primary_key=True)
-	course_id = db.Column('Course_ID',db.Integer,db.ForeignKey('stud_courses.course_id'))
-	student_id = db.Column('Stud_ID',db.Integer,db.ForeignKey('stud_courses.stud_id'))
+	course_id = db.Column('Course_ID',db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
+	student_id = db.Column('Stud_ID',db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
 	status = db.Column('Present',db.String)
-	timestamp = db.Column(db.DateTime,index = True)
+	timestamp = db.Column(db.Date,primary_key=True)
 	faculty_id = db.Column('Faculty',db.Integer,db.ForeignKey('prof_courses.prof_id'))
 	TA_id = db.Column('TA',db.Integer,db.ForeignKey('ta_courses.ta_id'))
-
 
 
 '''	tutors = db.relationship('User',
