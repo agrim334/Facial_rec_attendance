@@ -4,13 +4,5 @@
 {% block app_content %}
 <title>Face recognizer</title>
 <h1>Check for matching pictures</h1>
-
-
-<form method="POST" enctype="multipart/form-data"> 
-		{{ wtf.quick_form(form) }}
-		Class image
-		<input type="file" name='file' accept="image/*;capture=camera">
-		<br>
-		<input type="submit" value="Upload">
-</form>
+	{{ wtf.quick_form(form) }}
 {% endblock %}

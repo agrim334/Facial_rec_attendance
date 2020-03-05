@@ -1,11 +1,23 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User
+from app import APP
+import os
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
+photos = UploadSet('photos', IMAGES)
+configure_uploads(APP, photos)
+patch_request_class(APP)
 
 class AttendForm(FlaskForm):
 	CID = StringField('Course ID', validators=[DataRequired()])
-	
+	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
+	submit = SubmitField('Upload')
+
 class CourseForm(FlaskForm):
 	CID = StringField('CourseID', validators=[DataRequired()])
 	Cname = StringField('Course Name', validators=[DataRequired()])

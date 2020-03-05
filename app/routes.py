@@ -8,6 +8,15 @@ from flask_login import current_user, login_user,logout_user,login_required
 from app.models import User,Course,Attendance
 from app.email import send_password_reset_email
 import numpy as np
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
+photos = UploadSet('photos', IMAGES)
+configure_uploads(APP, photos)
+patch_request_class(APP)
 
 @APP.after_request
 def after_request(response):
@@ -181,33 +190,24 @@ def allowed_file(filename):
 @login_required
 def upload_image():
 	form = AttendForm()
+	if form.validate_on_submit():
+		base = os.path.abspath(os.path.dirname(__file__))
 
-	if request.method == 'POST':
-		if 'file' not in request.files:
-			flash("not got file ")
-			return redirect(request.url)
-
-		file = request.files['file']
-
-		if file.filename == '':
-			flash("no file selected")
-			return redirect(request.url)
-
-		if file and allowed_file(file.filename):
-			return detect_faces_in_image(file)
+		file = photos.save(form.photo.data)
+		CID = form.CID.data
+		return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID)
 
 	return render_template("face_rec.html",title="Hello",form=form)
 
 
-def detect_faces_in_image(file_stream):
+def detect_faces_in_image(file_stream,CID):
 	known_dir = "/home/agrim/Downloads/known/"
 
 	known_face_encd = []
 	known_face_name = {}
-#	user = User.query.filter_by(current_user.).first()
-
-#	atdrecord = Attendance(course_id=form.CID.data,faculty_id=user.i)
-
+	user = User.query.filter_by(username=current_user.username,role="Faculty").first()
+	
+	
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
 #		try:
@@ -245,7 +245,14 @@ def detect_faces_in_image(file_stream):
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
 			result.append(("Face number " + str(num),name))
-
+			
+			if name != "Unknown":
+				stud = User.query.filter_by(username=current_user.username,role="Student").first()
+				if stud:
+					atdrecord = Attendance(course_id=CID,faculty_id=user.id,status="Yes",student_id=stud.id)
+					print(atdrecord)
+				else :
+					print("Not student of this course")
 		return jsonify(result)
 	else:
 		result = {
