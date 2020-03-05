@@ -1,6 +1,6 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,CheckAttendanceForm
+from app.forms import CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm
 import face_recognition
 import os
 from werkzeug.urls import url_parse
@@ -40,13 +40,29 @@ def login():
 
 	return render_template('login.html', title='Sign In', form=form)
 
+@APP.route('/course',methods=['GET','POST'])
+@login_required
+def course_add():
+	if current_user.is_authenticated:
+		form = CourseForm()
+		if form.validate_on_submit():
+			user = User(Course_ID=form.CID.data, Course_name=form.Cname.data, fname=form.fname.data)
+			db.session.add(course)
+			db.session.commit()
+			flash('Course has been added')
+			return redirect(url_for('home'))
+		return render_template('course.html', title='Course', form=form)
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
 @APP.route('/register',methods=['GET','POST'])
+@login_required
 def register():
 	if current_user.is_authenticated:
 		form = RegistrationForm()
 		if form.validate_on_submit():
-			user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
-			user.set_password(form.password.data)
+			course = Course(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
 			db.session.add(user)
 			db.session.commit()
 			flash('User has been added')
@@ -164,6 +180,7 @@ def allowed_file(filename):
 @APP.route('/faces', methods=['GET', 'POST'])
 @login_required
 def upload_image():
+	form = AttendForm()
 
 	if request.method == 'POST':
 		if 'file' not in request.files:
@@ -179,7 +196,7 @@ def upload_image():
 		if file and allowed_file(file.filename):
 			return detect_faces_in_image(file)
 
-	return render_template("face_rec.html",title="Hello")
+	return render_template("face_rec.html",title="Hello",form=form)
 
 
 def detect_faces_in_image(file_stream):
@@ -187,6 +204,10 @@ def detect_faces_in_image(file_stream):
 
 	known_face_encd = []
 	known_face_name = {}
+#	user = User.query.filter_by(current_user.).first()
+
+#	atdrecord = Attendance(course_id=form.CID.data,faculty_id=user.i)
+
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
 #		try:
@@ -224,6 +245,7 @@ def detect_faces_in_image(file_stream):
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
 			result.append(("Face number " + str(num),name))
+
 		return jsonify(result)
 	else:
 		result = {

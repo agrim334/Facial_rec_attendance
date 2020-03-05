@@ -3,6 +3,14 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioF
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from app.models import User
 
+class AttendForm(FlaskForm):
+	CID = StringField('Course ID', validators=[DataRequired()])
+	
+class CourseForm(FlaskForm):
+	CID = StringField('CourseID', validators=[DataRequired()])
+	Cname = StringField('Course Name', validators=[DataRequired()])
+	Faculty = StringField('Faculty',validators=[DataRequired()])
+
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])

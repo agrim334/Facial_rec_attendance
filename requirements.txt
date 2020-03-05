@@ -1,0 +1,12 @@
+flask-wtf
+flask-sqlalchemy
+flask-migrate
+flask-mail
+flask-login
+flask-bootstrap
+numpy
+Click>=6.0
+dlib>=19.3.0
+numpy
+Pillow
+scipy>=0.17.0

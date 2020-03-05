@@ -10,7 +10,8 @@
 			{% elif current_user.role == 'Student' %}
 				<a href="{{ url_for('checkattd') }}">Check attendance</a>
 			{% else %}
-				<a href="{{ url_for('register') }}"> Add User </a>
+				<div> <a href="{{ url_for('register') }}"> Add User </a> </div>
+				<div> <a href="{{ url_for('course_add') }}"> Add Course </a> </div>
 			{% endif %}
 		</div>
 	</div>
