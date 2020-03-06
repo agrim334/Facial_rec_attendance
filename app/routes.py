@@ -41,7 +41,7 @@ def login():
 			return redirect(url_for('login'))
 		login_user(user, remember=form.remember_me.data)
 		next_page = request.args.get('next')
-		
+
 		if not next_page or url_parse(next_page).netloc != '':
 			next_page = url_for('home',user = user)
 
@@ -103,15 +103,14 @@ def edit_profile():
 		form.email.data = current_user.email
 		form.fname.data = current_user.fname
 		form.lname.data = current_user.lname
-	return render_template('edit_profile.html', title='Edit Profile',form=form)	
-
+	return render_template('edit_profile.html', title='Edit Profile',form=form)
 
 @APP.route('/change_password', methods=['GET','POST'])
 @login_required
 def change_password():
 	form = ChangePWDForm()
 	if request.method == 'POST':
-		if form.validate_on_submit(): 
+		if form.validate_on_submit():
 			if current_user.check_password(form.currentpassword.data):
 				current_user.set_password(form.newpassword.data)
 				db.session.commit()
@@ -120,7 +119,7 @@ def change_password():
 			else :
 				flash('Old password incorrect')
 			return redirect(url_for('change_password'))
-	return render_template('change_password.html', title='Change Password',form=form)	
+	return render_template('change_password.html', title='Change Password',form=form)
 
 @APP.route('/logout')
 def logout():
@@ -180,7 +179,6 @@ def checkattd():
 
 	return render_template('check_attendance.html',form=form)
 
-
 def allowed_file(filename):
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 	return '.' in filename and \
@@ -199,22 +197,19 @@ def upload_image():
 
 	return render_template("face_rec.html",title="Hello",form=form)
 
-
 def detect_faces_in_image(file_stream,CID):
-	known_dir = "/home/agrim/Downloads/known/"
+	known_dir = "/home/tejas5/Download/known/"
 
 	known_face_encd = []
 	known_face_name = {}
 	user = User.query.filter_by(username=current_user.username,role="Faculty").first()
-	
-	
+
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
-#		try:
-#			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
-
-#		except RuntimeError:
-		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
+		try:
+			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
+		except RuntimeError:
+			inp_face_locations = face_recognition.face_locations(temp, model = "hog")
 
 		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
 		known_face_encd.append(encd)
@@ -222,10 +217,10 @@ def detect_faces_in_image(file_stream,CID):
 
 	un_image = face_recognition.load_image_file(file_stream)
 
-#	try:
-#		face_locations = face_recognition.face_locations(un_image,model = "cnn")
-#	except RuntimeError:
-	face_locations = face_recognition.face_locations(un_image,model = "hog")
+	try:
+		face_locations = face_recognition.face_locations(un_image,model = "cnn")
+	except RuntimeError:
+		face_locations = face_recognition.face_locations(un_image,model = "hog")
 
 	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
@@ -245,7 +240,7 @@ def detect_faces_in_image(file_stream,CID):
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
 			result.append(("Face number " + str(num),name))
-			
+
 			if name != "Unknown":
 				stud = User.query.filter_by(username=current_user.username,role="Student").first()
 				if stud:
