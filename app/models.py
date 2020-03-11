@@ -41,8 +41,8 @@ class User(UserMixin,db.Model):
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (ta_courses.c.ta_id == id & role == 'Faculty'),
-			secondaryjoin = (ta_courses.c.course_id == Course.Course_ID),
+			primaryjoin = (prof_courses.c.prof_id == id & role == 'Faculty'),
+			secondaryjoin = (prof_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
 
@@ -93,22 +93,7 @@ class User(UserMixin,db.Model):
 class Attendance(db.Model):
 	course_id = db.Column('Course_ID',db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
 	student_id = db.Column('Stud_ID',db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
-	status = db.Column('Present',db.String)
+	status = db.Column('Present',db.String(4))
 	timestamp = db.Column(db.Date,primary_key=True)
 	faculty_id = db.Column('Faculty',db.Integer,db.ForeignKey('prof_courses.prof_id'))
 	TA_id = db.Column('TA',db.Integer,db.ForeignKey('ta_courses.ta_id'))
-
-
-'''	tutors = db.relationship('User',
-			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.course_id == Course_ID),
-			secondaryjoin = (ta_courses.c.ta_id == user.id),
-			backref = db.backref('tutoring',lazy='dynamic'),
-			lazy = 'dynamic')
-
-	students = db.relationship('User',
-			secondary = stud_courses,
-			primaryjoin = (stud_courses.c.course_id == Course_ID),
-			secondaryjoin = (stud_courses.c.stud_id == user.id),
-			backref = db.backref('opted',lazy='dynamic'),
-			lazy = 'dynamic')'''
