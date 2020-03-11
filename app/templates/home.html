@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+	<h1>Hi, {{ current_user.username }}!</h1>
+	<div class="row">
+		<div class="col-md-4">
+			{% if current_user.role == 'Faculty' or current_user.role == 'TA' %}
+				<a href="{{ url_for('upload_image') }}"> Mark attendance </a>
+			{% elif current_user.role == 'Student' %}
+				<a href="{{ url_for('checkattd') }}">Check attendance</a>
+			{% else %}
+				<div> <a href="{{ url_for('register') }}"> Add User </a> </div>
+				<div> <a href="{{ url_for('course_add') }}"> Add Course </a> </div>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}
