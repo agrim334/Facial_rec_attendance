@@ -4,7 +4,9 @@ flask-migrate
 flask-mail
 flask-login
 flask-bootstrap
-flasd-uploads
+flask-uploads
+flask-mysql
+flask-mysqldb
 numpy
 Click>=6.0
 dlib>=19.3.0

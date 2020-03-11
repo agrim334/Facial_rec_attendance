@@ -5,7 +5,7 @@ import face_recognition
 import os
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Course,Attendance
+from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses
 from app.email import send_password_reset_email
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -55,7 +55,7 @@ def course_add():
 	if current_user.is_authenticated:
 		form = CourseForm()
 		if form.validate_on_submit():
-			user = User(Course_ID=form.CID.data, Course_name=form.Cname.data, fname=form.fname.data)
+			course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data, fname=form.fname.data)
 			db.session.add(course)
 			db.session.commit()
 			flash('Course has been added')
@@ -71,7 +71,8 @@ def register():
 	if current_user.is_authenticated:
 		form = RegistrationForm()
 		if form.validate_on_submit():
-			course = Course(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
+			user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
+			user.set_password(form.password.data)
 			db.session.add(user)
 			db.session.commit()
 			flash('User has been added')
@@ -192,22 +193,35 @@ def upload_image():
 	form = AttendForm()
 	if form.validate_on_submit():
 		base = os.path.abspath(os.path.dirname(__file__))
+		user = User.query.filter_by(username=current_user.username,role="Faculty").first()
+		if not user:
+			user = User.query.filter_by(username=current_user.username,role="TA").first()
+			if not user:
+				flash("No TA or Faculty with given name found")
+				return redirect(url_for('upload_image'))
+			confirm = User.query.join(ta_courses).join(Course).filter(ta_courses.c.ta_id == User.id & ta_courses.c.course_id == Course.Course_ID).all()
+			if not confirm:
+				flash("No TA or Faculty with given name found")
+				return redirect(url_for('upload_image'))
+
+		confirm = User.query.join(prof_courses).join(Course).filter(prof_courses.c.prof_id == User.id & prof_courses.c.course_id == Course.Course_ID).all()
+		if not confirm:
+			flash("No TA or Faculty with given name found")
+			return redirect(url_for('upload_image'))
 
 		file = photos.save(form.photo.data)
 		CID = form.CID.data
-		return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID)
+		return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
 	return render_template("face_rec.html",title="Hello",form=form)
 
 
-def detect_faces_in_image(file_stream,CID):
+def detect_faces_in_image(file_stream,CID,user):
 	known_dir = "/home/agrim/Downloads/known/"
 
 	known_face_encd = []
 	known_face_name = {}
-	user = User.query.filter_by(username=current_user.username,role="Faculty").first()
-	
-	
+		
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
 #		try:

@@ -8,6 +8,7 @@ from flask_bootstrap import Bootstrap
 import logging
 from logging.handlers import SMTPHandler,RotatingFileHandler
 import os
+import MySQLdb
 
 APP = Flask(__name__)
 APP.config.from_object(Config)
