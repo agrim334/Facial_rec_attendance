@@ -1,6 +1,6 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm
+from app.forms import CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
 import face_recognition
 import os
 from werkzeug.urls import url_parse
@@ -48,6 +48,38 @@ def login():
 		return redirect(next_page)
 
 	return render_template('login.html', title='Sign In', form=form)
+
+@APP.route('/course_user',methods=['GET','POST'])
+@login_required
+def course_user_add():
+	if current_user.is_authenticated:
+		form = CourseUserForm()
+		if form.validate_on_submit():
+			course = Course.query.filter_by(Course_ID=form.CID.data).first()
+			if not course:
+				flash('Course not in Database.Please add this course to database and then try or enter correct course id.')
+				return redirect(url_for('course_add'))
+			user = User.query.filter_by(username=form.username.data,role=form.role.data).first()
+			if not user:
+				flash('No such TA or Faculty found')
+				return redirect(url_for('register'))
+			if form.role.data == 'Faculty':
+				statement = prof_courses.insert().values(prof_id=user.id,course_id=course.Course_ID)
+			elif form.role.data == 'TA':
+				statement = ta_courses.insert().values(ta_id=user.id,course_id=course.Course_ID)
+			elif form.role.data == 'Student':
+				statement = stud_courses.insert().values(stud_id=user.id,course_id=course.Course_ID)
+			else:
+				flash("Not allowed for this role")
+				return redirect(url_for('course_faculty_add'))
+			db.session.execute(statement)
+			db.session.commit()
+			flash('Mapping has been added')
+			return redirect(url_for('home'))
+		return render_template('course_user.html', title='Course', form=form)
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
 
 @APP.route('/course',methods=['GET','POST'])
 @login_required

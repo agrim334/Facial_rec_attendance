@@ -18,6 +18,10 @@ class AttendForm(FlaskForm):
 	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
+class CourseUserForm(FlaskForm):
+	CID = StringField('CourseID', validators=[DataRequired()])
+	User = StringField('UserID',validators=[DataRequired()])
+	Role = StringField('Role',validators=[DataRequired()])
 class CourseForm(FlaskForm):
 	CID = StringField('CourseID', validators=[DataRequired()])
 	Cname = StringField('Course Name', validators=[DataRequired()])

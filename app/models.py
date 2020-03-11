@@ -40,7 +40,7 @@ class User(UserMixin,db.Model):
 	role = db.Column(db.String(20))
 
 	facult = db.relationship('Course',
-			secondary=ta_courses,
+			secondary=prof_courses,
 			primaryjoin = (ta_courses.c.ta_id == id & role == 'Faculty'),
 			secondaryjoin = (ta_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
