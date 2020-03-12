@@ -10,7 +10,7 @@ from app.email import send_password_reset_email
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-
+from datetime import datetime
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
@@ -55,20 +55,20 @@ def course_user_add():
 	if current_user.is_authenticated:
 		form = CourseUserForm()
 		if form.validate_on_submit():
-			course = Course.query.filter_by(Course_ID=form.CID.data).first()
+			course = Course.query.filter(Course.Course_ID == form.CID.data).first()
 			if not course:
 				flash('Course not in Database.Please add this course to database and then try or enter correct course id.')
 				return redirect(url_for('course_add'))
-			user = User.query.filter_by(username=form.username.data,role=form.role.data).first()
+			user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
 			if not user:
 				flash('No such TA or Faculty found')
 				return redirect(url_for('register'))
 			if form.role.data == 'Faculty':
-				statement = prof_courses.insert().values(prof_id=user.id,course_id=course.Course_ID)
+				statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
 			elif form.role.data == 'TA':
-				statement = ta_courses.insert().values(ta_id=user.id,course_id=course.Course_ID)
+				statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)
 			elif form.role.data == 'Student':
-				statement = stud_courses.insert().values(stud_id=user.id,course_id=course.Course_ID)
+				statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
 			else:
 				flash("Not allowed for this role")
 				return redirect(url_for('course_faculty_add'))
@@ -87,7 +87,7 @@ def course_add():
 	if current_user.is_authenticated:
 		form = CourseForm()
 		if form.validate_on_submit():
-			course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data, fname=form.fname.data)
+			course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)
 			db.session.add(course)
 			db.session.commit()
 			flash('Course has been added')
@@ -225,25 +225,28 @@ def upload_image():
 	form = AttendForm()
 	if form.validate_on_submit():
 		base = os.path.abspath(os.path.dirname(__file__))
+		print(current_user.username)
 		user = User.query.filter_by(username=current_user.username,role="Faculty").first()
+		CID = form.CID.data
 		if not user:
 			user = User.query.filter_by(username=current_user.username,role="TA").first()
 			if not user:
 				flash("No TA or Faculty with given name found")
 				return redirect(url_for('upload_image'))
-			confirm = User.query.join(ta_courses).join(Course).filter(ta_courses.c.ta_id == User.id & ta_courses.c.course_id == Course.Course_ID).all()
+			confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
 			if not confirm:
 				flash("No TA or Faculty with given name found")
 				return redirect(url_for('upload_image'))
+			file = photos.save(form.photo.data)
+			return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
-		confirm = User.query.join(prof_courses).join(Course).filter(prof_courses.c.prof_id == User.id & prof_courses.c.course_id == Course.Course_ID).all()
-		if not confirm:
-			flash("No TA or Faculty with given name found")
-			return redirect(url_for('upload_image'))
-
-		file = photos.save(form.photo.data)
-		CID = form.CID.data
-		return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+		else:
+			confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
+			if not confirm:
+				flash("No TA or Faculty with given name found")
+				return redirect(url_for('upload_image'))
+			file = photos.save(form.photo.data)
+			return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
 	return render_template("face_rec.html",title="Hello",form=form)
 
@@ -253,7 +256,7 @@ def detect_faces_in_image(file_stream,CID,user):
 
 	known_face_encd = []
 	known_face_name = {}
-		
+
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
 #		try:
@@ -295,7 +298,12 @@ def detect_faces_in_image(file_stream,CID,user):
 			if name != "Unknown":
 				stud = User.query.filter_by(username=current_user.username,role="Student").first()
 				if stud:
-					atdrecord = Attendance(course_id=CID,faculty_id=user.id,status="Yes",student_id=stud.id)
+					if user.role == 'TA':
+						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),TA_id = user.id)
+					else:
+						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),faculty_id = user.id)
+					db.session.add(atdrecord)
+					db.session.commit()
 					print(atdrecord)
 				else :
 					print("Not student of this course")

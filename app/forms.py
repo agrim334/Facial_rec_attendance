@@ -20,12 +20,14 @@ class AttendForm(FlaskForm):
 
 class CourseUserForm(FlaskForm):
 	CID = StringField('CourseID', validators=[DataRequired()])
-	User = StringField('UserID',validators=[DataRequired()])
-	Role = StringField('Role',validators=[DataRequired()])
+	user = StringField('UserID',validators=[DataRequired()])
+	role = StringField('Role',validators=[DataRequired()])
+	submit = SubmitField('Upload')
+
 class CourseForm(FlaskForm):
 	CID = StringField('CourseID', validators=[DataRequired()])
 	Cname = StringField('Course Name', validators=[DataRequired()])
-	Faculty = StringField('Faculty',validators=[DataRequired()])
+	submit = SubmitField('Upload')
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -47,7 +49,7 @@ class RegistrationForm(FlaskForm):
 	submit = SubmitField('Register')
 
 	def validate_username(self, username):
-		if username.data != self.original_username:
+		if username.data != self.username:
 			user = User.query.filter_by(username=self.username.data).first()
 			if user is not None:
 				raise ValidationError('Please use a different username.')

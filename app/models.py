@@ -27,7 +27,6 @@ prof_courses = db.Table('prof_courses',
 class Course(db.Model):
 	Course_ID = db.Column(db.Integer, primary_key=True)
 	Course_name = db.Column(db.String(64))
-	Classes_held = db.Column(db.DateTime)
 
 class User(UserMixin,db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -93,7 +92,6 @@ class User(UserMixin,db.Model):
 class Attendance(db.Model):
 	course_id = db.Column('Course_ID',db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
 	student_id = db.Column('Stud_ID',db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
-	status = db.Column('Present',db.String(4))
 	timestamp = db.Column(db.Date,primary_key=True)
 	faculty_id = db.Column('Faculty',db.Integer,db.ForeignKey('prof_courses.prof_id'))
 	TA_id = db.Column('TA',db.Integer,db.ForeignKey('ta_courses.ta_id'))
