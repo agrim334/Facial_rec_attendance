@@ -11,6 +11,7 @@ import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime
+import re
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
@@ -253,6 +254,7 @@ def upload_image():
 
 def detect_faces_in_image(file_stream,CID,user):
 	known_dir = "/home/agrim/Downloads/known/"
+	base = os.path.abspath(os.path.dirname(__file__))
 
 	known_face_encd = []
 	known_face_name = {}
@@ -296,8 +298,9 @@ def detect_faces_in_image(file_stream,CID,user):
 			result.append(("Face number " + str(num),name))
 			
 			if name != "Unknown":
-				stud = User.query.filter(User.username == name, User.role == "Student").first()
-				print(stud)
+				pattern = "*\.*"
+				name = 
+				stud = User.query.filter_by(username=name,role="Student").first()
 				if stud:
 					if user.role == 'TA':
 						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),TA_id = user.id)
@@ -308,9 +311,17 @@ def detect_faces_in_image(file_stream,CID,user):
 					print(atdrecord)
 				else :
 					print("Not student of this course")
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(image):
+				os.remove(image)
+
 		return jsonify(result)
 	else:
 		result = {
 			"face_found_in_image": False,
 		}
+		for image in os.listdir(base+"/uploads/"):
+			if os.isfile(image):
+				os.remove(image)
+
 		return jsonify(result)
