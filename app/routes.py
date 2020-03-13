@@ -57,7 +57,7 @@ def course_user_add():
 		if form.validate_on_submit():
 			course = Course.query.filter(Course.Course_ID == form.CID.data).first()
 			if not course:
-				flash('Course not in Database.Please add this course to database and then try or enter correct course id.')
+				flash('Course not find this course in Database.Please add this course to database and then try or enter correct course id.')
 				return redirect(url_for('course_add'))
 			user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
 			if not user:
@@ -296,7 +296,8 @@ def detect_faces_in_image(file_stream,CID,user):
 			result.append(("Face number " + str(num),name))
 			
 			if name != "Unknown":
-				stud = User.query.filter_by(username=current_user.username,role="Student").first()
+				stud = User.query.filter(User.username == name, User.role == "Student").first()
+				print(stud)
 				if stud:
 					if user.role == 'TA':
 						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),TA_id = user.id)
