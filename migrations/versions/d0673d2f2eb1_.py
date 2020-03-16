@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cbc11f2555c9
+Revision ID: d0673d2f2eb1
 Revises: 
-Create Date: 2020-03-12 11:03:01.880771
+Create Date: 2020-03-16 10:53:33.442318
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cbc11f2555c9'
+revision = 'd0673d2f2eb1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,6 @@ def upgrade():
     op.create_table('course',
     sa.Column('Course_ID', sa.Integer(), nullable=False),
     sa.Column('Course_name', sa.String(length=64), nullable=True),
-    sa.Column('Classes_held', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('Course_ID')
     )
     op.create_table('user',
@@ -35,11 +34,13 @@ def upgrade():
     sa.Column('role', sa.String(length=20), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_user_dept'), 'user', ['dept'], unique=False)
-    op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
-    op.create_index(op.f('ix_user_fname'), 'user', ['fname'], unique=False)
-    op.create_index(op.f('ix_user_lname'), 'user', ['lname'], unique=False)
-    op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
+    with op.batch_alter_table('user', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_user_dept'), ['dept'], unique=False)
+        batch_op.create_index(batch_op.f('ix_user_email'), ['email'], unique=True)
+        batch_op.create_index(batch_op.f('ix_user_fname'), ['fname'], unique=False)
+        batch_op.create_index(batch_op.f('ix_user_lname'), ['lname'], unique=False)
+        batch_op.create_index(batch_op.f('ix_user_username'), ['username'], unique=True)
+
     op.create_table('prof_courses',
     sa.Column('prof_id', sa.Integer(), nullable=True),
     sa.Column('course_id', sa.Integer(), nullable=True),
@@ -61,7 +62,6 @@ def upgrade():
     op.create_table('attendance',
     sa.Column('Course_ID', sa.Integer(), nullable=False),
     sa.Column('Stud_ID', sa.Integer(), nullable=False),
-    sa.Column('Present', sa.String(length=4), nullable=True),
     sa.Column('timestamp', sa.Date(), nullable=False),
     sa.Column('Faculty', sa.Integer(), nullable=True),
     sa.Column('TA', sa.Integer(), nullable=True),
@@ -80,11 +80,13 @@ def downgrade():
     op.drop_table('ta_courses')
     op.drop_table('stud_courses')
     op.drop_table('prof_courses')
-    op.drop_index(op.f('ix_user_username'), table_name='user')
-    op.drop_index(op.f('ix_user_lname'), table_name='user')
-    op.drop_index(op.f('ix_user_fname'), table_name='user')
-    op.drop_index(op.f('ix_user_email'), table_name='user')
-    op.drop_index(op.f('ix_user_dept'), table_name='user')
+    with op.batch_alter_table('user', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_user_username'))
+        batch_op.drop_index(batch_op.f('ix_user_lname'))
+        batch_op.drop_index(batch_op.f('ix_user_fname'))
+        batch_op.drop_index(batch_op.f('ix_user_email'))
+        batch_op.drop_index(batch_op.f('ix_user_dept'))
+
     op.drop_table('user')
     op.drop_table('course')
     # ### end Alembic commands ###

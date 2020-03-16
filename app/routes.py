@@ -226,7 +226,6 @@ def upload_image():
 	form = AttendForm()
 	if form.validate_on_submit():
 		base = os.path.abspath(os.path.dirname(__file__))
-		print(current_user.username)
 		user = User.query.filter_by(username=current_user.username,role="Faculty").first()
 		CID = form.CID.data
 		if not user:
@@ -298,14 +297,16 @@ def detect_faces_in_image(file_stream,CID,user):
 			result.append(("Face number " + str(num),name))
 			
 			if name != "Unknown":
-				pattern = "*\.*"
-				name = 
+				pat = re.compile('[A-Za-z]+\.')
+				name = pat.match(name)[0]
+				name = name[:-1] 
+				print(name)
 				stud = User.query.filter_by(username=name,role="Student").first()
 				if stud:
 					if user.role == 'TA':
-						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),TA_id = user.id)
+						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
 					else:
-						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%d-%m-%Y'),faculty_id = user.id)
+						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
 					db.session.add(atdrecord)
 					db.session.commit()
 					print(atdrecord)
