@@ -59,7 +59,8 @@ work. Will update for other OS as well.**
                   MAIL_PASSWORD  pwd --> admin's email password
                 The remaining environment variables are to be set up according to your email server
                 
-          6c.) In routes.py update known_dir to the directory where you will keep photos of known persons.
+          6c.) In routes.py update **known_dir** in **detect_faces_in_image** function to the directory 
+               where images of known persons are kept.
       
       7.) Run following commmands to setup the database:
                   flask db init
