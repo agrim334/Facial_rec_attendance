@@ -1,3 +1,9 @@
+numpy
+scipy
+click
+Pillow
+opencv-python
+flask
 flask-wtf
 flask-sqlalchemy
 flask-migrate
@@ -7,8 +13,3 @@ flask-bootstrap
 flask-uploads
 flask-mysql
 flask-mysqldb
-Click>=6.0
-dlib>=19.3.0
-numpy
-Pillow
-scipy>=0.17.0
