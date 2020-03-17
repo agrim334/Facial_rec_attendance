@@ -57,7 +57,8 @@ work. Will update for other OS as well.**
                   FLASK_APP  microblog.py --> whatever new name you choose for your app
                   MAIL_USERNAME  emailid --> the admin's email id
                   MAIL_PASSWORD  pwd --> admin's email password
-                The remaining
+                The remaining environment variables are to be set up according to your email server
+                
           6c.) In routes.py update known_dir to the directory where you will keep photos of known persons.
       
       7.) Run following commmands to setup the database:
