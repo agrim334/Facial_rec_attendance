@@ -206,10 +206,29 @@ def reset_password(token):
 def checkattd():
 	form =CheckAttendanceForm()
 	if form.validate_on_submit():
-		course = form.courseID.data
-#		attd = db.session.query(Attendance).join(Course).join(Student).join(Prof).join(TA).filter(Course.c.Course_ID == course)
-		if attd is False:
-			flash('Incorrect course code')
+		CID = form.courseID.data
+		course = Course.query.filter_by(Course_ID=CID).first() 
+		if course:
+			user = User.query.filter_by(username=current_user.username,role="Student").first()
+			if user:
+				is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
+				if is_stud:
+					attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
+					if not attd:
+						flash('Incorrect course code')
+						return redirect(url_for('checkattd'))
+					else:
+						flash('pfsesfe')
+						return redirect(url_for('checkattd')) 
+				else:
+					flash("Student not registered for this course")
+					return redirect(url_for('checkattd'))
+			else:
+				flash('No such student in database')
+				return redirect(url_for('checkattd'))
+
+		else:
+			flash('No such course')
 			return redirect(url_for('checkattd'))
 
 	return render_template('check_attendance.html',form=form)
