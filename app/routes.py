@@ -139,7 +139,6 @@ def edit_profile():
 		form.lname.data = current_user.lname
 	return render_template('edit_profile.html', title='Edit Profile',form=form)	
 
-
 @APP.route('/change_password', methods=['GET','POST'])
 @login_required
 def change_password():
@@ -171,8 +170,6 @@ def reset_password_request():
 		return redirect(url_for('home'))
 	form = ResetPasswordRequestForm()
 	if form.validate_on_submit():
-		#method = form.choice.data
-		#if(method == "username"):
 		user = User.query.filter_by(email=form.email.data).first()
 		if user:
 			send_password_reset_email(user,user.email)
@@ -200,11 +197,12 @@ def reset_password(token):
 		return redirect(url_for('login'))
 	return render_template('reset_password.html', form=form)
 
-
 @APP.route('/check_attendance',methods=['GET','POST'])
 @login_required
 def checkattd():
 	form =CheckAttendanceForm()
+	columns = []
+	records = []
 	if form.validate_on_submit():
 		CID = form.courseID.data
 		course = Course.query.filter_by(Course_ID=CID).first() 
@@ -218,21 +216,21 @@ def checkattd():
 						flash('Incorrect course code')
 						return redirect(url_for('checkattd'))
 					else:
-						flash('pfsesfe')
-						return redirect(url_for('checkattd')) 
+						for c in Attendance.columns:
+							columns.append(c)
+						for r in attd:
+							records.append(r)
 				else:
 					flash("Student not registered for this course")
 					return redirect(url_for('checkattd'))
 			else:
 				flash('No such student in database')
 				return redirect(url_for('checkattd'))
-
 		else:
 			flash('No such course')
 			return redirect(url_for('checkattd'))
 
-	return render_template('check_attendance.html',form=form)
-
+	return render_template('check_attendance.html',form=form,columns=columns,items=record)
 
 def allowed_file(filename):
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -247,28 +245,32 @@ def upload_image():
 		base = os.path.abspath(os.path.dirname(__file__))
 		user = User.query.filter_by(username=current_user.username,role="Faculty").first()
 		CID = form.CID.data
-		if not user:
-			user = User.query.filter_by(username=current_user.username,role="TA").first()
+		course = Course.query.filter_by(Course_ID=CID).first() 
+		if course:		
 			if not user:
-				flash("No TA or Faculty with given name found")
-				return redirect(url_for('upload_image'))
-			confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
-			if not confirm:
-				flash("No TA or Faculty with given name found")
-				return redirect(url_for('upload_image'))
-			file = photos.save(form.photo.data)
-			return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+				user = User.query.filter_by(username=current_user.username,role="TA").first()
+				if not user:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
+				if not confirm:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				file = photos.save(form.photo.data)
+				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
+			else:
+				confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
+				if not confirm:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				file = photos.save(form.photo.data)
+				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 		else:
-			confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
-			if not confirm:
-				flash("No TA or Faculty with given name found")
-				return redirect(url_for('upload_image'))
-			file = photos.save(form.photo.data)
-			return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+			flash("No such Course found")
+			return redirect(url_for('upload_image'))
 
 	return render_template("face_rec.html",title="Hello",form=form)
-
 
 def detect_faces_in_image(file_stream,CID,user):
 	known_dir = "/home/agrim/Downloads/known/"
@@ -298,7 +300,6 @@ def detect_faces_in_image(file_stream,CID,user):
 
 	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
-
 	if len(un_face_encodings) > 0:
 		result = []
 		num = 0
@@ -314,12 +315,11 @@ def detect_faces_in_image(file_stream,CID,user):
 				im = known_face_encd[best_match_index]
 				name = known_face_name[str(im)]
 			result.append(("Face number " + str(num),name))
-			
+
 			if name != "Unknown":
 				pat = re.compile('[A-Za-z]+\.')
 				name = pat.match(name)[0]
-				name = name[:-1] 
-				print(name)
+				name = name[:-1]
 				stud = User.query.filter_by(username=name,role="Student").first()
 				if stud:
 					if user.role == 'TA':
@@ -328,7 +328,6 @@ def detect_faces_in_image(file_stream,CID,user):
 						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
 					db.session.add(atdrecord)
 					db.session.commit()
-					print(atdrecord)
 				else :
 					print("Not student of this course")
 		for image in os.listdir(base+"/uploads/"):
