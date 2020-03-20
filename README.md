@@ -75,6 +75,7 @@ work. Will update for other OS as well.**
       
       2.) Run the following ([] means optional):
                   . env.sh
-                  python3 -m flask run [--with-threads] [--host=IPADDRESS]
+                  python3 -m flask run [--with-threads] [--host=IPADDRESS:port]
+          By default the server runs on localhost:5000/
 
       
