@@ -20,7 +20,7 @@
 			{% for row in items %}
 			<tr>
 				{% for col in columns %}
-					<td> {{ row.col }} </td>
+					<td> {{ row[col] }} </td>
 				{% endfor %}
 			</tr>
  			{% endfor %}

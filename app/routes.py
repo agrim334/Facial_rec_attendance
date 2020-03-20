@@ -244,37 +244,36 @@ def checkattd():
 			if form.validate_on_submit():
 				CID = form.courseID.data
 				course = Course.query.filter_by(Course_ID=CID).first() 
-			if course:
-				user = User.query.filter_by(username=current_user.username,role="Student").first()
-				if user:
-					is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
-					if is_stud:
-						attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
-						if not attd:
-							flash('Incorrect course code')
-							return redirect(url_for('checkattd'))
+				if course:
+					user = User.query.filter_by(username=current_user.username,role="Student").first()
+					if user:
+						is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
+						if is_stud:
+							attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
+							if not attd:
+								flash('Incorrect course code')
+								return redirect(url_for('checkattd'))
+							else:
+								columns = Attendance.__table__.columns.keys()
+								for r in attd:
+									records.append(r)
 						else:
-							columns = Attendance.__table__.columns.keys()
-							cols = [x.lower() for x in columns]
-							for r in attd:
-								records.append(r)
+							flash("Student not registered for this course")
+							return redirect(url_for('checkattd'))
 					else:
-						flash("Student not registered for this course")
+						flash('No such student in database')
 						return redirect(url_for('checkattd'))
 				else:
-					flash('No such student in database')
+					flash('No such course')
 					return redirect(url_for('checkattd'))
-			else:
-				flash('No such course')
-				return redirect(url_for('checkattd'))
-
-			return render_template('check_attendance.html',form=form,columns=columns,items=records)
+				return render_template('check_attendance.html',form=form,columns=columns,items=records)
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
+	return render_template('check_attendance.html',form=form,columns=columns,items=records)
 
 def allowed_file(filename):
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -285,40 +284,52 @@ def allowed_file(filename):
 @login_required
 def upload_image():
 	if current_user.is_authenticated:
-		if current_user.role == "Faculty" or current_user.role == "TA":
+		if current_user.role == "Faculty":
 			form = AttendForm()
 			if form.validate_on_submit():
 				base = os.path.abspath(os.path.dirname(__file__))
 				user = User.query.filter_by(username=current_user.username,role="Faculty").first()
 				CID = form.CID.data
-				course = Course.query.filter_by(Course_ID=CID).first() 
-				if course:		
-					if not user:
-						user = User.query.filter_by(username=current_user.username,role="TA").first()
-					if not user:
-						flash("No TA or Faculty with given name found")
-						return redirect(url_for('upload_image'))
-					confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
-					if not confirm:
-						flash("No TA or Faculty with given name found")
-						return redirect(url_for('upload_image'))
-					file = photos.save(form.photo.data)
-					return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
-				else:
-					confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
-					if not confirm:
-						flash("No TA or Faculty with given name found")
-						return redirect(url_for('upload_image'))
-					file = photos.save(form.photo.data)
-					return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
-			else:
-				flash("No such Course found")
-				return redirect(url_for('upload_image'))
+				course = Course.query.filter_by(Course_ID=CID).first()
+				if not user:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				if not course:
+					flash("No such Course found")
+					return redirect(url_for('upload_image'))
 
-			return render_template("face_rec.html",title="Hello",form=form)
+				confirm = db.session.query(prof_courses).filter_by(prof_id=user.id,course_id = CID)
+				if not confirm:
+					flash("No TA or Faculty with given name found for this course")
+					return redirect(url_for('upload_image'))
+				file = photos.save(form.photo.data)
+				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+
+		elif current_user.role == "TA":
+			form = AttendForm()
+			if form.validate_on_submit():
+				base = os.path.abspath(os.path.dirname(__file__))
+				user = User.query.filter_by(username=current_user.username,role="TA").first()
+				CID = form.CID.data
+				course = Course.query.filter_by(Course_ID=CID).first()
+				if not user:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				if not course:
+					flash("No such Course found")
+					return redirect(url_for('upload_image'))
+
+				confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
+				if not confirm:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				file = photos.save(form.photo.data)
+				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
+		return render_template("face_rec.html",title="Hello",form=form)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
