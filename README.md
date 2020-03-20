@@ -77,5 +77,5 @@ work. Will update for other OS as well.**
                   . env.sh
                   python3 -m flask run [--with-threads] [--host=IPADDRESS:port]
           By default the server runs on localhost:5000/
-
+      3.) If you wish to use CUDA for better performance, then set the value of model argument in routes.py as "cnn".
       
