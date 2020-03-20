@@ -13,20 +13,19 @@
 	<table>
 		<thead>
 			{% for col in columns %}
-				<th>{{ col }}</th>
+				<th> {{ col }} </th>
 			{% endfor %}
 		</thead>
-
 		<tbody>
 			{% for row in items %}
 			<tr>
 				{% for col in columns %}
-					<td>{{ row.attr(col) }}</td>
+					<td> {{ row.col }} </td>
 				{% endfor %}
 			</tr>
  			{% endfor %}
  		</tbody>
- 	</table>
+ 	</table> 
  	</div>
  
 {% endblock %}

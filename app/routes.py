@@ -12,6 +12,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime
 import re
+import inspect
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
@@ -54,30 +55,34 @@ def login():
 @login_required
 def course_user_add():
 	if current_user.is_authenticated:
-		form = CourseUserForm()
-		if form.validate_on_submit():
-			course = Course.query.filter(Course.Course_ID == form.CID.data).first()
-			if not course:
-				flash('Course not find this course in Database.Please add this course to database and then try or enter correct course id.')
-				return redirect(url_for('course_add'))
-			user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
-			if not user:
-				flash('No such TA or Faculty found')
-				return redirect(url_for('register'))
-			if form.role.data == 'Faculty':
-				statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
-			elif form.role.data == 'TA':
-				statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)
-			elif form.role.data == 'Student':
-				statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
-			else:
-				flash("Not allowed for this role")
-				return redirect(url_for('course_faculty_add'))
-			db.session.execute(statement)
-			db.session.commit()
-			flash('Mapping has been added')
+		if current_user.role == "Admin":
+			form = CourseUserForm()
+			if form.validate_on_submit():
+				course = Course.query.filter(Course.Course_ID == form.CID.data).first()
+				if not course:
+					flash('Course not find this course in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('course_add'))
+				user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
+				if not user:
+					flash('No such TA or Faculty found')
+					return redirect(url_for('register'))
+				if form.role.data == 'Faculty':
+					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
+				elif form.role.data == 'TA':
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)
+				elif form.role.data == 'Student':
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
+				else:
+					flash("Not allowed for this role")
+					return redirect(url_for('course_faculty_add'))
+				db.session.execute(statement)
+				db.session.commit()
+				flash('Mapping has been added')
+				return redirect(url_for('home'))
+			return render_template('course_user.html', title='Course', form=form)
+		else:
+			flash('Only admins can access this page')
 			return redirect(url_for('home'))
-		return render_template('course_user.html', title='Course', form=form)
 	else:
 		flash('Login please!!')
 		return redirect(url_for('login'))
@@ -86,14 +91,21 @@ def course_user_add():
 @login_required
 def course_add():
 	if current_user.is_authenticated:
-		form = CourseForm()
-		if form.validate_on_submit():
-			course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)
-			db.session.add(course)
-			db.session.commit()
-			flash('Course has been added')
+		if current_user.role == "Admin":
+			form = CourseForm()
+			if form.validate_on_submit():
+				course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)
+				db.session.add(course)
+				db.session.commit()
+				flash('Course has been added')
+				return redirect(url_for('home'))
+				return render_template('course.html', title='Course', form=form)
+			else:
+				flash('Incorrect info')
+				return redirect(url_for('course_add'))
+		else:
+			flash('Only admins can access this page')
 			return redirect(url_for('home'))
-		return render_template('course.html', title='Course', form=form)
 	else:
 		flash('Login please!!')
 		return redirect(url_for('login'))
@@ -102,15 +114,22 @@ def course_add():
 @login_required
 def register():
 	if current_user.is_authenticated:
-		form = RegistrationForm()
-		if form.validate_on_submit():
-			user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
-			user.set_password(form.password.data)
-			db.session.add(user)
-			db.session.commit()
-			flash('User has been added')
+		if current_user.role == "Admin":
+			form = RegistrationForm()
+			if form.validate_on_submit():
+				user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
+				user.set_password(form.password.data)
+				db.session.add(user)
+				db.session.commit()
+				flash('User has been added')
+				return redirect(url_for('home'))
+				return render_template('register.html', title='Register', form=form)
+			else:
+				flash('Incorrect info')
+				return redirect(url_for('register'))
+		else:
+			flash('Only admins can access this page')
 			return redirect(url_for('home'))
-		return render_template('register.html', title='Register', form=form)
 	else:
 		flash('Login please!!')
 		return redirect(url_for('login'))
@@ -118,42 +137,59 @@ def register():
 @APP.route('/user/<username>')
 @login_required
 def user(username):
-	user = User.query.filter_by(username=username).first_or_404()
-	return render_template('user.html', user=user)
+	if current_user.is_authenticated:
+		user = User.query.filter_by(username=username).first_or_404()
+		if user:
+			if current_user.username == username:
+				return render_template('user.html', user=user)
+			else:
+				flash('Not allowed')
+				return redirect('home')
+	else:
+		flash('login please')
+		return redirect(url_for('login'))
 
 @APP.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-	form = EditProfileForm(current_user)
-	if form.validate_on_submit():
-		current_user.email = form.email.data
-		current_user.fname = form.fname.data
-		current_user.lname = form.lname.data
-		db.session.commit()
-		flash('Your changes have been saved.')
-		return redirect(url_for('edit_profile'))
+	if current_user.is_authenticated:
+		form = EditProfileForm(current_user)
+		if form.validate_on_submit():
+			current_user.email = form.email.data
+			current_user.fname = form.fname.data
+			current_user.lname = form.lname.data
+			db.session.commit()
+			flash('Your changes have been saved.')
+			return redirect(url_for('edit_profile'))
 
-	elif request.method == 'GET':
-		form.email.data = current_user.email
-		form.fname.data = current_user.fname
-		form.lname.data = current_user.lname
-	return render_template('edit_profile.html', title='Edit Profile',form=form)	
+		elif request.method == 'GET':
+			form.email.data = current_user.email
+			form.fname.data = current_user.fname
+			form.lname.data = current_user.lname
+		return render_template('edit_profile.html', title='Edit Profile',form=form)	
+	else:
+		flash('login please')
+		return redirect(url_for('login'))
 
 @APP.route('/change_password', methods=['GET','POST'])
 @login_required
 def change_password():
-	form = ChangePWDForm()
-	if request.method == 'POST':
-		if form.validate_on_submit(): 
-			if current_user.check_password(form.currentpassword.data):
-				current_user.set_password(form.newpassword.data)
-				db.session.commit()
-				flash('Your changes have been saved.')
-				return redirect(url_for('home'))
-			else :
-				flash('Old password incorrect')
-			return redirect(url_for('change_password'))
-	return render_template('change_password.html', title='Change Password',form=form)	
+	if current_user.is_authenticated:
+		form = ChangePWDForm()
+		if request.method == 'POST':
+			if form.validate_on_submit(): 
+				if current_user.check_password(form.currentpassword.data):
+					current_user.set_password(form.newpassword.data)
+					db.session.commit()
+					flash('Your changes have been saved.')
+					return redirect(url_for('home'))
+				else :
+					flash('Old password incorrect')
+					return redirect(url_for('change_password'))
+		return render_template('change_password.html', title='Change Password',form=form)	
+	else:
+		flash('login please')
+		return redirect(url_for('login'))
 
 @APP.route('/logout')
 def logout():
@@ -200,37 +236,45 @@ def reset_password(token):
 @APP.route('/check_attendance',methods=['GET','POST'])
 @login_required
 def checkattd():
-	form =CheckAttendanceForm()
-	columns = []
-	records = []
-	if form.validate_on_submit():
-		CID = form.courseID.data
-		course = Course.query.filter_by(Course_ID=CID).first() 
-		if course:
-			user = User.query.filter_by(username=current_user.username,role="Student").first()
-			if user:
-				is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
-				if is_stud:
-					attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
-					if not attd:
-						flash('Incorrect course code')
-						return redirect(url_for('checkattd'))
+	if current_user.is_authenticated:
+		if current_user.role == "Student":
+			form =CheckAttendanceForm()
+			columns = []
+			records = []
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				course = Course.query.filter_by(Course_ID=CID).first() 
+			if course:
+				user = User.query.filter_by(username=current_user.username,role="Student").first()
+				if user:
+					is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
+					if is_stud:
+						attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
+						if not attd:
+							flash('Incorrect course code')
+							return redirect(url_for('checkattd'))
+						else:
+							columns = Attendance.__table__.columns.keys()
+							cols = [x.lower() for x in columns]
+							for r in attd:
+								records.append(r)
 					else:
-						for c in Attendance.columns:
-							columns.append(c)
-						for r in attd:
-							records.append(r)
+						flash("Student not registered for this course")
+						return redirect(url_for('checkattd'))
 				else:
-					flash("Student not registered for this course")
+					flash('No such student in database')
 					return redirect(url_for('checkattd'))
 			else:
-				flash('No such student in database')
+				flash('No such course')
 				return redirect(url_for('checkattd'))
-		else:
-			flash('No such course')
-			return redirect(url_for('checkattd'))
 
-	return render_template('check_attendance.html',form=form,columns=columns,items=record)
+			return render_template('check_attendance.html',form=form,columns=columns,items=records)
+		else:
+			flash('Not allowed')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
 
 def allowed_file(filename):
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -240,37 +284,44 @@ def allowed_file(filename):
 @APP.route('/faces', methods=['GET', 'POST'])
 @login_required
 def upload_image():
-	form = AttendForm()
-	if form.validate_on_submit():
-		base = os.path.abspath(os.path.dirname(__file__))
-		user = User.query.filter_by(username=current_user.username,role="Faculty").first()
-		CID = form.CID.data
-		course = Course.query.filter_by(Course_ID=CID).first() 
-		if course:		
-			if not user:
-				user = User.query.filter_by(username=current_user.username,role="TA").first()
-				if not user:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
-				if not confirm:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				file = photos.save(form.photo.data)
-				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
-
+	if current_user.is_authenticated:
+		if current_user.role == "Faculty" or current_user.role == "TA":
+			form = AttendForm()
+			if form.validate_on_submit():
+				base = os.path.abspath(os.path.dirname(__file__))
+				user = User.query.filter_by(username=current_user.username,role="Faculty").first()
+				CID = form.CID.data
+				course = Course.query.filter_by(Course_ID=CID).first() 
+				if course:		
+					if not user:
+						user = User.query.filter_by(username=current_user.username,role="TA").first()
+					if not user:
+						flash("No TA or Faculty with given name found")
+						return redirect(url_for('upload_image'))
+					confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
+					if not confirm:
+						flash("No TA or Faculty with given name found")
+						return redirect(url_for('upload_image'))
+					file = photos.save(form.photo.data)
+					return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+				else:
+					confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
+					if not confirm:
+						flash("No TA or Faculty with given name found")
+						return redirect(url_for('upload_image'))
+					file = photos.save(form.photo.data)
+					return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 			else:
-				confirm = db.session.query(prof_courses).filter_by(prof_id = user.id ,course_id = CID)
-				if not confirm:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				file = photos.save(form.photo.data)
-				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
-		else:
-			flash("No such Course found")
-			return redirect(url_for('upload_image'))
+				flash("No such Course found")
+				return redirect(url_for('upload_image'))
 
-	return render_template("face_rec.html",title="Hello",form=form)
+			return render_template("face_rec.html",title="Hello",form=form)
+		else:
+			flash('Not allowed')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
 
 def detect_faces_in_image(file_stream,CID,user):
 	known_dir = "/home/agrim/Downloads/known/"
