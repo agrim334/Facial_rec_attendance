@@ -384,13 +384,17 @@ def detect_faces_in_image(file_stream,CID,user):
 				name = name[:-1]
 				stud = User.query.filter_by(username=name,role="Student").first()
 				if stud:
-					if user.role == 'TA':
-						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
+					check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'))
+					if not check:
+						if user.role == 'TA':
+							atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
+						else:
+							atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
+						db.session.add(atdrecord)
+						db.session.commit()
 					else:
-						atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
-					db.session.add(atdrecord)
-					db.session.commit()
-				else :
+						print("marked")
+				else:
 					print("Not student of this course")
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(image):
