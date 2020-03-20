@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d0673d2f2eb1
+Revision ID: 111b99a506c5
 Revises: 
-Create Date: 2020-03-16 10:53:33.442318
+Create Date: 2020-03-20 14:02:36.948217
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd0673d2f2eb1'
+revision = '111b99a506c5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -60,16 +60,16 @@ def upgrade():
     sa.ForeignKeyConstraint(['ta_id'], ['user.id'], )
     )
     op.create_table('attendance',
-    sa.Column('Course_ID', sa.Integer(), nullable=False),
-    sa.Column('Stud_ID', sa.Integer(), nullable=False),
+    sa.Column('course_id', sa.Integer(), nullable=False),
+    sa.Column('student_id', sa.Integer(), nullable=False),
     sa.Column('timestamp', sa.Date(), nullable=False),
-    sa.Column('Faculty', sa.Integer(), nullable=True),
-    sa.Column('TA', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['Course_ID'], ['stud_courses.course_id'], ),
-    sa.ForeignKeyConstraint(['Faculty'], ['prof_courses.prof_id'], ),
-    sa.ForeignKeyConstraint(['Stud_ID'], ['stud_courses.stud_id'], ),
-    sa.ForeignKeyConstraint(['TA'], ['ta_courses.ta_id'], ),
-    sa.PrimaryKeyConstraint('Course_ID', 'Stud_ID', 'timestamp')
+    sa.Column('faculty_id', sa.Integer(), nullable=True),
+    sa.Column('TA_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['TA_id'], ['ta_courses.ta_id'], ),
+    sa.ForeignKeyConstraint(['course_id'], ['stud_courses.course_id'], ),
+    sa.ForeignKeyConstraint(['faculty_id'], ['prof_courses.prof_id'], ),
+    sa.ForeignKeyConstraint(['student_id'], ['stud_courses.stud_id'], ),
+    sa.PrimaryKeyConstraint('course_id', 'student_id', 'timestamp')
     )
     # ### end Alembic commands ###
 

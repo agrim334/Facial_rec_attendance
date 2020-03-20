@@ -14,15 +14,15 @@ stud_courses = 	db.Table('stud_courses',
 				)
 
 ta_courses = db.Table('ta_courses',
-			 db.Column('ta_id',db.Integer,db.ForeignKey('user.id')),
-			 db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
-			 )
+			db.Column('ta_id',db.Integer,db.ForeignKey('user.id')),
+			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+			)
 
 
 prof_courses = db.Table('prof_courses',
-			 db.Column('prof_id',db.Integer,db.ForeignKey('user.id')),
-			 db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
-			 )
+			db.Column('prof_id',db.Integer,db.ForeignKey('user.id')),
+			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+			)
 
 class Course(db.Model):
 	Course_ID = db.Column(db.Integer, primary_key=True)
@@ -90,8 +90,8 @@ class User(UserMixin,db.Model):
 		return User.query.get(id)
 
 class Attendance(db.Model):
-	course_id = db.Column('Course_ID',db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
-	student_id = db.Column('Stud_ID',db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
+	course_id = db.Column(db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
+	student_id = db.Column(db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)
-	faculty_id = db.Column('Faculty',db.Integer,db.ForeignKey('prof_courses.prof_id'))
-	TA_id = db.Column('TA',db.Integer,db.ForeignKey('ta_courses.ta_id'))
+	faculty_id = db.Column(db.Integer,db.ForeignKey('prof_courses.prof_id'))
+	TA_id = db.Column(db.Integer,db.ForeignKey('ta_courses.ta_id'))

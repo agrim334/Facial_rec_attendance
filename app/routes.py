@@ -12,7 +12,6 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime
 import re
-import inspect
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
@@ -99,10 +98,7 @@ def course_add():
 				db.session.commit()
 				flash('Course has been added')
 				return redirect(url_for('home'))
-				return render_template('course.html', title='Course', form=form)
-			else:
-				flash('Incorrect info')
-				return redirect(url_for('course_add'))
+			return render_template('course.html', title='Course', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -123,10 +119,8 @@ def register():
 				db.session.commit()
 				flash('User has been added')
 				return redirect(url_for('home'))
-				return render_template('register.html', title='Register', form=form)
-			else:
-				flash('Incorrect info')
-				return redirect(url_for('register'))
+			return render_template('register.html', title='Register', form=form)
+
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -257,6 +251,8 @@ def checkattd():
 								columns = Attendance.__table__.columns.keys()
 								for r in attd:
 									records.append(r)
+									for c in columns:
+										print(c)
 						else:
 							flash("Student not registered for this course")
 							return redirect(url_for('checkattd'))
@@ -343,10 +339,6 @@ def detect_faces_in_image(file_stream,CID,user):
 
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
-#		try:
-#			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
-
-#		except RuntimeError:
 		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
 
 		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
@@ -355,9 +347,6 @@ def detect_faces_in_image(file_stream,CID,user):
 
 	un_image = face_recognition.load_image_file(file_stream)
 
-#	try:
-#		face_locations = face_recognition.face_locations(un_image,model = "cnn")
-#	except RuntimeError:
 	face_locations = face_recognition.face_locations(un_image,model = "hog")
 
 	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
@@ -384,7 +373,7 @@ def detect_faces_in_image(file_stream,CID,user):
 				name = name[:-1]
 				stud = User.query.filter_by(username=name,role="Student").first()
 				if stud:
-					check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'))
+					check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
 					if not check:
 						if user.role == 'TA':
 							atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
@@ -396,9 +385,10 @@ def detect_faces_in_image(file_stream,CID,user):
 						print("marked")
 				else:
 					print("Not student of this course")
+
 		for image in os.listdir(base+"/uploads/"):
-			if os.path.isfile(image):
-				os.remove(image)
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
 
 		return jsonify(result)
 	else:
@@ -406,7 +396,7 @@ def detect_faces_in_image(file_stream,CID,user):
 			"face_found_in_image": False,
 		}
 		for image in os.listdir(base+"/uploads/"):
-			if os.isfile(image):
-				os.remove(image)
+			if os.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
 
 		return jsonify(result)
