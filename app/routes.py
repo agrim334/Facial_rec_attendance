@@ -113,14 +113,13 @@ def register():
 		if current_user.role == "Admin":
 			form = RegistrationForm()
 			if form.validate_on_submit():
-				user = User(username=form.username.data, email=form.email.data, fname=form.fname.data, lname=form.lname.data,role=form.role.data,dept=form.dept.data)
+				user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role=form.role.data,dept=int(form.dept.data))
 				user.set_password(form.password.data)
 				db.session.add(user)
 				db.session.commit()
 				flash('User has been added')
 				return redirect(url_for('home'))
 			return render_template('register.html', title='Register', form=form)
-
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -299,6 +298,8 @@ def upload_image():
 					flash("No TA or Faculty with given name found for this course")
 					return redirect(url_for('upload_image'))
 				file = photos.save(form.photo.data)
+				course.Classes_held = course.Classes_held + 1
+				db.session.commit()
 				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
 		elif current_user.role == "TA":
@@ -320,6 +321,8 @@ def upload_image():
 					flash("No TA or Faculty with given name found")
 					return redirect(url_for('upload_image'))
 				file = photos.save(form.photo.data)
+				course.Classes_held = course.Classes_held + 1
+				db.session.commit()
 				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
 
 		else:

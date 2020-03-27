@@ -40,7 +40,7 @@ class RegistrationForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	fname =	StringField('First name', validators=[DataRequired()])
 	lname = StringField('Last name', validators=[DataRequired()])
-	dept = RadioField('Department',choices=[(1,'CSE'),(2,'ECE'),(3,'Civil'),(4,'Metta')])
+	dept = RadioField('Department',coerce=int,choices=[(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()])
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')] )
 	password = PasswordField('Password', validators=[DataRequired()])
