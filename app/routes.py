@@ -4,6 +4,7 @@ from app.forms import CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,
 import face_recognition
 import os
 from werkzeug.urls import url_parse
+from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
 from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department
 from app.email import send_password_reset_email
@@ -14,7 +15,7 @@ from datetime import datetime
 import re
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
+APP.config['UPLOAD_PATH'] = os.path.join(basedir, 'uploads')
 photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
@@ -59,12 +60,12 @@ def course_user_add():
 			if form.validate_on_submit():
 				course = Course.query.filter(Course.Course_ID == form.CID.data).first()
 				if not course:
-					flash('Course not find this course in Database.Please add this course to database and then try or enter correct course id.')
-					return redirect(url_for('course_add'))
+					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('course_user_add'))
 				user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
 				if not user:
 					flash('No such TA or Faculty found')
-					return redirect(url_for('register'))
+					return redirect(url_for('course_user_add'))
 				if form.role.data == 'Faculty':
 					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
 				elif form.role.data == 'TA':
@@ -73,11 +74,11 @@ def course_user_add():
 					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
 				else:
 					flash("Not allowed for this role")
-					return redirect(url_for('course_faculty_add'))
+					return redirect(url_for('course_user_add'))
 				db.session.execute(statement)
 				db.session.commit()
 				flash('Mapping has been added')
-				return redirect(url_for('home'))
+				return redirect(url_for('course_user_add'))
 			return render_template('course_user.html', title='Course', form=form)
 		else:
 			flash('Only admins can access this page')
@@ -118,7 +119,7 @@ def register():
 				db.session.add(user)
 				db.session.commit()
 				flash('User has been added')
-				return redirect(url_for('home'))
+				return redirect(url_for('register'))
 			return render_template('register.html', title='Register', form=form)
 		else:
 			flash('Only admins can access this page')
@@ -236,7 +237,8 @@ def checkattd():
 			records = []
 			if form.validate_on_submit():
 				CID = form.courseID.data
-				course = Course.query.filter_by(Course_ID=CID).first() 
+				course = Course.query.filter_by(Course_ID=CID).first()
+				count = course.Classes_held
 				if course:
 					user = User.query.filter_by(username=current_user.username,role="Student").first()
 					if user:
@@ -250,8 +252,6 @@ def checkattd():
 								columns = Attendance.__table__.columns.keys()
 								for r in attd:
 									records.append(r)
-									for c in columns:
-										print(c)
 						else:
 							flash("Student not registered for this course")
 							return redirect(url_for('checkattd'))
@@ -261,7 +261,7 @@ def checkattd():
 				else:
 					flash('No such course')
 					return redirect(url_for('checkattd'))
-				return render_template('check_attendance.html',form=form,columns=columns,items=records)
+				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
@@ -297,10 +297,13 @@ def upload_image():
 				if not confirm:
 					flash("No TA or Faculty with given name found for this course")
 					return redirect(url_for('upload_image'))
-				file = photos.save(form.photo.data)
+				file = request.files.getlist("photo")
+				for f in file:
+					filename = secure_filename(f.filename)
+					f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
 				course.Classes_held = course.Classes_held + 1
 				db.session.commit()
-				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+				return detect_faces_in_image(base+"/uploads/",CID,user)
 
 		elif current_user.role == "TA":
 			form = AttendForm()
@@ -320,10 +323,13 @@ def upload_image():
 				if not confirm:
 					flash("No TA or Faculty with given name found")
 					return redirect(url_for('upload_image'))
-				file = photos.save(form.photo.data)
+				file = request.files.getlist("photo")
+				for f in file:
+					filename = secure_filename(f.filename)
+					f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
 				course.Classes_held = course.Classes_held + 1
 				db.session.commit()
-				return detect_faces_in_image(os.path.join(base+"/uploads/", str(file)),CID,user)
+				return detect_faces_in_image(base+"/uploads/",CID,user)
 
 		else:
 			flash('Not allowed')
@@ -339,67 +345,59 @@ def detect_faces_in_image(file_stream,CID,user):
 
 	known_face_encd = []
 	known_face_name = {}
+	result = []
+	num = 0
 
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
 		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
-
 		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
 		known_face_encd.append(encd)
 		known_face_name[str(encd)] = image
 
-	un_image = face_recognition.load_image_file(file_stream)
+	for file in os.listdir(file_stream):
 
-	face_locations = face_recognition.face_locations(un_image,model = "hog")
+		un_image = face_recognition.load_image_file(file_stream+file)
 
-	un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
+		face_locations = face_recognition.face_locations(un_image,model = "hog")
 
-	if len(un_face_encodings) > 0:
-		result = []
-		num = 0
-		for face_encoding in un_face_encodings:
-			num = num + 1
-			matches = face_recognition.compare_faces(known_face_encd, face_encoding)
-			name = "Unknown"
+		un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
-			face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
-			best_match_index = np.argmin(face_distances)
+		if len(un_face_encodings) > 0:
+			for face_encoding in un_face_encodings:
+				num = num + 1
+				matches = face_recognition.compare_faces(known_face_encd, face_encoding)
+				name = "Unknown"
 
-			if matches[best_match_index]:
-				im = known_face_encd[best_match_index]
-				name = known_face_name[str(im)]
-			result.append(("Face number " + str(num),name))
+				face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
+				best_match_index = np.argmin(face_distances)
 
-			if name != "Unknown":
-				pat = re.compile('[A-Za-z]+\.')
-				name = pat.match(name)[0]
-				name = name[:-1]
-				stud = User.query.filter_by(username=name,role="Student").first()
-				if stud:
-					check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-					if not check:
-						if user.role == 'TA':
-							atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
+				if matches[best_match_index]:
+					im = known_face_encd[best_match_index]
+					name = known_face_name[str(im)]
+				result.append(("Face number " + str(num),name))
+
+				if name != "Unknown":
+					pat = re.compile('[A-Za-z]+\.')
+					name = pat.match(name)[0]
+					name = name[:-1]
+					stud = User.query.filter_by(username=name,role="Student").first()
+					if stud:
+						check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+						if not check:
+							if user.role == 'TA':
+								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
+							else:
+								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
+							db.session.add(atdrecord)
+							db.session.commit()
 						else:
-							atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
-						db.session.add(atdrecord)
-						db.session.commit()
+							print("marked")
 					else:
-						print("marked")
-				else:
-					print("Not student of this course")
+						print("Not student of this course")
 
-		for image in os.listdir(base+"/uploads/"):
-			if os.path.isfile(base+"/uploads/"+image):
-				os.remove(base+"/uploads/"+image)
+	for image in os.listdir(base+"/uploads/"):
+		if os.path.isfile(base+"/uploads/"+image):
+			os.remove(base+"/uploads/"+image)
 
-		return jsonify(result)
-	else:
-		result = {
-			"face_found_in_image": False,
-		}
-		for image in os.listdir(base+"/uploads/"):
-			if os.isfile(base+"/uploads/"+image):
-				os.remove(base+"/uploads/"+image)
-
-		return jsonify(result)
+	return jsonify(result)

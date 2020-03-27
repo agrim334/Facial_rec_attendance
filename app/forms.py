@@ -15,7 +15,7 @@ patch_request_class(APP)
 
 class AttendForm(FlaskForm):
 	CID = StringField('Course ID', validators=[DataRequired()])
-	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
+	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
 class CourseUserForm(FlaskForm):

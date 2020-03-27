@@ -26,6 +26,11 @@
  			{% endfor %}
  		</tbody>
  	</table> 
+	{% if columns: %}
+		<p> Classes Held for this course is {{ class_count }} </p>
+		<p> Your attendance is {{ items|length }} out of {{ class_count }} </p>
+	{% endif %}
+
  	</div>
  
 {% endblock %}
