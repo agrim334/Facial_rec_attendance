@@ -3,7 +3,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from app.models import User
+from app.models import User,Course,Department
 from app import APP
 import os
 
@@ -40,8 +40,8 @@ class RegistrationForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	fname =	StringField('First name', validators=[DataRequired()])
 	lname = StringField('Last name', validators=[DataRequired()])
+	dept = RadioField('Department',choices=[(1,'CSE'),(2,'ECE'),(3,'Civil'),(4,'Metta')])
 	email = StringField('Email', validators=[DataRequired(), Email()])
-	dept = StringField('Department', validators=[DataRequired()])
 	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')] )
 	password = PasswordField('Password', validators=[DataRequired()])
 	password2 = PasswordField(

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 111b99a506c5
+Revision ID: a0c880773b19
 Revises: 
-Create Date: 2020-03-20 14:02:36.948217
+Create Date: 2020-03-27 11:44:52.879965
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '111b99a506c5'
+revision = 'a0c880773b19'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,13 @@ def upgrade():
     op.create_table('course',
     sa.Column('Course_ID', sa.Integer(), nullable=False),
     sa.Column('Course_name', sa.String(length=64), nullable=True),
+    sa.Column('Classes_held', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('Course_ID')
+    )
+    op.create_table('department',
+    sa.Column('Dept_ID', sa.Integer(), nullable=False),
+    sa.Column('Dept_name', sa.String(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('Dept_ID')
     )
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -30,12 +36,12 @@ def upgrade():
     sa.Column('fname', sa.String(length=64), nullable=True),
     sa.Column('lname', sa.String(length=64), nullable=True),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
-    sa.Column('dept', sa.String(length=20), nullable=True),
+    sa.Column('dept', sa.Integer(), nullable=True),
     sa.Column('role', sa.String(length=20), nullable=True),
+    sa.ForeignKeyConstraint(['dept'], ['department.Dept_ID'], ),
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('user', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('ix_user_dept'), ['dept'], unique=False)
         batch_op.create_index(batch_op.f('ix_user_email'), ['email'], unique=True)
         batch_op.create_index(batch_op.f('ix_user_fname'), ['fname'], unique=False)
         batch_op.create_index(batch_op.f('ix_user_lname'), ['lname'], unique=False)
@@ -85,8 +91,8 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_user_lname'))
         batch_op.drop_index(batch_op.f('ix_user_fname'))
         batch_op.drop_index(batch_op.f('ix_user_email'))
-        batch_op.drop_index(batch_op.f('ix_user_dept'))
 
     op.drop_table('user')
+    op.drop_table('department')
     op.drop_table('course')
     # ### end Alembic commands ###

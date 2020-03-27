@@ -5,7 +5,7 @@ import face_recognition
 import os
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses
+from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department
 from app.email import send_password_reset_email
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed

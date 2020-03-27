@@ -24,9 +24,14 @@ prof_courses = db.Table('prof_courses',
 			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
 			)
 
+class Department(db.Model):
+	Dept_ID = db.Column(db.Integer, primary_key=True)
+	Dept_name = db.Column(db.String(64))
+
 class Course(db.Model):
 	Course_ID = db.Column(db.Integer, primary_key=True)
 	Course_name = db.Column(db.String(64))
+	Classes_held = db.Column(db.Integer,default=0)
 
 class User(UserMixin,db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +40,7 @@ class User(UserMixin,db.Model):
 	fname = db.Column(db.String(64), index=True)
 	lname = db.Column(db.String(64), index=True)
 	password_hash = db.Column(db.String(128))
-	dept = db.Column(db.String(20), index=True)
+	dept = db.Column(db.Integer,db.ForeignKey('department.Dept_ID'))
 	role = db.Column(db.String(20))
 
 	facult = db.relationship('Course',

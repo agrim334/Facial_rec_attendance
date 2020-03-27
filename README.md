@@ -69,6 +69,18 @@ work. Will update for other OS as well.**
       
       8.) Insert database records (for first time usage) using mysql or flask shell 
           (refer https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database or mysql docs for relevant commands)
+          
+      9.) Locate wtf.html (For linux it's in /home/username/.local/lib/python3.x/site-packages/flask_bootstrap/templates/bootstrap) and add
+            {{field.label(class="control-label")|safe}} above
+                {% for item in field -%}
+                 <div class="radio">
+                   <label>
+                    {{item|safe}} {{item.label.text|safe}}
+                   </label>
+                </div>
+                {% endfor %}
+            {% endcall %}
+
  
  # **Usage**
       1.) Open a terminal session in the cloned repo directory.
