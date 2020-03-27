@@ -10,7 +10,7 @@
 		</div>
 	</div>
 	<div>
-	<table>
+	<table class="table table-striped">
 		<thead>
 			{% for col in columns %}
 				<th> {{ col }} </th>
@@ -30,7 +30,6 @@
 		<p> Classes Held for this course is {{ class_count }} </p>
 		<p> Your attendance is {{ items|length }} out of {{ class_count }} </p>
 	{% endif %}
-
  	</div>
  
 {% endblock %}

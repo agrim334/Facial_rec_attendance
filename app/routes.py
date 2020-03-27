@@ -11,7 +11,7 @@ from app.email import send_password_reset_email
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-from datetime import datetime
+from datetime import datetime,timedelta
 import re
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -20,8 +20,18 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
 
+@APP.before_request
+def make_session_permanent():
+    session.permanent = True
+    APP.permanent_session_lifetime = timedelta(minutes=10)
+
 @APP.after_request
 def after_request(response):
+	response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+#	response.headers['Content-Security-Policy'] = "default-src 'self'"
+	response.headers['X-Content-Type-Options'] = 'nosniff'
+	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
