@@ -54,23 +54,14 @@ work. Will update for other OS as well.**
                   DATABASE_URL user --> your username 
                               pwd  --> your mysql password
                               db   --> the database name where data will be stored
-                  FLASK_APP  microblog.py --> whatever new name you choose for your app
+                  FLASK_APP  microblog.py --> whatever new name you choose for your app.Do update microblog.py's name to if                changes made
                   MAIL_USERNAME  emailid --> the admin's email id
                   MAIL_PASSWORD  pwd --> admin's email password
                 The remaining environment variables are to be set up according to your email server
                 
           6c.) In routes.py update **known_dir** in **detect_faces_in_image** function to the directory 
-               where images of known persons are kept.
-      
-      7.) Run following commmands to setup the database:
-                  flask db init
-                  flask db migrate 
-                  flask db upgrade
-      
-      8.) Insert database records (for first time usage) using mysql or flask shell 
-          (refer https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database or mysql docs for relevant commands)
-          
-      9.) Locate wtf.html (For linux it's in /home/username/.local/lib/python3.x/site-packages/flask_bootstrap/templates/bootstrap) and add
+               where images of known persons are kept.   
+      7.) Locate wtf.html (For linux it's in /home/username/.local/lib/python3.x/site-packages/flask_bootstrap/templates/bootstrap) and add
             {{field.label(class="control-label")|safe}} above
                 {% for item in field -%}
                  <div class="radio">
@@ -80,7 +71,14 @@ work. Will update for other OS as well.**
                 </div>
                 {% endfor %}
             {% endcall %}
-
+      8.) Create a table department in your database as per the fields given in models.py
+      9.) In the cloned directory run
+                     . path_to_env.sh
+                     flask db init
+                     flask db migrate
+                     flask db upgrade
+      10.) Insert database records (for first time usage) using mysql or flask shell 
+          (refer https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database or mysql docs for relevant commands)
  
  # **Usage**
       1.) Open a terminal session in the cloned repo directory.
