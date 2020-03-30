@@ -93,7 +93,7 @@ class User(UserMixin,db.Model):
 			return
 		return User.query.get(id)
 
-class Attendance(db.Model):
+class Attendance(db.Model):													#attendance records
 	course_id = db.Column(db.String(64),db.ForeignKey('stud_courses.course_id'),primary_key=True)
 	student_id = db.Column(db.String(64),db.ForeignKey('stud_courses.stud_id'),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)

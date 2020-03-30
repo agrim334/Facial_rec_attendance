@@ -26,7 +26,7 @@ def make_session_permanent():
 	APP.permanent_session_lifetime = timedelta(minutes=10)
 
 @APP.after_request
-def after_request(response):
+def after_request(response):									#security
 	response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 	response.headers['X-Content-Type-Options'] = 'nosniff'
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
@@ -45,23 +45,23 @@ def internal_error(error):
 
 @APP.route('/')
 @login_required
-def home():
+def home():													#home page url
 	return render_template('home.html', title='Home',user = user)
 
 @APP.route('/login',methods={'GET','POST'})
-def login():
+def login():										#login page url
 	if current_user.is_authenticated:
 		return redirect(url_for('home'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data,role=form.role.data).first()
+		user = User.query.filter_by(username=form.username.data,role=form.role.data).first() #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('login'))
 		login_user(user, remember=form.remember_me.data)
 		next_page = request.args.get('next')
 		
-		if not next_page or url_parse(next_page).netloc != '':
+		if not next_page or url_parse(next_page).netloc != '':							#redirect to home
 			next_page = url_for('home',user = user)
 
 		return redirect(next_page)
@@ -70,9 +70,9 @@ def login():
 
 @APP.route('/course_user',methods=['GET','POST'])
 @login_required
-def course_user_add():
+def course_user_add():														#map course to user url
 	if current_user.is_authenticated:
-		if current_user.role == "Admin":
+		if current_user.role == "Admin":										
 			form = CourseUserForm()
 			if form.validate_on_submit():
 				course = Course.query.filter(Course.Course_ID == form.CID.data).first()
@@ -86,10 +86,10 @@ def course_user_add():
 				if form.role.data == 'Faculty':
 					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
 				elif form.role.data == 'TA':
-					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
 				elif form.role.data == 'Student':
-					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
-					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
 					if not os.path.exists(known_dir):
 						os.makedirs(known_dir)
 					file = request.files.getlist("photo")
@@ -119,7 +119,7 @@ def course_add():
 		if current_user.role == "Admin":
 			form = CourseForm()
 			if form.validate_on_submit():
-				course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)
+				course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
 				known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
 				if not os.path.exists(known_dir):
 					os.makedirs(known_dir)
@@ -386,14 +386,14 @@ def users():
 		return redirect(url_for('login'))
 	return render_template('view_user.html',form=form,columns=columns,items=records)
 
-def allowed_file(filename):
+def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 	return '.' in filename and \
 		   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @APP.route('/faces', methods=['GET', 'POST'])
 @login_required
-def upload_image():
+def upload_image():																	#upload images to mark attendance
 	if current_user.is_authenticated:
 		if current_user.role == "Faculty":
 			form = AttendForm()
@@ -513,7 +513,7 @@ def detect_faces_in_image(file_stream,CID,user):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
 
-		return redirect(url_for('manual_mark',CID=CID))
+		return redirect(url_for('manual_mark',CID=CID))										#redirect to manual attendance to handle missed cases
 	except:
 		return redirect(url_for('manual_mark',CID=CID))
 

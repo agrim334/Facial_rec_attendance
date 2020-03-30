@@ -13,43 +13,43 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
 
-class MultiCheckboxField(SelectMultipleField):
+class MultiCheckboxField(SelectMultipleField):							#for creating checkboxes
 	widget = widgets.ListWidget(prefix_label=False)
 	option_widget = widgets.CheckboxInput()
 
-class DeptForm(FlaskForm):
+class DeptForm(FlaskForm):												#add new departments
 	depart = StringField('Department', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
-class AttendForm(FlaskForm):
+class AttendForm(FlaskForm):														#attendance form using facial recognition
 	CID = StringField('Course ID', validators=[DataRequired()])
 	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
-class ManualAttendForm(FlaskForm):
+class ManualAttendForm(FlaskForm):												#for manual entries if facial recognition does not work or some error occurs
 	manual = MultiCheckboxField('Remaining Students',choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).all()])
 	submit = SubmitField('Upload')
 
-class CourseUserForm(FlaskForm):
+class CourseUserForm(FlaskForm):											#Map courses and users
 	CID = StringField('CourseID', validators=[DataRequired()])
 	user = StringField('UserID',validators=[DataRequired()])
-	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')])
+	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA')])
 	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
 class CourseForm(FlaskForm):
-	CID = StringField('CourseID', validators=[DataRequired()])
+	CID = StringField('CourseID', validators=[DataRequired()])								#add new course
 	Cname = StringField('Course Name', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
-class LoginForm(FlaskForm):
+class LoginForm(FlaskForm):															#user login form
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])
 	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')])
 	remember_me = BooleanField('Remember Me')
 	submit = SubmitField('Sign In')
 
-class RegistrationForm(FlaskForm):
+class RegistrationForm(FlaskForm):															#add new users
 	username = StringField('Username', validators=[DataRequired()])
 	fname =	StringField('First name', validators=[DataRequired()])
 	lname = StringField('Last name', validators=[DataRequired()])
@@ -86,7 +86,7 @@ class ChangePWDForm(FlaskForm):
 	newpassword2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('newpassword')])
 	submit = SubmitField('Change Password')
 
-class EditProfileForm(FlaskForm):
+class EditProfileForm(FlaskForm):									#basic profile editing
 	fname =	StringField('First name', validators=[DataRequired()])
 	lname = StringField('Last name', validators=[DataRequired()])
 	email = StringField('Email', validators=[DataRequired(), Email()])
@@ -102,6 +102,6 @@ class EditProfileForm(FlaskForm):
 			if user is not None:
 				raise ValidationError('Please use a different username.')
 
-class CheckAttendanceForm(FlaskForm):
+class CheckAttendanceForm(FlaskForm):											# form for checking attendance
 	courseID = StringField("Course ID",validators=[DataRequired()])
 	submit = SubmitField('Submit')
