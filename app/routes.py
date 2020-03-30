@@ -22,13 +22,12 @@ patch_request_class(APP)
 
 @APP.before_request
 def make_session_permanent():
-    session.permanent = True
-    APP.permanent_session_lifetime = timedelta(minutes=10)
+	session.permanent = True
+	APP.permanent_session_lifetime = timedelta(minutes=10)
 
 @APP.after_request
 def after_request(response):
 	response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-#	response.headers['Content-Security-Policy'] = "default-src 'self'"
 	response.headers['X-Content-Type-Options'] = 'nosniff'
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
@@ -126,6 +125,9 @@ def register():
 			if form.validate_on_submit():
 				user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role=form.role.data,dept=int(form.dept.data))
 				user.set_password(form.password.data)
+				known_dir = "/home/agrim/Downloads/known/" + str(CID) +"/"
+				if not os.path.exists(known_dir):
+					os.makedirs(known_dir)
 				db.session.add(user)
 				db.session.commit()
 				flash('User has been added')
@@ -252,9 +254,9 @@ def checkattd():
 				if course:
 					user = User.query.filter_by(username=current_user.username,role="Student").first()
 					if user:
-						is_stud = db.session.query(stud_courses).filter_by(stud_id=user.id,course_id = CID)
+						is_stud = db.session.query(stud_courses).filter_by(stud_id=user.username,course_id = CID)
 						if is_stud:
-							attd = Attendance.query.filter_by(course_id=CID,student_id=user.id)
+							attd = Attendance.query.filter_by(course_id=CID,student_id=user.username)
 							if not attd:
 								flash('Incorrect course code')
 								return redirect(url_for('checkattd'))
@@ -303,7 +305,7 @@ def upload_image():
 					flash("No such Course found")
 					return redirect(url_for('upload_image'))
 
-				confirm = db.session.query(prof_courses).filter_by(prof_id=user.id,course_id = CID)
+				confirm = db.session.query(prof_courses).filter_by(prof_id=user.username,course_id = CID)
 				if not confirm:
 					flash("No TA or Faculty with given name found for this course")
 					return redirect(url_for('upload_image'))
@@ -329,7 +331,7 @@ def upload_image():
 					flash("No such Course found")
 					return redirect(url_for('upload_image'))
 
-				confirm = db.session.query(ta_courses).filter_by(ta_id=user.id,course_id = CID)
+				confirm = db.session.query(ta_courses).filter_by(ta_id=user.username,course_id = CID)
 				if not confirm:
 					flash("No TA or Faculty with given name found")
 					return redirect(url_for('upload_image'))
@@ -350,13 +352,14 @@ def upload_image():
 		return redirect(url_for('login'))
 
 def detect_faces_in_image(file_stream,CID,user):
-	known_dir = "/home/agrim/Downloads/known/"
+	known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
 	base = os.path.abspath(os.path.dirname(__file__))
 
 	known_face_encd = []
 	known_face_name = {}
 	result = []
 	num = 0
+	studs = db.session.query(stud_courses).filter_by(course_id = CID)
 
 	for image in os.listdir(known_dir):
 		temp = face_recognition.load_image_file(known_dir+image)
@@ -396,9 +399,9 @@ def detect_faces_in_image(file_stream,CID,user):
 						check = Attendance.query.filter_by(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
 						if not check:
 							if user.role == 'TA':
-								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.id)
+								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
 							else:
-								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.id)
+								atdrecord = Attendance(course_id=CID,student_id=stud.id,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
 							db.session.add(atdrecord)
 							db.session.commit()
 						else:

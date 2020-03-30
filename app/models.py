@@ -5,22 +5,22 @@ from time import time
 import jwt
 
 @login.user_loader
-def load_user(id):
+def load_user.username):
 	return User.query.get(int(id))
 
 stud_courses = 	db.Table('stud_courses',
-				db.Column('stud_id',db.Integer,db.ForeignKey('user.id')),
+				db.Column('stud_id',db.Integer,db.ForeignKey('user.username')),
 				db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
 				)
 
 ta_courses = db.Table('ta_courses',
-			db.Column('ta_id',db.Integer,db.ForeignKey('user.id')),
+			db.Column('ta_id',db.Integer,db.ForeignKey('user.username')),
 			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
 			)
 
 
 prof_courses = db.Table('prof_courses',
-			db.Column('prof_id',db.Integer,db.ForeignKey('user.id')),
+			db.Column('prof_id',db.Integer,db.ForeignKey('user.username')),
 			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
 			)
 
@@ -34,8 +34,7 @@ class Course(db.Model):
 	Classes_held = db.Column(db.Integer,default=0)
 
 class User(UserMixin,db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	username = db.Column(db.String(64), index=True, unique=True)
+	username = db.Column(db.String(64), index=True, primary_key=True)
 	email = db.Column(db.String(120), index=True, unique=True)
 	fname = db.Column(db.String(64), index=True)
 	lname = db.Column(db.String(64), index=True)
@@ -96,7 +95,7 @@ class User(UserMixin,db.Model):
 
 class Attendance(db.Model):
 	course_id = db.Column(db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
-	student_id = db.Column(db.Integer,db.ForeignKey('stud_courses.stud_id'),primary_key=True)
+	student_id = db.Column(db.String(64),db.ForeignKey('stud_courses.stud_id'),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)
 	faculty_id = db.Column(db.Integer,db.ForeignKey('prof_courses.prof_id'))
 	TA_id = db.Column(db.Integer,db.ForeignKey('ta_courses.ta_id'))

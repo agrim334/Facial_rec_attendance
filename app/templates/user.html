@@ -14,7 +14,9 @@
 			{% endif %}
 		</tr>
 		<tr>
-			<td>Name: {{ user.fname }} {{user.lname }} </td>
+			{% if user.fname %}
+				<td> Name: {{ user.fname }} {% if user.lname %} {{user.lname }} {% endif %}  </td>
+			{% endif %}
 		</tr>
 	</table>
 	<hr>
