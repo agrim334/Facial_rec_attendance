@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField,SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField,SelectMultipleField,widgets
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User,Course,Department,Attendance,stud_courses,prof_courses,ta_courses
@@ -13,6 +13,10 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
 
+class MultiCheckboxField(SelectMultipleField):
+	widget = widgets.ListWidget(prefix_label=False)
+	option_widget = widgets.CheckboxInput()
+
 class DeptForm(FlaskForm):
 	depart = StringField('Department', validators=[DataRequired()])
 	submit = SubmitField('Upload')
@@ -23,7 +27,7 @@ class AttendForm(FlaskForm):
 	submit = SubmitField('Upload')
 
 class ManualAttendForm(FlaskForm):
-	manual = SelectField('Remaining Students',choices = [(student.stud_id) for student in db.session.query(stud_courses).all()])
+	manual = MultiCheckboxField('Remaining Students',choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).all()])
 	submit = SubmitField('Upload')
 
 class CourseUserForm(FlaskForm):

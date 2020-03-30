@@ -444,82 +444,88 @@ def upload_image():
 		return redirect(url_for('login'))
 
 def detect_faces_in_image(file_stream,CID,user):
-	known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
-	base = os.path.abspath(os.path.dirname(__file__))
-
-	known_face_encd = []
-	known_face_name = {}
 	result = []
-	num = 0
-	studs = db.session.query(stud_courses).filter_by(course_id = CID)
+	try:
+		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
+		base = os.path.abspath(os.path.dirname(__file__))
 
-	for image in os.listdir(known_dir):
-		temp = face_recognition.load_image_file(known_dir+image)
-		inp_face_locations = face_recognition.face_locations(temp, model = "hog")
-		encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
-		known_face_encd.append(encd)
-		known_face_name[str(encd)] = image
+		known_face_encd = []
+		known_face_name = {}
+		result = []
+		num = 0
+		studs = db.session.query(stud_courses).filter_by(course_id = CID)
 
-	for file in os.listdir(file_stream):
+		for image in os.listdir(known_dir):
+			temp = face_recognition.load_image_file(known_dir+image)
+			inp_face_locations = face_recognition.face_locations(temp, model = "hog")
+			encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
+			known_face_encd.append(encd)
+			known_face_name[str(encd)] = image
 
-		un_image = face_recognition.load_image_file(file_stream+file)
+		for file in os.listdir(file_stream):
 
-		face_locations = face_recognition.face_locations(un_image,model = "hog")
+			un_image = face_recognition.load_image_file(file_stream+file)
 
-		un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
+			face_locations = face_recognition.face_locations(un_image,model = "hog")
 
-		if len(un_face_encodings) > 0:
-			for face_encoding in un_face_encodings:
-				num = num + 1
-				matches = face_recognition.compare_faces(known_face_encd, face_encoding)
-				name = "Unknown"
+			un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
-				face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
-				best_match_index = np.argmin(face_distances)
+			if len(un_face_encodings) > 0:
+				for face_encoding in un_face_encodings:
+					num = num + 1
+					matches = face_recognition.compare_faces(known_face_encd, face_encoding)
+					name = "Unknown"
 
-				if matches[best_match_index]:
-					im = known_face_encd[best_match_index]
-					name = known_face_name[str(im)]
-				result.append(("Face number " + str(num),name))
+					face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
+					best_match_index = np.argmin(face_distances)
 
-				if name != "Unknown":
-					pat = re.compile('[0-9A-Za-z]+\.')
-					name = pat.match(name)[0]
-					name = name[:-1]
-					stud = User.query.filter_by(username=name,role="Student").first()
-					if stud:
-						check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-						if not check:
-							if user.role == 'TA':
-								atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
+					if matches[best_match_index]:
+						im = known_face_encd[best_match_index]
+						name = known_face_name[str(im)]
+					result.append(("Face number " + str(num),name))
+
+					if name != "Unknown":
+						pat = re.compile('[0-9A-Za-z]+\.')
+						name = pat.match(name)[0]
+						name = name[:-1]
+						stud = User.query.filter_by(username=name,role="Student").first()
+						if stud:
+							check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+							if not check:
+								if user.role == 'TA':
+									atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
+								else:
+									atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
+								db.session.add(atdrecord)
+								db.session.commit()
 							else:
-								atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
-							db.session.add(atdrecord)
-							db.session.commit()
+								print("marked")
 						else:
-							print("marked")
-					else:
-						print("Not student of this course")
+							print("Not student of this course")
 
-	for image in os.listdir(base+"/uploads/"):
-		if os.path.isfile(base+"/uploads/"+image):
-			os.remove(base+"/uploads/"+image)
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
 
-	return redirect(url_for('manual_mark',marked = result,CID = CID))
+		return redirect(url_for('manual_mark',CID=CID))
+	except:
+		return redirect(url_for('manual_mark',CID=CID))
+
 
 @APP.route('/manual', methods=['GET', 'POST'])
 @login_required
-def manual_mark(marked,CID):
+def manual_mark():
 	if current_user.is_authenticated:
 		if current_user.role == "Faculty":
-			form = ManualAttendForm(CID)
+			form = ManualAttendForm()
+			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
+			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stud in recr:
-					check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+					check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
 					if not check:
-						atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
-						course.Classes_held = course.Classes_held + 1
+						atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = current_user.username)
 						db.session.add(atdrecord)
 						db.session.commit()
 						db.session.close()
@@ -527,13 +533,14 @@ def manual_mark(marked,CID):
 
 		elif current_user.role == "TA":
 			form = ManualAttendForm()
+			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
+			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stud in recr:
-					check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+					check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
 					if not check:
-						atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
-						course.Classes_held = course.Classes_held + 1
+						atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = current_user.username)
 						db.session.add(atdrecord)
 						db.session.commit()
 						db.session.close()
