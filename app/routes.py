@@ -34,7 +34,15 @@ def after_request(response):
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
-@APP.route('/index')
+@APP.errorhandler(404)
+def not_found_error(error):
+	return render_template('404.html'), 404
+
+@APP.errorhandler(500)
+def internal_error(error):
+	db.session.rollback()
+	return render_template('500.html'), 500
+
 @APP.route('/')
 @login_required
 def home():
@@ -490,18 +498,16 @@ def detect_faces_in_image(file_stream,CID,user):
 						name = name[:-1]
 						stud = User.query.filter_by(username=name,role="Student").first()
 						if stud:
-							check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-							if not check:
-								if user.role == 'TA':
-									atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
-								else:
-									atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
-								db.session.add(atdrecord)
-								db.session.commit()
-							else:
-								print("marked")
-						else:
-							print("Not student of this course")
+							c1 = db.session.query(stud_courses).filter_by(ta_id=stud.username,course_id = CID)
+							if c1:
+								check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+								if not check:
+									if user.role == 'TA':
+										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
+									else:
+										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
+									db.session.add(atdrecord)
+									db.session.commit()
 
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(base+"/uploads/"+image):
@@ -522,14 +528,21 @@ def manual_mark():
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
-				for stud in recr:
-					check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-					if not check:
-						atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = current_user.username)
-						db.session.add(atdrecord)
-						db.session.commit()
-						db.session.close()
-						return render_template("manual.html",form=form)
+				for stu in recr:
+					stud = User.query.filter_by(username=stu,role="Student").first()
+					if stud:
+						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
+						if c1:
+							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+							if not check:
+								atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = current_user.username)
+								db.session.add(atdrecord)
+								db.session.commit()
+								db.session.close()
+				flash("Attendance marked")
+				return redirect(url_for('home'))
+
+			return render_template("manual.html",form=form)
 
 		elif current_user.role == "TA":
 			form = ManualAttendForm()
@@ -537,14 +550,21 @@ def manual_mark():
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
-				for stud in recr:
-					check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-					if not check:
-						atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = current_user.username)
-						db.session.add(atdrecord)
-						db.session.commit()
-						db.session.close()
-						return render_template("manual.html",form=form)
+				for stu in recr:
+					stud = User.query.filter_by(username=stu,role="Student").first()
+					if stud:
+						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
+						if c1:
+							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+							if not check:
+								atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = current_user.username)
+								db.session.add(atdrecord)
+								db.session.commit()
+								db.session.close()
+
+				flash("Attendance marked")
+				return redirect(url_for('home'))
+			return render_template("manual.html",form=form)
 
 		else:
 			flash('Not allowed')
