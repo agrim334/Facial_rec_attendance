@@ -22,14 +22,15 @@ class AttendForm(FlaskForm):
 	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
-class ManualAttendForm(FlaskForm,CID):
-	manual = SelectField('Remaining Students',choices = [(student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id = CID)])
+class ManualAttendForm(FlaskForm):
+	manual = SelectField('Remaining Students',choices = [(student.stud_id) for student in db.session.query(stud_courses).all()])
 	submit = SubmitField('Upload')
 
 class CourseUserForm(FlaskForm):
 	CID = StringField('CourseID', validators=[DataRequired()])
 	user = StringField('UserID',validators=[DataRequired()])
-	role = StringField('Role',validators=[DataRequired()])
+	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')])
+	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
 class CourseForm(FlaskForm):

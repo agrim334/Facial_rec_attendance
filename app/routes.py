@@ -71,7 +71,7 @@ def course_user_add():
 				if not course:
 					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
 					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(id=form.user.data,role=form.role.data).first()
+				user = User.query.filter_by(username=form.user.data,role=form.role.data).first()
 				if not user:
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
@@ -81,6 +81,13 @@ def course_user_add():
 					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)
 				elif form.role.data == 'Student':
 					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					file = request.files.getlist("photo")
+					for f in file:
+						filename = secure_filename(f.filename)
+						f.save(os.path.join(known_dir, filename))
 				else:
 					flash("Not allowed for this role")
 					return redirect(url_for('course_user_add'))
@@ -89,7 +96,7 @@ def course_user_add():
 				db.session.close()
 				flash('Mapping has been added')
 				return redirect(url_for('course_user_add'))
-			return render_template('course_user.html', title='Course', form=form)
+			return render_template('course_user.html', title='Course_user', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -476,7 +483,7 @@ def detect_faces_in_image(file_stream,CID,user):
 				result.append(("Face number " + str(num),name))
 
 				if name != "Unknown":
-					pat = re.compile('[A-Za-z]+\.')
+					pat = re.compile('[0-9A-Za-z]+\.')
 					name = pat.match(name)[0]
 					name = name[:-1]
 					stud = User.query.filter_by(username=name,role="Student").first()
