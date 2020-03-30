@@ -5,23 +5,23 @@ from time import time
 import jwt
 
 @login.user_loader
-def load_user.username):
-	return User.query.get(int(id))
+def load_user(username):
+	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
-				db.Column('stud_id',db.Integer,db.ForeignKey('user.username')),
-				db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+				db.Column('stud_id',db.String(64),db.ForeignKey('user.username')),
+				db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
 				)
 
 ta_courses = db.Table('ta_courses',
-			db.Column('ta_id',db.Integer,db.ForeignKey('user.username')),
-			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+			db.Column('ta_id',db.String(64),db.ForeignKey('user.username')),
+			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
 			)
 
 
 prof_courses = db.Table('prof_courses',
-			db.Column('prof_id',db.Integer,db.ForeignKey('user.username')),
-			db.Column('course_id',db.Integer,db.ForeignKey('course.Course_ID'))
+			db.Column('prof_id',db.String(64),db.ForeignKey('user.username')),
+			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
 			)
 
 class Department(db.Model):
@@ -44,21 +44,21 @@ class User(UserMixin,db.Model):
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (prof_courses.c.prof_id == id & role == 'Faculty'),
+			primaryjoin = (prof_courses.c.prof_id == username & role == 'Faculty'),
 			secondaryjoin = (prof_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	tutoring = db.relationship('Course',
 			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.ta_id == id & role == 'TA'),
+			primaryjoin = (ta_courses.c.ta_id == username & role == 'TA'),
 			secondaryjoin = (ta_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('tutored_by',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	opted = db.relationship('Course',
 			secondary=stud_courses,
-			primaryjoin = (stud_courses.c.stud_id == id & role == 'Student'),
+			primaryjoin = (stud_courses.c.stud_id == username & role == 'Student'),
 			secondaryjoin = (stud_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('studied_by',lazy='dynamic'),
 			lazy = 'dynamic')
@@ -72,10 +72,10 @@ class User(UserMixin,db.Model):
 		return check_password_hash(self.password_hash, password)
 
 	def get_reset_password_token(self, expires_in=600):
-		return jwt.encode({'reset_password': self.id, 'exp': time() + expires_in},APP.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+		return jwt.encode({'reset_password': self.username, 'exp': time() + expires_in},APP.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
 	def get_id(self):
-			return self.id
+			return self.username
 	def is_active(self):
 			return self.is_active
 	def activate_user(self):

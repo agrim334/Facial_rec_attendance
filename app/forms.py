@@ -3,8 +3,8 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField,SelectField
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from app.models import User,Course,Department
-from app import APP
+from app.models import User,Course,Department,Attendance,stud_courses,prof_courses,ta_courses
+from app import APP,db
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,12 +13,16 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
 
+class DeptForm(FlaskForm):
+	depart = StringField('Department', validators=[DataRequired()])
+	submit = SubmitField('Upload')
+
 class AttendForm(FlaskForm):
 	CID = StringField('Course ID', validators=[DataRequired()])
 	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
-class ManualAttendForm(FlaskForm):
+class ManualAttendForm(FlaskForm,CID):
 	manual = SelectField('Remaining Students',choices = [(student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id = CID)])
 	submit = SubmitField('Upload')
 
@@ -95,8 +99,4 @@ class EditProfileForm(FlaskForm):
 
 class CheckAttendanceForm(FlaskForm):
 	courseID = StringField("Course ID",validators=[DataRequired()])
-	submit = SubmitField('Submit')
-
-class ViewCourseForm(FlaskForm):
-	UID = StringField("User ID",validators=[DataRequired()])
 	submit = SubmitField('Submit')
