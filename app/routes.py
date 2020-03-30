@@ -96,6 +96,9 @@ def course_user_add():														#map course to user url
 					for f in file:
 						filename = secure_filename(f.filename)
 						f.save(os.path.join(known_dir, filename))
+						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + ofile_extension
+						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
 					flash("Not allowed for this role")
 					return redirect(url_for('course_user_add'))
@@ -388,8 +391,7 @@ def users():
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-	return '.' in filename and \
-		   filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @APP.route('/faces', methods=['GET', 'POST'])
 @login_required
