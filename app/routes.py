@@ -1,6 +1,6 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import ViewCourseForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
+from app.forms import ManualAttendForm,ViewCourseForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
 import face_recognition
 import os
 from werkzeug.urls import url_parse
@@ -482,4 +482,46 @@ def detect_faces_in_image(file_stream,CID,user):
 		if os.path.isfile(base+"/uploads/"+image):
 			os.remove(base+"/uploads/"+image)
 
-	return jsonify(result)
+	return manual_mark(marked = result,CID = CID)
+
+@APP.route('/manual', methods=['GET', 'POST'])
+@login_required
+def manual_mark(marked,CID):
+	if current_user.is_authenticated:
+		if current_user.role == "Faculty":
+			form = ManualAttendForm()
+			if form.validate_on_submit():
+
+		elif current_user.role == "TA":
+			form = AttendForm()
+			if form.validate_on_submit():
+				base = os.path.abspath(os.path.dirname(__file__))
+				user = User.query.filter_by(username=current_user.username,role="TA").first()
+				CID = form.CID.data
+				course = Course.query.filter_by(Course_ID=CID).first()
+				if not user:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				if not course:
+					flash("No such Course found")
+					return redirect(url_for('upload_image'))
+
+				confirm = db.session.query(ta_courses).filter_by(ta_id=user.username,course_id = CID)
+				if not confirm:
+					flash("No TA or Faculty with given name found")
+					return redirect(url_for('upload_image'))
+				file = request.files.getlist("photo")
+				for f in file:
+					filename = secure_filename(f.filename)
+					f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
+				course.Classes_held = course.Classes_held + 1
+				db.session.commit()
+				return detect_faces_in_image(base+"/uploads/",CID,user)
+
+		else:
+			flash('Not allowed')
+			return redirect(url_for('home'))
+		return render_template("manual.html",form=form)
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))

@@ -29,7 +29,7 @@ class Department(db.Model):
 	Dept_name = db.Column(db.String(64))
 
 class Course(db.Model):
-	Course_ID = db.Column(db.Integer, primary_key=True)
+	Course_ID = db.Column(db.String(64), primary_key=True)
 	Course_name = db.Column(db.String(64))
 	Classes_held = db.Column(db.Integer,default=0)
 
@@ -94,8 +94,8 @@ class User(UserMixin,db.Model):
 		return User.query.get(id)
 
 class Attendance(db.Model):
-	course_id = db.Column(db.Integer,db.ForeignKey('stud_courses.course_id'),primary_key=True)
+	course_id = db.Column(db.String(64),db.ForeignKey('stud_courses.course_id'),primary_key=True)
 	student_id = db.Column(db.String(64),db.ForeignKey('stud_courses.stud_id'),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)
-	faculty_id = db.Column(db.Integer,db.ForeignKey('prof_courses.prof_id'))
-	TA_id = db.Column(db.Integer,db.ForeignKey('ta_courses.ta_id'))
+	faculty_id = db.Column(db.String(64),db.ForeignKey('prof_courses.prof_id'))
+	TA_id = db.Column(db.String(64),db.ForeignKey('ta_courses.ta_id'))

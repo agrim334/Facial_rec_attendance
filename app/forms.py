@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
-from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioField,FileField,SelectField
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User,Course,Department
@@ -16,6 +16,10 @@ patch_request_class(APP)
 class AttendForm(FlaskForm):
 	CID = StringField('Course ID', validators=[DataRequired()])
 	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
+	submit = SubmitField('Upload')
+
+class ManualAttendForm(FlaskForm):
+	manual = SelectField('Remaining Students',choices = [(student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id = CID)])
 	submit = SubmitField('Upload')
 
 class CourseUserForm(FlaskForm):
