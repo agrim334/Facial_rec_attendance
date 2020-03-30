@@ -1,6 +1,6 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
+from app.forms import ViewCourseForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
 import face_recognition
 import os
 from werkzeug.urls import url_parse
@@ -274,6 +274,75 @@ def checkattd():
 					flash('No such course')
 					return redirect(url_for('checkattd'))
 				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
+		else:
+			flash('Not allowed')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+	return render_template('check_attendance.html',form=form,columns=columns,items=records)
+
+@APP.route('/view_courses',methods=['GET','POST'])
+@login_required
+def courses():
+	if current_user.is_authenticated:
+		columns = []
+		records = []
+		if current_user.role == "Student":
+			form = ViewCourseForm()
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				courses = db.session.query(stud_courses).filter_by(stud_id=user.username,course_id = CID)
+				if courses:
+					columns = stud_courses.__table__.columns.keys()
+						for r in attd:
+							records.append(r)
+				else:
+					flash("No Courses Found")
+					return redirect(url_for('view_courses'))
+				return render_template('view.html',form=form,columns=columns,items=records,class_count=count)
+
+		elif current_user.role == "TA":
+			form = ViewCourseForm()
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				courses = db.session.query(ta_courses).filter_by(ta_id=user.username,course_id = CID)
+				if courses:
+					columns = ta_courses.__table__.columns.keys()
+						for r in attd:
+							records.append(r)
+				else:
+					flash("No Courses Found")
+					return redirect(url_for('view_courses'))
+				return render_template('view.html',form=form,columns=columns,items=records,class_count=count)
+		elif current_user.role == "Faculty":
+			form = ViewCourseForm()
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				courses = db.session.query(prof_courses).filter_by(prof_id = user.username,course_id = CID)
+				if courses:
+					columns = prof_courses.__table__.columns.keys()
+						for r in attd:
+							records.append(r)
+				else:
+					flash("No Courses Found")
+					return redirect(url_for('view_courses'))
+				return render_template('view.html',form=form,columns=columns,items=records,class_count=count)
+
+		elif current_user.role == "Admin":
+			form = ViewCourseForm()
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				courses = Course.query.all()
+				if courses:
+					columns = Course.__table__.columns.keys()
+						for r in attd:
+							records.append(r)
+				else:
+					flash("No Courses Found")
+					return redirect(url_for('view_courses'))
+				return render_template('view.html',form=form,columns=columns,items=records,class_count=count)
+			return redirect(url_for('home'))
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))

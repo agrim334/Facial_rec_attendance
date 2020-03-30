@@ -92,3 +92,7 @@ class EditProfileForm(FlaskForm):
 class CheckAttendanceForm(FlaskForm):
 	courseID = StringField("Course ID",validators=[DataRequired()])
 	submit = SubmitField('Submit')
+
+class ViewCourseForm(FlaskForm):
+	UID = StringField("User ID",validators=[DataRequired()])
+	submit = SubmitField('Submit')

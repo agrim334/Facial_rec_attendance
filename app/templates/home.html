@@ -6,13 +6,16 @@
 	<div class="row">
 		<div class="col-md-4">
 			{% if current_user.role == 'Faculty' or current_user.role == 'TA' %}
-				<a href="{{ url_for('upload_image') }}"> Mark attendance </a>
+				<div> <a href="{{ url_for('upload_image') }}"> Mark attendance </a> </div>
+				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
 			{% elif current_user.role == 'Student' %}
-				<a href="{{ url_for('checkattd') }}">Check attendance</a>
+				<div> <a href="{{ url_for('checkattd') }}">Check attendance</a> </div>
+				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
 			{% else %}
 				<div> <a href="{{ url_for('register') }}"> Add User </a> </div>
 				<div> <a href="{{ url_for('course_add') }}"> Add Course </a> </div>
 				<div> <a href="{{ url_for('course_user_add') }}"> Map user to Course </a> </div>
+				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
 			{% endif %}
 		</div>
 	</div>
