@@ -13,10 +13,6 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
 
-class MultiCheckboxField(SelectMultipleField):							#for creating checkboxes
-	widget = widgets.ListWidget(prefix_label=False)
-	option_widget = widgets.CheckboxInput()
-
 class DeptForm(FlaskForm):												#add new departments
 	depart = StringField('Department', validators=[DataRequired()])
 	submit = SubmitField('Upload')
@@ -27,7 +23,7 @@ class AttendForm(FlaskForm):														#attendance form using facial recognit
 	submit = SubmitField('Upload')
 
 class ManualAttendForm(FlaskForm):												#for manual entries if facial recognition does not work or some error occurs
-	manual = MultiCheckboxField('Remaining Students',choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).all()])
+	manual = SelectMultipleField('Remaining Students',widget = widgets.ListWidget(prefix_label=False),option_widget = widgets.CheckboxInput())
 	submit = SubmitField('Upload')
 
 class CourseUserForm(FlaskForm):											#Map courses and users

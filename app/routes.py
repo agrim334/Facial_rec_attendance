@@ -458,18 +458,20 @@ def detect_faces_in_image(file_stream,CID,user):
 	try:
 		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
 		base = os.path.abspath(os.path.dirname(__file__))
-
 		known_face_encd = []
 		known_face_name = {}
 		result = []
 		num = 0
-		studs = db.session.query(stud_courses).filter_by(course_id = CID)
+		pat = re.compile('[0-9A-Za-z]+\.')
 
 		for image in os.listdir(known_dir):
 			temp = face_recognition.load_image_file(known_dir+image)
 			inp_face_locations = face_recognition.face_locations(temp, model = "hog")
 			encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
 			known_face_encd.append(encd)
+			image = pat.match(image)[0]
+			image = image[:-1]
+			print(image)
 			known_face_name[str(encd)] = image
 
 		for file in os.listdir(file_stream):
@@ -495,7 +497,6 @@ def detect_faces_in_image(file_stream,CID,user):
 					result.append(("Face number " + str(num),name))
 
 					if name != "Unknown":
-						pat = re.compile('[0-9A-Za-z]+\.')
 						name = pat.match(name)[0]
 						name = name[:-1]
 						stud = User.query.filter_by(username=name,role="Student").first()
@@ -508,6 +509,7 @@ def detect_faces_in_image(file_stream,CID,user):
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
 									else:
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
+									print(atdrecord)
 									db.session.add(atdrecord)
 									db.session.commit()
 
@@ -526,6 +528,10 @@ def manual_mark():
 	if current_user.is_authenticated:
 		if current_user.role == "Faculty":
 			form = ManualAttendForm()
+			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
+			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
+			form.manual.default = [r.student_id for r in already]			
+			print(form.manual.default)
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
@@ -548,6 +554,10 @@ def manual_mark():
 
 		elif current_user.role == "TA":
 			form = ManualAttendForm()
+			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
+			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
+			form.manual.default = [r.student_id for r in already]			
+			print(form.manual.default)
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
