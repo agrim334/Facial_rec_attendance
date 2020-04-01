@@ -54,7 +54,7 @@ def login():										#login page url
 		return redirect(url_for('home'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data,role=form.role.data).first() #check if credentials valid
+		user = User.query.filter_by(username=form.username.data,role=form.role.data)  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('login'))
@@ -75,11 +75,11 @@ def course_user_add():														#map course to user url
 		if current_user.role == "Admin":										
 			form = CourseUserForm()
 			if form.validate_on_submit():
-				course = Course.query.filter(Course.Course_ID == form.CID.data).first()
+				course = Course.query.filter(Course.Course_ID == form.CID.data) 
 				if not course:
 					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
 					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(username=form.user.data,role=form.role.data).first()
+				user = User.query.filter_by(username=form.user.data,role=form.role.data) 
 				if not user:
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
@@ -273,7 +273,7 @@ def reset_password_request():
 		return redirect(url_for('home'))
 	form = ResetPasswordRequestForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(email=form.email.data).first()
+		user = User.query.filter_by(email=form.email.data) 
 		if user:
 			send_password_reset_email(user,user.email)
 			flash('Check your email for the instructions to reset your password')
@@ -310,27 +310,22 @@ def checkattd():
 			records = []
 			if form.validate_on_submit():
 				CID = form.courseID.data
-				course = Course.query.filter_by(Course_ID=CID).first()
+				course = Course.query.filter_by(Course_ID=CID) 
 				count = 0
-				if course:
+				if course and course.count() != 0:
 					count = course.Classes_held
-					user = User.query.filter_by(username=current_user.username,role="Student").first()
-					if user:
-						is_stud = db.session.query(stud_courses).filter_by(stud_id=user.username,course_id = CID)
-						if is_stud:
-							attd = Attendance.query.filter_by(course_id=CID,student_id=user.username)
-							if not attd:
-								flash('Incorrect course code')
-								return redirect(url_for('checkattd'))
-							else:
-								columns = Attendance.__table__.columns.keys()
-								for r in attd:
-									records.append(r)
-						else:
-							flash("Student not registered for this course")
+					is_stud = db.session.query(stud_courses).filter_by(stud_id=current_user.username,course_id = CID)
+					if is_stud and is_stud.count() != 0:
+						attd = Attendance.query.filter_by(course_id=CID,student_id=current_user.username)
+						if not attd:
+							flash('Incorrect course code')
 							return redirect(url_for('checkattd'))
+						else:
+							columns = Attendance.__table__.columns.keys()
+							for r in attd:
+								records.append(r)
 					else:
-						flash('No such student in database')
+						flash("Student not registered for this course")
 						return redirect(url_for('checkattd'))
 				else:
 					flash('No such course')
@@ -351,7 +346,7 @@ def courses():
 		columns = []
 		records = []
 		courses = Course.query.all()
-		if courses:
+		if courses and courses.count() != 0:
 			columns = Course.__table__.columns.keys()
 			for r in courses:
 				records.append(r)
@@ -372,7 +367,7 @@ def users():
 		records = []
 		if current_user.role == "Admin":
 			user = User.query.all()
-			if user:
+			if user and user.count() != 0:
 				columns = User.__table__.columns.keys()
 				columns.remove('password_hash')
 				for r in user:
@@ -401,50 +396,47 @@ def upload_image():																	#upload images to mark attendance
 			form = AttendForm()
 			if form.validate_on_submit():
 				base = os.path.abspath(os.path.dirname(__file__))
-				user = User.query.filter_by(username=current_user.username,role="Faculty").first()
 				CID = form.CID.data
-				course = Course.query.filter_by(Course_ID=CID).first()
-				if not user:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				if not course:
-					flash("No such Course found")
-					return redirect(url_for('upload_image'))
+				course = Course.query.filter_by(Course_ID=CID) 			
+				if course and course.count() != 0:
+					confirm = db.session.query(prof_courses).filter_by(prof_id=current_user.username,course_id = CID)
+					if confirm and confirm.count() != 0:
+						file = request.files.getlist("photo")
+						for f in file:
+							filename = secure_filename(f.filename)
+							f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
+						user = User.query.filter_by(username=current_user.username,role='Faculty')
+						return detect_faces_in_image(base+"/uploads/",CID,user)
 
-				confirm = db.session.query(prof_courses).filter_by(prof_id=user.username,course_id = CID)
-				if not confirm:
-					flash("No TA or Faculty with given name found for this course")
-					return redirect(url_for('upload_image'))
-				file = request.files.getlist("photo")
-				for f in file:
-					filename = secure_filename(f.filename)
-					f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
-				return detect_faces_in_image(base+"/uploads/",CID,user)
+					else:
+						flash("No TA or Faculty with given ID found for this course")
+						return redirect(url_for('home'))
+				else:
+					flash("No such Course found")
+					return redirect(url_for('home'))
 
 		elif current_user.role == "TA":
 			form = AttendForm()
 			if form.validate_on_submit():
 				base = os.path.abspath(os.path.dirname(__file__))
-				user = User.query.filter_by(username=current_user.username,role="TA").first()
 				CID = form.CID.data
-				course = Course.query.filter_by(Course_ID=CID).first()
-				if not user:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				if not course:
+				course = Course.query.filter_by(Course_ID=CID) 			
+				if course and course.count() != 0:
+					confirm = db.session.query(ta_courses).filter_by(ta_id=current_user.username,course_id = CID)
+					if confirm and confirm.count() != 0:
+						file = request.files.getlist("photo")
+						for f in file:
+							filename = secure_filename(f.filename)
+							f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
+						user = User.query.filter_by(username=current_user.username,role='TA')
+						return detect_faces_in_image(base+"/uploads/",CID,user)
+
+					else:
+						flash("No TA or Faculty with given ID found for this course")
+						return redirect(url_for('home'))
+				else:
 					flash("No such Course found")
-					return redirect(url_for('upload_image'))
-
-				confirm = db.session.query(ta_courses).filter_by(ta_id=user.username,course_id = CID)
-				if not confirm:
-					flash("No TA or Faculty with given name found")
-					return redirect(url_for('upload_image'))
-				file = request.files.getlist("photo")
-				for f in file:
-					filename = secure_filename(f.filename)
-					f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
-				return detect_faces_in_image(base+"/uploads/",CID,user)
-
+					return redirect(url_for('home'))
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
@@ -499,12 +491,12 @@ def detect_faces_in_image(file_stream,CID,user):
 					if name != "Unknown":
 						name = pat.match(name)[0]
 						name = name[:-1]
-						stud = User.query.filter_by(username=name,role="Student").first()
+						stud = User.query.filter_by(username=name,role="Student") 
 						if stud:
 							c1 = db.session.query(stud_courses).filter_by(ta_id=stud.username,course_id = CID)
 							if c1:
-								check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-								if not check:
+								check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+								if not check or check.count() == 0:
 									if user.role == 'TA':
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
 									else:
@@ -531,18 +523,17 @@ def manual_mark():
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
 			form.manual.default = [r.student_id for r in already]			
-			print(form.manual.default)
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stu in recr:
-					stud = User.query.filter_by(username=stu,role="Student").first()
-					if stud:
+					stud = User.query.filter_by(username=stu,role="Student") 
+					if stud and stud.count() != 0:
 						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
-						if c1:
-							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-							if not check:
+						if c1 and c1.count() != 0:
+							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+							if not check or check.count() == 0:
 								atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = current_user.username)
 								db.session.add(atdrecord)
 								db.session.commit()
@@ -557,18 +548,17 @@ def manual_mark():
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
 			form.manual.default = [r.student_id for r in already]			
-			print(form.manual.default)
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stu in recr:
-					stud = User.query.filter_by(username=stu,role="Student").first()
-					if stud:
+					stud = User.query.filter_by(username=stu,role="Student") 
+					if stud and stud.count() != 0:
 						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
-						if c1:
-							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
-							if not check:
+						if c1 and c1.count() != 0:
+							check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+							if not check or check.count() == 0:
 								atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = current_user.username)
 								db.session.add(atdrecord)
 								db.session.commit()
