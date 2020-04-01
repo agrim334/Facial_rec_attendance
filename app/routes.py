@@ -54,7 +54,7 @@ def login():										#login page url
 		return redirect(url_for('home'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data,role=form.role.data)  #check if credentials valid
+		user = User.query.filter_by(username=form.username.data,role=form.role.data).first()  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			return redirect(url_for('login'))
@@ -79,7 +79,7 @@ def course_user_add():														#map course to user url
 				if not course:
 					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
 					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(username=form.user.data,role=form.role.data) 
+				user = User.query.filter_by(username=form.user.data,role=form.role.data).first()
 				if not user:
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
@@ -511,6 +511,11 @@ def detect_faces_in_image(file_stream,CID,user):
 
 		return redirect(url_for('manual_mark',CID=CID))										#redirect to manual attendance to handle missed cases
 	except:
+
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
+
 		return redirect(url_for('manual_mark',CID=CID))
 
 
@@ -522,7 +527,7 @@ def manual_mark():
 			form = ManualAttendForm()
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
-			form.manual.default = [r.student_id for r in already]			
+			form.manual.data = [r.stud_id for r in already]
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
@@ -547,7 +552,8 @@ def manual_mark():
 			form = ManualAttendForm()
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
-			form.manual.default = [r.student_id for r in already]			
+			form.manual.data = [r.stud_id for r in already]
+			
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
