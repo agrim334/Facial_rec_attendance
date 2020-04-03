@@ -15,7 +15,7 @@ from datetime import datetime,timedelta
 import re
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-APP.config['UPLOAD_PATH'] = os.path.join(basedir, 'uploads')
+APP.config['UPLOAD_PATH'] = basedir
 photos = UploadSet('photos', IMAGES)
 configure_uploads(APP, photos)
 patch_request_class(APP)
@@ -23,7 +23,7 @@ patch_request_class(APP)
 @APP.before_request
 def make_session_permanent():
 	session.permanent = True
-	APP.permanent_session_lifetime = timedelta(minutes=10)
+	APP.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
 @APP.after_request
 def after_request(response):									#security
@@ -43,6 +43,11 @@ def internal_error(error):
 	db.session.rollback()
 	return render_template('500.html'), 500
 
+@APP.errorhandler(Exception)
+def unhandled_exception(e):
+    APP.logger.error('Unhandled Exception: %s', (e))
+    return render_template('500.html'), 500
+
 @APP.route('/')
 @login_required
 def home():													#home page url
@@ -57,14 +62,17 @@ def login():										#login page url
 		user = User.query.filter_by(username=form.username.data,role=form.role.data).first()  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
+			APP.logger.error('login failed for user ' + user.username )
 			return redirect(url_for('login'))
-		login_user(user, remember=form.remember_me.data)
-		next_page = request.args.get('next')
+		else:
+			login_user(user, remember=form.remember_me.data)
+			APP.logger.error('Successfull login for user ' + user.username )
+			next_page = request.args.get('next')
 		
-		if not next_page or url_parse(next_page).netloc != '':							#redirect to home
-			next_page = url_for('home',user = user)
+			if not next_page or url_parse(next_page).netloc != '':							#redirect to home
+				next_page = url_for('home',user = user)
 
-		return redirect(next_page)
+			return redirect(next_page)
 
 	return render_template('login.html', title='Sign In', form=form)
 
@@ -244,7 +252,7 @@ def change_password():
 	if current_user.is_authenticated:
 		form = ChangePWDForm()
 		if request.method == 'POST':
-			if form.validate_on_submit(): 
+			if form.validate_on_submit():
 				if current_user.check_password(form.currentpassword.data):
 					current_user.set_password(form.newpassword.data)
 					db.session.commit()
@@ -279,7 +287,7 @@ def reset_password_request():
 			flash('Check your email for the instructions to reset your password')
 			return redirect(url_for('login'))
 		else:
-			flash('Error could not send email as User not registered or no email entered for this user')
+			flash('Error could not send email as user not registered or no email address set for this user')
 			return redirect(url_for('reset_password_request'))
 
 	return render_template('reset_password_request.html',title='Reset Password', form=form)
@@ -317,18 +325,18 @@ def checkattd():
 					is_stud = db.session.query(stud_courses).filter_by(stud_id=current_user.username,course_id = CID)
 					if is_stud and is_stud.count() != 0:
 						attd = Attendance.query.filter_by(course_id=CID,student_id=current_user.username)
-						if not attd:
-							flash('Incorrect course code')
+						if not attd or attd.count() == 0:
+							flash('No record found')
 							return redirect(url_for('checkattd'))
 						else:
 							columns = Attendance.__table__.columns.keys()
 							for r in attd:
 								records.append(r)
 					else:
-						flash("Student not registered for this course")
+						flash("You are not registered for this course")
 						return redirect(url_for('checkattd'))
 				else:
-					flash('No such course')
+					flash("No course with ID " + CID + " found")
 					return redirect(url_for('checkattd'))
 				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
 		else:
@@ -346,7 +354,7 @@ def courses():
 		columns = []
 		records = []
 		courses = Course.query.all()
-		if courses and courses.count() != 0:
+		if courses :
 			columns = Course.__table__.columns.keys()
 			for r in courses:
 				records.append(r)
@@ -393,6 +401,7 @@ def allowed_file(filename):															#set allowed extensions for images
 def upload_image():																	#upload images to mark attendance
 	if current_user.is_authenticated:
 		if current_user.role == "Faculty":
+			flash("Image format should be png,jpg or jpeg")
 			form = AttendForm()
 			if form.validate_on_submit():
 				base = os.path.abspath(os.path.dirname(__file__))
@@ -402,40 +411,50 @@ def upload_image():																	#upload images to mark attendance
 					confirm = db.session.query(prof_courses).filter_by(prof_id=current_user.username,course_id = CID)
 					if confirm and confirm.count() != 0:
 						file = request.files.getlist("photo")
+					upl_dir = os.path.join(APP.config['UPLOAD_PATH'],"uploads/")
+					if not os.path.exists(upl_dir):
+						os.makedirs(upl_dir)
+
 						for f in file:
 							filename = secure_filename(f.filename)
-							f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
+							f.save(os.path.join(upl_dir, filename))
 						user = User.query.filter_by(username=current_user.username,role='Faculty')
-						return detect_faces_in_image(base+"/uploads/",CID,user)
+						return detect_faces_in_image(upl_dir,CID,user)
 
 					else:
-						flash("No TA or Faculty with given ID found for this course")
+						flash("You are not authorized to mark attendance for this course.")
 						return redirect(url_for('home'))
 				else:
-					flash("No such Course found")
+					flash("No Course found with code " + CID)
 					return redirect(url_for('home'))
 
 		elif current_user.role == "TA":
 			form = AttendForm()
+			flash("Image format should be png,jpg or jpeg")
 			if form.validate_on_submit():
 				base = os.path.abspath(os.path.dirname(__file__))
 				CID = form.CID.data
 				course = Course.query.filter_by(Course_ID=CID) 			
+
 				if course and course.count() != 0:
 					confirm = db.session.query(ta_courses).filter_by(ta_id=current_user.username,course_id = CID)
 					if confirm and confirm.count() != 0:
 						file = request.files.getlist("photo")
+						upl_dir = os.path.join(APP.config['UPLOAD_PATH'],"uploads/")
+						if not os.path.exists(upl_dir):
+							os.makedirs(upl_dir)
+
 						for f in file:
 							filename = secure_filename(f.filename)
-							f.save(os.path.join(APP.config['UPLOAD_PATH'], filename))
+							f.save(os.path.join(upl_dir, filename))
 						user = User.query.filter_by(username=current_user.username,role='TA')
-						return detect_faces_in_image(base+"/uploads/",CID,user)
+						return detect_faces_in_image(upl_dir,CID,user)
 
 					else:
-						flash("No TA or Faculty with given ID found for this course")
+						flash("You are not authorized to mark attendance for this course.")
 						return redirect(url_for('home'))
 				else:
-					flash("No such Course found")
+					flash("No Course found with code " + CID)
 					return redirect(url_for('home'))
 		else:
 			flash('Not allowed')
@@ -463,7 +482,6 @@ def detect_faces_in_image(file_stream,CID,user):
 			known_face_encd.append(encd)
 			image = pat.match(image)[0]
 			image = image[:-1]
-			print(image)
 			known_face_name[str(encd)] = image
 
 		for file in os.listdir(file_stream):
@@ -491,7 +509,7 @@ def detect_faces_in_image(file_stream,CID,user):
 					if name != "Unknown":
 						name = pat.match(name)[0]
 						name = name[:-1]
-						stud = User.query.filter_by(username=name,role="Student") 
+						stud = User.query.filter_by(username=name,role="Student").first() 
 						if stud:
 							c1 = db.session.query(stud_courses).filter_by(ta_id=stud.username,course_id = CID)
 							if c1:
@@ -501,7 +519,6 @@ def detect_faces_in_image(file_stream,CID,user):
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
 									else:
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
-									print(atdrecord)
 									db.session.add(atdrecord)
 									db.session.commit()
 
@@ -510,6 +527,14 @@ def detect_faces_in_image(file_stream,CID,user):
 				os.remove(base+"/uploads/"+image)
 
 		return redirect(url_for('manual_mark',CID=CID))										#redirect to manual attendance to handle missed cases
+	except MemoryError as m:
+		flash("Ran out of memory.Switching to manual attendance")
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
+
+		return redirect(url_for('manual_mark',CID=CID))
+
 	except:
 
 		for image in os.listdir(base+"/uploads/"):
@@ -517,7 +542,6 @@ def detect_faces_in_image(file_stream,CID,user):
 				os.remove(base+"/uploads/"+image)
 
 		return redirect(url_for('manual_mark',CID=CID))
-
 
 @APP.route('/manual', methods=['GET', 'POST'])
 @login_required
@@ -553,7 +577,6 @@ def manual_mark():
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
 			form.manual.data = [r.stud_id for r in already]
-			
 			course = Course.query.filter_by(Course_ID=request.args.get('CID')).first()
 			course.Classes_held = course.Classes_held + 1
 			if form.validate_on_submit():
