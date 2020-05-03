@@ -92,10 +92,22 @@ def course_user_add():														#map course to user url
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
 				if form.role.data == 'Faculty':
+					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('course_user_add'))
 					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
 				elif form.role.data == 'TA':
+					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('course_user_add'))
 					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
 				elif form.role.data == 'Student':
+					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('course_user_add'))
 					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
 					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
 					if not os.path.exists(known_dir):
@@ -130,15 +142,20 @@ def course_add():
 		if current_user.role == "Admin":
 			form = CourseForm()
 			if form.validate_on_submit():
-				course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
-				known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
-				if not os.path.exists(known_dir):
-					os.makedirs(known_dir)
-				db.session.add(course)
-				db.session.commit()
-				db.session.close()
-				flash('Course has been added')
-				return redirect(url_for('home'))
+				check_course = Course.query.filter_by(Course_ID = form.CID.data)
+				if check_course and check_course.count() != 0:
+					flash('Course has been added already in database')
+					return redirect(url_for('course_add'))					
+				else:
+					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					db.session.add(course)
+					db.session.commit()
+					db.session.close()
+					flash('Course has been added')
+					return redirect(url_for('course_add'))
 			return render_template('course.html', title='Course', form=form)
 		else:
 			flash('Only admins can access this page')
@@ -153,14 +170,20 @@ def register():
 	if current_user.is_authenticated:
 		if current_user.role == "Admin":
 			form = RegistrationForm()
+			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
 			if form.validate_on_submit():
-				user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role=form.role.data,dept=int(form.dept.data))
-				user.set_password(form.password.data)
-				db.session.add(user)
-				db.session.commit()
-				db.session.close()
-				flash('User has been added')
-				return redirect(url_for('register'))
+				check_user = User.query.filter_by(username = form.username.data)
+				if user and user.count() != 0:
+					flash('User has been added already in database')
+					return redirect(url_for('register'))
+				else:
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role=form.role.data,dept=int(form.dept.data))
+					user.set_password(form.password.data)
+					db.session.add(user)
+					db.session.commit()
+					db.session.close()
+					flash('User has been added')
+					return redirect(url_for('register'))
 			return render_template('register.html', title='Register', form=form)
 		else:
 			flash('Only admins can access this page')
@@ -176,12 +199,19 @@ def add_dept():
 		if current_user.role == "Admin":
 			form = DeptForm()
 			if form.validate_on_submit():
-				dept = Department(Dept_name = form.depart.data)
-				db.session.add(dept)
-				db.session.commit()
+				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
 				db.session.close()
-				flash('Department has been added')
-				return redirect(url_for('add_dept'))
+				if check_dept and check_dept.count() != 0:
+					flash('Department has been added already in database')
+					return redirect(url_for('add_dept'))
+				else:
+					dept = Department(Dept_name = form.depart.data)
+					db.session.add(dept)
+					db.session.commit()
+					db.session.close()
+					flash('Department has been added')
+					return redirect(url_for('add_dept'))
+		
 			return render_template('dept.html', title='Add Department', form=form)
 		else:
 			flash('Only admins can access this page')
@@ -374,8 +404,9 @@ def users():
 		columns = []
 		records = []
 		if current_user.role == "Admin":
-			user = User.query.all()
+			user = db.session.query(User,Department).filter(User.dept == Department.Dept_ID).all()
 			if user and len(user) != 0:
+				print(user)
 				columns = User.__table__.columns.keys()
 				columns.remove('password_hash')
 				for r in user:
@@ -477,7 +508,7 @@ def detect_faces_in_image(file_stream,CID,user):
 
 		for image in os.listdir(known_dir):
 			temp = face_recognition.load_image_file(known_dir+image)
-			inp_face_locations = face_recognition.face_locations(temp, model = "hog")
+			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
 			encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
 			known_face_encd.append(encd)
 			image = pat.match(image)[0]
@@ -488,7 +519,7 @@ def detect_faces_in_image(file_stream,CID,user):
 
 			un_image = face_recognition.load_image_file(file_stream+file)
 
-			face_locations = face_recognition.face_locations(un_image,model = "hog")
+			face_locations = face_recognition.face_locations(un_image,model = "cnn")
 
 			un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
 
