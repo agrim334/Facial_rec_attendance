@@ -375,7 +375,7 @@ def users():
 		records = []
 		if current_user.role == "Admin":
 			user = User.query.all()
-			if user and user.count() != 0:
+			if user and len(user) != 0:
 				columns = User.__table__.columns.keys()
 				columns.remove('password_hash')
 				for r in user:

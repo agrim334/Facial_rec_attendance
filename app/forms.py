@@ -14,7 +14,7 @@ configure_uploads(APP, photos)
 patch_request_class(APP)
 
 class DeptForm(FlaskForm):												#add new departments
-	depart = StringField('Department', validators=[DataRequired()])
+	depart = StringField('Department Name', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
 class AttendForm(FlaskForm):														#attendance form using facial recognition

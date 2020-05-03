@@ -13,3 +13,4 @@ flask-bootstrap
 flask-uploads
 flask-mysql
 flask-mysqldb
+face_recognition

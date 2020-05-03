@@ -25,7 +25,7 @@ prof_courses = db.Table('prof_courses',
 			)
 
 class Department(db.Model):
-	Dept_ID = db.Column(db.Integer, primary_key=True)
+	Dept_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
 	Dept_name = db.Column(db.String(64))
 
 class Course(db.Model):
