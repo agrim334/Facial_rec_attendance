@@ -17,6 +17,10 @@ class DeptForm(FlaskForm):												#add new departments
 	depart = StringField('Department Name', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
+class CheckAttendanceForm(FlaskForm):											# form for checking attendance
+	courseID = StringField("Course ID",validators=[DataRequired()])
+	submit = SubmitField('Submit')
+
 class AttendForm(FlaskForm):														#attendance form using facial recognition
 	CID = StringField('Course ID', validators=[DataRequired()])
 	photo = FileField(render_kw={'multiple':True},validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
@@ -38,6 +42,16 @@ class CourseForm(FlaskForm):
 	Cname = StringField('Course Name', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
+class ViewUserForm(FlaskForm):
+	criteria = RadioField('Method',choices=[('By Department','1'),('By Role','2'),('By ID','3'),('Display All','4')])
+	match = StringField('Filter', validators=[DataRequired()])
+	submit = SubmitField('Upload')
+
+class ViewCourseForm(FlaskForm):
+	criteria = RadioField('Method',choices=[('By Department','1'),('By Faculty','2'),('By Course ID','3'),('Display All','4')])
+	match = StringField('Filter', validators=[DataRequired()])
+	submit = SubmitField('Upload')
+
 class LoginForm(FlaskForm):															#user login form
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])
@@ -53,8 +67,7 @@ class RegistrationForm(FlaskForm):															#add new users
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')] )
 	password = PasswordField('Password', validators=[DataRequired()])
-	password2 = PasswordField(
-		'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
 	submit = SubmitField('Register')
 
 	def validate_username(self, username):
@@ -62,6 +75,7 @@ class RegistrationForm(FlaskForm):															#add new users
 			user = User.query.filter_by(username=self.username.data).first()
 			if user is not None:
 				raise ValidationError('Please use a different username.')
+
 	def validate_email(self, email):
 		user = User.query.filter_by(email=email.data).first()
 		if user is not None:
@@ -97,7 +111,3 @@ class EditProfileForm(FlaskForm):									#basic profile editing
 			user = User.query.filter_by(username=self.username.data).first()
 			if user is not None:
 				raise ValidationError('Please use a different username.')
-
-class CheckAttendanceForm(FlaskForm):											# form for checking attendance
-	courseID = StringField("Course ID",validators=[DataRequired()])
-	submit = SubmitField('Submit')

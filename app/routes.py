@@ -1,18 +1,24 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import DeptForm,ManualAttendForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm
+from app.forms import ( DeptForm,ManualAttendForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,
+						ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm,ViewUserForm,ViewCourseForm )
 import face_recognition
 import os
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department
+from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department,Role
 from app.email import send_password_reset_email
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime,timedelta
 import re
+
+fa_role = Role.query.filter_by(role="Faculty").first()
+ta_role = Role.query.filter_by(role="TA").first()
+admin_role = Role.query.filter_by(role="Admin").first()
+stud_role = Role.query.filter_by(role="Student").first()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOAD_PATH'] = basedir
@@ -59,7 +65,7 @@ def login():										#login page url
 		return redirect(url_for('home'))
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data,role=form.role.data).first()  #check if credentials valid
+		user = User.query.filter_by(username=form.username.data,role_id=form.role_id.data).first()  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			APP.logger.error('login failed for user ' + user.username )
@@ -80,30 +86,31 @@ def login():										#login page url
 @login_required
 def course_user_add():														#map course to user url
 	if current_user.is_authenticated:
-		if current_user.role == "Admin":										
+		if current_user.role_id == admin_role.role_id:						
 			form = CourseUserForm()
+			role_id = Role.query.filter_by(role = form.role.data).first().role_id
 			if form.validate_on_submit():
 				course = Course.query.filter(Course.Course_ID == form.CID.data) 
 				if not course:
 					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
 					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(username=form.user.data,role=form.role.data).first()
+				user = User.query.filter_by(username=form.user.data,role_id=form.role_id.data).first()
 				if not user:
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
-				if form.role.data == 'Faculty':
+				if role_id == fa_role.role_id:
 					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
 					if check_map and check_map.count() != 0:
 						flash("Mapping already in database")
 						return redirect(url_for('course_user_add'))
 					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
-				elif form.role.data == 'TA':
+				elif role_id == ta_role.role_id:
 					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
 					if check_map and check_map.count() != 0:
 						flash("Mapping already in database")
 						return redirect(url_for('course_user_add'))
 					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
-				elif form.role.data == 'Student':
+				elif role_id == stud_role.role_id:
 					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
 					if check_map and check_map.count() != 0:
 						flash("Mapping already in database")
@@ -120,14 +127,14 @@ def course_user_add():														#map course to user url
 						nf = form.user.data + ofile_extension
 						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
-					flash("Not allowed for this role")
+					flash("Not allowed for this role_id")
 					return redirect(url_for('course_user_add'))
 				db.session.execute(statement)
 				db.session.commit()
 				db.session.close()
 				flash('Mapping has been added')
 				return redirect(url_for('course_user_add'))
-			return render_template('course_user.html', title='Course_user', form=form)
+			return render_template('form_entry.html', title='Course_user', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -139,7 +146,7 @@ def course_user_add():														#map course to user url
 @login_required
 def course_add():
 	if current_user.is_authenticated:
-		if current_user.role == "Admin":
+		if current_user.role_id == admin_role.role_id:
 			form = CourseForm()
 			if form.validate_on_submit():
 				check_course = Course.query.filter_by(Course_ID = form.CID.data)
@@ -156,7 +163,7 @@ def course_add():
 					db.session.close()
 					flash('Course has been added')
 					return redirect(url_for('course_add'))
-			return render_template('course.html', title='Course', form=form)
+			return render_template('form_entry.html', title='Add Course', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -168,7 +175,7 @@ def course_add():
 @login_required
 def register():
 	if current_user.is_authenticated:
-		if current_user.role == "Admin":
+		if current_user.role_id == admin_role.role_id:
 			form = RegistrationForm()
 			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
 			if form.validate_on_submit():
@@ -177,14 +184,14 @@ def register():
 					flash('User has been added already in database')
 					return redirect(url_for('register'))
 				else:
-					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role=form.role.data,dept=int(form.dept.data))
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role_id.data,dept=int(form.dept.data))
 					user.set_password(form.password.data)
 					db.session.add(user)
 					db.session.commit()
 					db.session.close()
 					flash('User has been added')
 					return redirect(url_for('register'))
-			return render_template('register.html', title='Register', form=form)
+			return render_template('form_entry.html', title='Register new user', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -196,7 +203,7 @@ def register():
 @login_required
 def add_dept():
 	if current_user.is_authenticated:
-		if current_user.role == "Admin":
+		if current_user.role_id == admin_role.role_id:
 			form = DeptForm()
 			if form.validate_on_submit():
 				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
@@ -212,7 +219,7 @@ def add_dept():
 					flash('Department has been added')
 					return redirect(url_for('add_dept'))
 		
-			return render_template('dept.html', title='Add Department', form=form)
+			return render_template('form_entry.html', title='Add Department', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -234,7 +241,7 @@ def view_dept():
 		else:
 			flash("No Departments Found")
 			return redirect(url_for('home'))
-		return render_template('view_dept.html',columns=columns,items=records)
+		return render_template('view.html',title="Department",columns=columns,items=records)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
@@ -271,7 +278,7 @@ def edit_profile():
 			form.email.data = current_user.email
 			form.fname.data = current_user.fname
 			form.lname.data = current_user.lname
-		return render_template('edit_profile.html', title='Edit Profile',form=form)	
+		return render_template('form_entry.html', title='Edit Profile',form=form)	
 	else:
 		flash('login please')
 		return redirect(url_for('login'))
@@ -291,7 +298,7 @@ def change_password():
 				else :
 					flash('Old password incorrect')
 					return redirect(url_for('change_password'))
-		return render_template('change_password.html', title='Change Password',form=form)	
+		return render_template('form_entry.html', title='Change Password',form=form)	
 	else:
 		flash('login please')
 		return redirect(url_for('login'))
@@ -320,7 +327,7 @@ def reset_password_request():
 			flash('Error could not send email as user not registered or no email address set for this user')
 			return redirect(url_for('reset_password_request'))
 
-	return render_template('reset_password_request.html',title='Reset Password', form=form)
+	return render_template('form_entry.html',title='Reset Password', form=form)
 
 @APP.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -336,21 +343,21 @@ def reset_password(token):
 		db.session.commit()
 		flash('Your password has been reset.')
 		return redirect(url_for('login'))
-	return render_template('reset_password.html', form=form)
+	return render_template('form_entry.html',title='Reset Password', form=form)
 
 @APP.route('/check_attendance',methods=['GET','POST'])
 @login_required
 def checkattd():
 	if current_user.is_authenticated:
-		if current_user.role == "Student":
+		if current_user.role_id == stud_role.role_id:
 			form =CheckAttendanceForm()
 			columns = []
 			records = []
 			if form.validate_on_submit():
 				CID = form.courseID.data
-				course = Course.query.filter_by(Course_ID=CID) 
+				course = Course.query.filter_by(Course_ID=CID).first()
 				count = 0
-				if course and course.count() != 0:
+				if course:
 					count = course.Classes_held
 					is_stud = db.session.query(stud_courses).filter_by(stud_id=current_user.username,course_id = CID)
 					if is_stud and is_stud.count() != 0:
@@ -383,19 +390,47 @@ def courses():
 	if current_user.is_authenticated:
 		columns = []
 		records = []
-		courses = Course.query.all()
-		if courses :
-			columns = Course.__table__.columns.keys()
-			for r in courses:
-				records.append(r)
+		form = ViewCourseForm()
+		if form.validate_on_submit():
+			criteria = form.criteria.data
+			courses = []
+			if criteria == 1:
+				value = form.match.data
+				if value == "all":
+					courses = db.session.query(Course,Department).filter(Course.dept_id == Department.Dept_ID).all()
+				else:
+					check_dept = Department.query.filter_by(value)
+					if check_dept:
+						courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
+					else:
+						flash("No such department")
+						return redirect(url_for('courses'))
+
+			elif criteria == 2:
+				value = form.match.data
+				if value == "all":
+					courses = db.session.query(Course,Department).filter(Course.dept_id == Department.Dept_ID).all()
+				else:
+					check_dept = Department.query.filter_by(value)
+					if check_dept:
+						courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
+					else:
+						flash("No such department")
+						return redirect(url_for('courses'))
+			#elif
+
+			if courses :
+				columns = Course.__table__.columns.keys()
+				for r in courses:
+					records.append(r)
 		else:
-			flash("No Courses Found")
+			flash("No Courses Found with given criteria")
 			return redirect(url_for('home'))
-		return render_template('view.html',columns=columns,items=records)
+		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
-	return render_template('view.html',columns=columns,items=records)
+	return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
 
 @APP.route('/view_users',methods=['GET','POST'])
 @login_required
@@ -403,7 +438,8 @@ def users():
 	if current_user.is_authenticated:
 		columns = []
 		records = []
-		if current_user.role == "Admin":
+		title = "User"
+		if current_user.role_id == admin_role.role_id:
 			user = db.session.query(User,Department).filter(User.dept == Department.Dept_ID).all()
 			if user and len(user) != 0:
 				print(user)
@@ -414,14 +450,14 @@ def users():
 			else:
 				flash("No Users Found")
 				return redirect(url_for('home'))
-			return render_template('view_user.html',columns=columns,items=records)
+			return render_template('view.html',title=title,columns=columns,items=records)
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
-	return render_template('view_user.html',form=form,columns=columns,items=records)
+	return render_template('view.html',title=title,form=form,columns=columns,items=records)
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -431,7 +467,7 @@ def allowed_file(filename):															#set allowed extensions for images
 @login_required
 def upload_image():																	#upload images to mark attendance
 	if current_user.is_authenticated:
-		if current_user.role == "Faculty":
+		if current_user.role_id == fa_role.role_id:
 			flash("Image format should be png,jpg or jpeg")
 			form = AttendForm()
 			if form.validate_on_submit():
@@ -449,7 +485,7 @@ def upload_image():																	#upload images to mark attendance
 						for f in file:
 							filename = secure_filename(f.filename)
 							f.save(os.path.join(upl_dir, filename))
-						user = User.query.filter_by(username=current_user.username,role='Faculty')
+						user = User.query.filter_by(username=current_user.username,role_id=fa_role.role_id)
 						return detect_faces_in_image(upl_dir,CID,user)
 
 					else:
@@ -459,7 +495,7 @@ def upload_image():																	#upload images to mark attendance
 					flash("No Course found with code " + CID)
 					return redirect(url_for('home'))
 
-		elif current_user.role == "TA":
+		elif current_user.role_id == ta_role.role_id:
 			form = AttendForm()
 			flash("Image format should be png,jpg or jpeg")
 			if form.validate_on_submit():
@@ -478,7 +514,7 @@ def upload_image():																	#upload images to mark attendance
 						for f in file:
 							filename = secure_filename(f.filename)
 							f.save(os.path.join(upl_dir, filename))
-						user = User.query.filter_by(username=current_user.username,role='TA')
+						user = User.query.filter_by(username=current_user.username,role_id=ta_role.role_id)
 						return detect_faces_in_image(upl_dir,CID,user)
 
 					else:
@@ -490,7 +526,7 @@ def upload_image():																	#upload images to mark attendance
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
-		return render_template("face_rec.html",title="Hello",form=form)
+		return render_template("form_entry.html",title="Automated Attendance",form=form)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
@@ -540,13 +576,13 @@ def detect_faces_in_image(file_stream,CID,user):
 					if name != "Unknown":
 						name = pat.match(name)[0]
 						name = name[:-1]
-						stud = User.query.filter_by(username=name,role="Student").first() 
+						stud = User.query.filter_by(username=name,role_id=stud_role.role_id).first() 
 						if stud:
 							c1 = db.session.query(stud_courses).filter_by(ta_id=stud.username,course_id = CID)
 							if c1:
 								check = Attendance.query.filter_by(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')) 
 								if not check or check.count() == 0:
-									if user.role == 'TA':
+									if user.role_id == ta_role.role_id :
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TA_id = user.username)
 									else:
 										atdrecord = Attendance(course_id=CID,student_id=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = user.username)
@@ -578,7 +614,7 @@ def detect_faces_in_image(file_stream,CID,user):
 @login_required
 def manual_mark():
 	if current_user.is_authenticated:
-		if current_user.role == "Faculty":
+		if current_user.role_id == fa_role.role_id:
 			form = ManualAttendForm()
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
@@ -588,7 +624,7 @@ def manual_mark():
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stu in recr:
-					stud = User.query.filter_by(username=stu,role="Student") 
+					stud = User.query.filter_by(username=stu,role_id=stud_role.role_id) 
 					if stud and stud.count() != 0:
 						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
 						if c1 and c1.count() != 0:
@@ -601,9 +637,9 @@ def manual_mark():
 				flash("Attendance marked")
 				return redirect(url_for('home'))
 
-			return render_template("manual.html",form=form)
+			return render_template('form_entry.html',title='Manual marking',form=form)
 
-		elif current_user.role == "TA":
+		elif current_user.role_id == ta_role.role_id:
 			form = ManualAttendForm()
 			form.manual.choices = [(student.stud_id,student.stud_id) for student in db.session.query(stud_courses).filter_by(course_id=request.args.get('CID'))]
 			already = db.session.query(stud_courses).join(Attendance,Attendance.course_id == stud_courses.c.course_id).filter_by(course_id=request.args.get('CID'),timestamp=datetime.today().strftime('%Y-%m-%d'))
@@ -613,7 +649,7 @@ def manual_mark():
 			if form.validate_on_submit():
 				recr = form.manual.data
 				for stu in recr:
-					stud = User.query.filter_by(username=stu,role="Student") 
+					stud = User.query.filter_by(username=stu,role_id=stud_role.role_id) 
 					if stud and stud.count() != 0:
 						c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
 						if c1 and c1.count() != 0:
@@ -626,12 +662,12 @@ def manual_mark():
 
 				flash("Attendance marked")
 				return redirect(url_for('home'))
-			return render_template("manual.html",form=form)
+			return render_template('form_entry.html',title='Manual marking',form=form)
 
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
-		return render_template("manual.html",form=form)
+		return render_template('form_entry.html',title='Manual marking',form=form)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))

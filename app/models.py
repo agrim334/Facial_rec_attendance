@@ -9,29 +9,36 @@ def load_user(username):
 	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
-				db.Column('stud_id',db.String(64),db.ForeignKey('user.username')),
-				db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
+				db.Column('stud_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+				db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
 				)
 
 ta_courses = db.Table('ta_courses',
-			db.Column('ta_id',db.String(64),db.ForeignKey('user.username')),
-			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
+			db.Column('ta_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
 			)
-
 
 prof_courses = db.Table('prof_courses',
-			db.Column('prof_id',db.String(64),db.ForeignKey('user.username')),
-			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID'))
+			db.Column('prof_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
 			)
+
+class Role(db.Model):
+	role_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
+	role = db.Column(db.String(20))
+	users_role = db.relationship('User', backref='role')
 
 class Department(db.Model):
 	Dept_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
 	Dept_name = db.Column(db.String(64))
+	users_dept = db.relationship('User', backref='udept')
+	courses_dept = db.relationship('Course', backref='cdept')
 
 class Course(db.Model):
 	Course_ID = db.Column(db.String(64), primary_key=True)
 	Course_name = db.Column(db.String(64))
 	Classes_held = db.Column(db.Integer,default=0)
+	dept_id = db.Column(db.Integer, db.ForeignKey('department.Dept_ID',onupdate="CASCADE",ondelete="CASCADE"))
 
 class User(UserMixin,db.Model):
 	username = db.Column(db.String(64), index=True, primary_key=True)
@@ -40,29 +47,29 @@ class User(UserMixin,db.Model):
 	lname = db.Column(db.String(64), index=True)
 	password_hash = db.Column(db.String(128))
 	dept = db.Column(db.Integer,db.ForeignKey('department.Dept_ID'))
-	role = db.Column(db.String(20))
+	role_id = db.Column(db.Integer, db.ForeignKey('role.role_id',onupdate="CASCADE",ondelete="CASCADE"))
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (prof_courses.c.prof_id == username & role == 'Faculty'),
+			primaryjoin = (prof_courses.c.prof_id == username & role_id ==  Role.query.filter_by(role ='Faculty').first().role_id),
 			secondaryjoin = (prof_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	tutoring = db.relationship('Course',
 			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.ta_id == username & role == 'TA'),
+			primaryjoin = (ta_courses.c.ta_id == username & role_id ==  Role.query.filter_by(role ='TA').first().role_id),
 			secondaryjoin = (ta_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('tutored_by',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	opted = db.relationship('Course',
 			secondary=stud_courses,
-			primaryjoin = (stud_courses.c.stud_id == username & role == 'Student'),
+			primaryjoin = (stud_courses.c.stud_id == username & role_id == Role.query.filter_by(role ='Student').first().role_id),
 			secondaryjoin = (stud_courses.c.course_id == Course.Course_ID),
 			backref = db.backref('studied_by',lazy='dynamic'),
 			lazy = 'dynamic')
-
+	
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    
 	def set_password(self, password):
