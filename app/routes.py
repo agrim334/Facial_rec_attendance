@@ -239,14 +239,20 @@ def view_dept():
 		columns = []
 		records = []
 		form = ViewDeptForm()
-		dept = Department.query.all()
-		if dept:
-			columns = Department.__table__.columns.keys()
-			for r in dept:
-				records.append(r)
-		else:
-			flash("No Departments Found")
-			return redirect(url_for('home'))
+		print(form.criteria.data)
+		if form.validate_on_submit():
+			if form.criteria.data == '1':
+				dept = Department.query.all()
+			else:
+				dept = Department.query.filter_by(Dept_name=form.match.data)
+
+			if dept:
+				columns = Department.__table__.columns.keys()
+				for r in dept:
+					records.append(r)
+			else:
+				flash("No Departments Found")
+				return redirect(url_for('home'))
 		return render_template('view.html',title="Department",form=form,columns=columns,items=records)
 	else:
 		flash('Login please')
@@ -399,44 +405,35 @@ def courses():
 		form = ViewCourseForm()
 		if form.validate_on_submit():
 			criteria = form.criteria.data
+			criteria = int(criteria)
 			courses = []
 			if criteria == 1:
 				value = form.match.data
-				if value == "all":
-					courses = db.session.query(Course,Department).filter(Course.dept_id == Department.Dept_ID).all()
+				check_dept = Department.query.filter_by(value)
+				if check_dept:
+					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
 				else:
-					check_dept = Department.query.filter_by(value)
-					if check_dept:
-						courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
-					else:
-						flash("No such department")
-						return redirect(url_for('courses'))
-
+					flash("No courses under department " + value + ".Ensure that the department exists")
+					return redirect(url_for('courses'))
 			elif criteria == 2:
 				value = form.match.data
-				if value == "all":
-					courses = db.session.query(Course,Department).filter(Course.dept_id == Department.Dept_ID).all()
-				else:
-					check_dept = Department.query.filter_by(value)
-					if check_dept:
-						courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
-					else:
-						flash("No such department")
-						return redirect(url_for('courses'))
-			#elif
+				courses = Course.query.filter_by(Course_ID=value)
 
-			if courses :
+			elif criteria == 3:
+				courses = Course.query.all()
+
+			if courses:
 				columns = Course.__table__.columns.keys()
 				for r in courses:
 					records.append(r)
-		else:
-			flash("No Courses Found with given criteria")
-			return redirect(url_for('home'))
+			else:
+				flash("No Courses Found with given criteria")
+				return redirect(url_for('home'))
 		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
+
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
-	return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
 
 @APP.route('/view_users',methods=['GET','POST'])
 @login_required
@@ -445,25 +442,74 @@ def users():
 		columns = []
 		records = []
 		title = "User"
-		if current_user.role_id == admin_role.role_id:
-			user = db.session.query(User,Department).filter(User.dept == Department.Dept_ID).all()
-			if user and len(user) != 0:
-				print(user)
-				columns = User.__table__.columns.keys()
-				columns.remove('password_hash')
-				for r in user:
-					records.append(r)
+		form = ViewUserForm()
+		if form.validate_on_submit():
+			if current_user.role_id == admin_role.role_id:
+				criteria = form.criteria.data			
+				criteria = int(criteria)
+				if criteria == 1:
+					value = form.match.data
+					check_dept = Department.query.filter_by(value)
+					if check_dept:
+						user = db.session.query(User,Department).filter(User.dept == value).all()
+						if user:
+							columns = User.__table__.columns.keys()
+							columns.remove('password_hash')
+							for r in user:
+								records.append(r)
+						else:
+							flash("No users under department " + value + ".Ensure that the department exists")
+							return redirect(url_for('users'))
+					else:
+						flash("No users under department " + value + ".Ensure that the department exists")
+						return redirect(url_for('users'))
+				elif criteria == 2:
+					value = form.match.data
+					check_role = Role.query.filter_by(role=value).first().role_id
+					if check_role:
+						user = User.query.filter_by(role_id=value)
+						if user:
+							columns = User.__table__.columns.keys()
+							columns.remove('password_hash')
+							for r in user:
+								records.append(r)
+						else:
+							flash("No users under role " + value +". Ensure role exists")
+							return redirect(url_for('users'))
+					else:
+						flash("No users under role " + value +". Ensure role exists")
+						return redirect(url_for('users'))
+
+				elif criteria == 3:
+					value = form.match.data
+					user = User.query.filter_by(username=value)
+					if user:
+						columns = User.__table__.columns.keys()
+						columns.remove('password_hash')
+						for r in user:
+							records.append(r)
+					else:
+						flash("No Users Found with ID " + value)
+						return redirect(url_for('users'))
+				elif criteria == 4:
+					user = User.query.all()
+					print(user)
+					if user and len(user) != 0:
+						columns = User.__table__.columns.keys()
+						columns.remove('password_hash')
+						for r in user:
+							records.append(r)
+					else:
+						flash("No Users Found")
+						return redirect(url_for('users'))
 			else:
-				flash("No Users Found")
+				flash('Not allowed')
 				return redirect(url_for('home'))
-			return render_template('view.html',title=title,columns=columns,items=records)
-		else:
-			flash('Not allowed')
-			return redirect(url_for('home'))
+
+		return render_template('view.html',title=title,form=form,columns=columns,items=records)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
-	return render_template('view.html',title=title,form=form,columns=columns,items=records)
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

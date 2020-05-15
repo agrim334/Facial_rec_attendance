@@ -43,18 +43,18 @@ class CourseForm(FlaskForm):
 	submit = SubmitField('Upload')
 
 class ViewUserForm(FlaskForm):
-	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Role'),('3','By ID'),('4','Display All')])
+	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Role'),('3','By User ID'),('4','Display All')])
 	match = StringField('Filter', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
 class ViewCourseForm(FlaskForm):
-	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Role'),('3','By ID'),('4','Display All')])
+	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Course ID'),('3','Display All')])
 	match = StringField('Filter', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
 class ViewDeptForm(FlaskForm):
 	criteria = RadioField('Method',choices=[('1','Display All'),('2','Search')])
-	match = StringField('Filter', validators=[DataRequired()])
+	match = StringField('Filter')
 	submit = SubmitField('Upload')
 
 class LoginForm(FlaskForm):															#user login form
