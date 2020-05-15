@@ -33,7 +33,7 @@ class ManualAttendForm(FlaskForm):												#for manual entries if facial reco
 class CourseUserForm(FlaskForm):											#Map courses and users
 	CID = StringField('CourseID', validators=[DataRequired()])
 	user = StringField('UserID',validators=[DataRequired()])
-	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA')])
+	role = RadioField('Role', coerce=int)
 	photo = FileField(validators=[FileAllowed(photos, 'Image only!'), FileRequired('File was empty!')])
 	submit = SubmitField('Upload')
 
@@ -43,19 +43,24 @@ class CourseForm(FlaskForm):
 	submit = SubmitField('Upload')
 
 class ViewUserForm(FlaskForm):
-	criteria = RadioField('Method',choices=[('By Department','1'),('By Role','2'),('By ID','3'),('Display All','4')])
+	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Role'),('3','By ID'),('4','Display All')])
 	match = StringField('Filter', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
 class ViewCourseForm(FlaskForm):
-	criteria = RadioField('Method',choices=[('By Department','1'),('By Faculty','2'),('By Course ID','3'),('Display All','4')])
+	criteria = RadioField('Method',choices=[('1','By Department'),('2','By Role'),('3','By ID'),('4','Display All')])
+	match = StringField('Filter', validators=[DataRequired()])
+	submit = SubmitField('Upload')
+
+class ViewDeptForm(FlaskForm):
+	criteria = RadioField('Method',choices=[('1','Display All'),('2','Search')])
 	match = StringField('Filter', validators=[DataRequired()])
 	submit = SubmitField('Upload')
 
 class LoginForm(FlaskForm):															#user login form
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired()])
-	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')])
+	role = RadioField('Role',coerce=int)
 	remember_me = BooleanField('Remember Me')
 	submit = SubmitField('Sign In')
 
@@ -65,7 +70,7 @@ class RegistrationForm(FlaskForm):															#add new users
 	lname = StringField('Last name', validators=[DataRequired()])
 	dept = RadioField('Department',coerce=int)
 	email = StringField('Email', validators=[DataRequired(), Email()])
-	role = RadioField('Role',choices=[('Student','Student'),('Faculty','Faculty'),('TA','TA'),('Admin','Admin')] )
+	role = RadioField('Role', coerce=int)
 	password = PasswordField('Password', validators=[DataRequired()])
 	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
 	submit = SubmitField('Register')

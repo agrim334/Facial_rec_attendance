@@ -10,4 +10,7 @@
 	</div>
 		<p> Forgot Your Password? <a href="{{ url_for('reset_password_request') }}">Click to Reset It</a>
 	</p>
+	{% if form.errors %}
+		{{ form.errors }}
+	{% endif %}
 {% endblock %}

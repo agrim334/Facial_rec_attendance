@@ -1,7 +1,7 @@
 from app import APP,db,errors
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
 from app.forms import ( DeptForm,ManualAttendForm,CheckAttendanceForm,CourseForm,LoginForm,RegistrationForm,
-						ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm,ViewUserForm,ViewCourseForm )
+						ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,AttendForm,CourseUserForm,ViewUserForm,ViewCourseForm,ViewDeptForm )
 import face_recognition
 import os
 from werkzeug.urls import url_parse
@@ -57,15 +57,18 @@ def unhandled_exception(e):
 @APP.route('/')
 @login_required
 def home():													#home page url
-	return render_template('home.html', title='Home',user = user)
+	return render_template('home.html', title='Home',user = user,faculty = fa_role.role_id,ta = ta_role.role_id,admin = admin_role.role_id,stud = stud_role.role_id)
 
 @APP.route('/login',methods={'GET','POST'})
 def login():										#login page url
 	if current_user.is_authenticated:
 		return redirect(url_for('home'))
 	form = LoginForm()
+	form.role.choices = [(int(role.role_id),role.role) for role in Role.query.all()]
+	print(type(form.role.data))
+		
 	if form.validate_on_submit():
-		user = User.query.filter_by(username=form.username.data,role_id=form.role_id.data).first()  #check if credentials valid
+		user = User.query.filter_by(username=form.username.data,role_id=form.role.data).first()  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
 			APP.logger.error('login failed for user ' + user.username )
@@ -88,13 +91,14 @@ def course_user_add():														#map course to user url
 	if current_user.is_authenticated:
 		if current_user.role_id == admin_role.role_id:						
 			form = CourseUserForm()
-			role_id = Role.query.filter_by(role = form.role.data).first().role_id
 			if form.validate_on_submit():
+				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
+				role_id = 1
 				course = Course.query.filter(Course.Course_ID == form.CID.data) 
 				if not course:
 					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
 					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(username=form.user.data,role_id=form.role_id.data).first()
+				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
 				if not user:
 					flash('No such TA or Faculty found')
 					return redirect(url_for('course_user_add'))
@@ -178,13 +182,14 @@ def register():
 		if current_user.role_id == admin_role.role_id:
 			form = RegistrationForm()
 			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
+			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
 			if form.validate_on_submit():
 				check_user = User.query.filter_by(username = form.username.data)
 				if user and user.count() != 0:
 					flash('User has been added already in database')
 					return redirect(url_for('register'))
 				else:
-					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role_id.data,dept=int(form.dept.data))
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
 					user.set_password(form.password.data)
 					db.session.add(user)
 					db.session.commit()
@@ -233,6 +238,7 @@ def view_dept():
 	if current_user.is_authenticated:
 		columns = []
 		records = []
+		form = ViewDeptForm()
 		dept = Department.query.all()
 		if dept:
 			columns = Department.__table__.columns.keys()
@@ -241,7 +247,7 @@ def view_dept():
 		else:
 			flash("No Departments Found")
 			return redirect(url_for('home'))
-		return render_template('view.html',title="Department",columns=columns,items=records)
+		return render_template('view.html',title="Department",form=form,columns=columns,items=records)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
