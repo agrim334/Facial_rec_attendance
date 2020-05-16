@@ -7,18 +7,33 @@
 		<div class="col-md-4">
 			{% if current_user.role_id == faculty or current_user.role_id == ta %}
 				<div> <a href="{{ url_for('upload_image') }}"> Mark attendance </a> </div>
-				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
+				<div> <a href="{{ url_for('view_courses') }}">View courses</a> </div>
+
 			{% elif current_user.role_id == stud %}
 				<div> <a href="{{ url_for('checkattd') }}">Check attendance</a> </div>
-				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
+				<div> <a href="{{ url_for('view_courses') }}">View courses</a> </div>
+
 			{% elif current_user.role_id == admin %}
-				<div> <a href="{{ url_for('register') }}"> Add User </a> </div>
-				<div> <a href="{{ url_for('course_add') }}"> Add Course </a> </div>
-				<div> <a href="{{ url_for('course_user_add') }}"> Map user to Course </a> </div>
-				<div> <a href="{{ url_for('courses') }}">View courses</a> </div>
-				<div> <a href="{{ url_for('users') }}">View users</a> </div>
+				<div> <a href="{{ url_for('add_users') }}"> Add User </a> </div>
+				<div> <a href="{{ url_for('view_users') }}">View users</a> </div>
+				<div> <a href="{{ url_for('upd_users') }}">Update Users </a> </div>
+				<div> <a href="{{ url_for('del_users') }}">Delete Users</a> </div>
+
+				<div> <a href="{{ url_for('add_courses') }}"> Add Course </a> </div>
+				<div> <a href="{{ url_for('view_courses') }}">View courses</a> </div>
+				<div> <a href="{{ url_for('upd_courses') }}"> Update Course </a> </div>
+				<div> <a href="{{ url_for('del_courses') }}">Delete courses</a> </div>
+
+				<div> <a href="{{ url_for('add_course_user') }}"> Map user to Course </a> </div>
+				<div> <a href="{{ url_for('view_course_user') }}"> View Mappings  </a> </div>
+				<div> <a href="{{ url_for('upd_course_user') }}"> Update Mappings  </a> </div>
+				<div> <a href="{{ url_for('del_course_user') }}"> Delete Mappings  </a> </div>
+
 				<div> <a href="{{ url_for('add_dept') }}">Add Department</a> </div>
 				<div> <a href="{{ url_for('view_dept') }}">View Departments</a> </div>
+				<div> <a href="{{ url_for('upd_dept') }}">Update Department</a> </div>
+				<div> <a href="{{ url_for('del_dept') }}">Delete Departments</a> </div>
+
 			{% endif %}
 		</div>
 	</div>

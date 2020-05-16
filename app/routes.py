@@ -59,6 +59,21 @@ def unhandled_exception(e):
 def home():													#home page url
 	return render_template('home.html', title='Home',user = user,faculty = fa_role.role_id,ta = ta_role.role_id,admin = admin_role.role_id,stud = stud_role.role_id)
 
+@APP.route('/user/<username>')
+@login_required
+def user(username):
+	if current_user.is_authenticated:
+		user = User.query.filter_by(username=username).first_or_404()
+		if user:
+			if current_user.username == username:
+				return render_template('user.html', user=user)
+			else:
+				flash('Not allowed')
+				return redirect('home')
+	else:
+		flash('login please')
+		return redirect(url_for('login'))
+
 @APP.route('/login',methods={'GET','POST'})
 def login():										#login page url
 	if current_user.is_authenticated:
@@ -84,194 +99,6 @@ def login():										#login page url
 			return redirect(next_page)
 
 	return render_template('login.html', title='Sign In', form=form)
-
-@APP.route('/course_user',methods=['GET','POST'])
-@login_required
-def course_user_add():														#map course to user url
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:						
-			form = CourseUserForm()
-			if form.validate_on_submit():
-				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
-				role_id = 1
-				course = Course.query.filter(Course.Course_ID == form.CID.data) 
-				if not course:
-					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
-					return redirect(url_for('course_user_add'))
-				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
-				if not user:
-					flash('No such TA or Faculty found')
-					return redirect(url_for('course_user_add'))
-				if role_id == fa_role.role_id:
-					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
-					if check_map and check_map.count() != 0:
-						flash("Mapping already in database")
-						return redirect(url_for('course_user_add'))
-					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
-				elif role_id == ta_role.role_id:
-					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
-					if check_map and check_map.count() != 0:
-						flash("Mapping already in database")
-						return redirect(url_for('course_user_add'))
-					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
-				elif role_id == stud_role.role_id:
-					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
-					if check_map and check_map.count() != 0:
-						flash("Mapping already in database")
-						return redirect(url_for('course_user_add'))
-					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
-					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
-					if not os.path.exists(known_dir):
-						os.makedirs(known_dir)
-					file = request.files.getlist("photo")
-					for f in file:
-						filename = secure_filename(f.filename)
-						f.save(os.path.join(known_dir, filename))
-						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
-						nf = form.user.data + ofile_extension
-						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
-				else:
-					flash("Not allowed for this role_id")
-					return redirect(url_for('course_user_add'))
-				db.session.execute(statement)
-				db.session.commit()
-				db.session.close()
-				flash('Mapping has been added')
-				return redirect(url_for('course_user_add'))
-			return render_template('form_entry.html', title='Course_user', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('login'))
-
-@APP.route('/course',methods=['GET','POST'])
-@login_required
-def course_add():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = CourseForm()
-			if form.validate_on_submit():
-				check_course = Course.query.filter_by(Course_ID = form.CID.data)
-				if check_course and check_course.count() != 0:
-					flash('Course has been added already in database')
-					return redirect(url_for('course_add'))					
-				else:
-					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
-					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
-					if not os.path.exists(known_dir):
-						os.makedirs(known_dir)
-					db.session.add(course)
-					db.session.commit()
-					db.session.close()
-					flash('Course has been added')
-					return redirect(url_for('course_add'))
-			return render_template('form_entry.html', title='Add Course', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('login'))
-
-@APP.route('/register',methods=['GET','POST'])
-@login_required
-def register():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = RegistrationForm()
-			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
-			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
-			if form.validate_on_submit():
-				check_user = User.query.filter_by(username = form.username.data)
-				if user and user.count() != 0:
-					flash('User has been added already in database')
-					return redirect(url_for('register'))
-				else:
-					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
-					user.set_password(form.password.data)
-					db.session.add(user)
-					db.session.commit()
-					db.session.close()
-					flash('User has been added')
-					return redirect(url_for('register'))
-			return render_template('form_entry.html', title='Register new user', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('login'))
-
-@APP.route('/dept_add',methods=['GET','POST'])
-@login_required
-def add_dept():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = DeptForm()
-			if form.validate_on_submit():
-				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
-				db.session.close()
-				if check_dept and check_dept.count() != 0:
-					flash('Department has been added already in database')
-					return redirect(url_for('add_dept'))
-				else:
-					dept = Department(Dept_name = form.depart.data)
-					db.session.add(dept)
-					db.session.commit()
-					db.session.close()
-					flash('Department has been added')
-					return redirect(url_for('add_dept'))
-		
-			return render_template('form_entry.html', title='Add Department', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('login'))
-
-@APP.route('/dept_view',methods=['GET','POST'])
-@login_required
-def view_dept():
-	if current_user.is_authenticated:
-		columns = []
-		records = []
-		form = ViewDeptForm()
-		print(form.criteria.data)
-		if form.validate_on_submit():
-			if form.criteria.data == '1':
-				dept = Department.query.all()
-			else:
-				dept = Department.query.filter_by(Dept_name=form.match.data)
-
-			if dept:
-				columns = Department.__table__.columns.keys()
-				for r in dept:
-					records.append(r)
-			else:
-				flash("No Departments Found")
-				return redirect(url_for('home'))
-		return render_template('view.html',title="Department",form=form,columns=columns,items=records)
-	else:
-		flash('Login please')
-		return redirect(url_for('login'))
-
-@APP.route('/user/<username>')
-@login_required
-def user(username):
-	if current_user.is_authenticated:
-		user = User.query.filter_by(username=username).first_or_404()
-		if user:
-			if current_user.username == username:
-				return render_template('user.html', user=user)
-			else:
-				flash('Not allowed')
-				return redirect('home')
-	else:
-		flash('login please')
-		return redirect(url_for('login'))
 
 @APP.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -315,15 +142,6 @@ def change_password():
 		flash('login please')
 		return redirect(url_for('login'))
 
-@APP.route('/logout')
-def logout():
-	if not current_user.is_anonymous:
-		logout_user()
-		flash('You have logged out')
-	else:
-		flash('Error.Not logged in')
-	return redirect(url_for('login'))
-
 @APP.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
 	if current_user.is_authenticated:
@@ -357,87 +175,368 @@ def reset_password(token):
 		return redirect(url_for('login'))
 	return render_template('form_entry.html',title='Reset Password', form=form)
 
-@APP.route('/check_attendance',methods=['GET','POST'])
+@APP.route('/logout')
+def logout():
+	if not current_user.is_anonymous:
+		logout_user()
+		flash('You have logged out')
+	else:
+		flash('Error.Not logged in')
+	return redirect(url_for('login'))
+
+@APP.route('/add_course_user',methods=['GET','POST'])
 @login_required
-def checkattd():
+def add_course_user():														#map course to user url
 	if current_user.is_authenticated:
-		if current_user.role_id == stud_role.role_id:
-			form =CheckAttendanceForm()
-			columns = []
-			records = []
+		if current_user.role_id == admin_role.role_id:						
+			form = CourseUserForm()
 			if form.validate_on_submit():
-				CID = form.courseID.data
-				course = Course.query.filter_by(Course_ID=CID).first()
-				count = 0
-				if course:
-					count = course.Classes_held
-					is_stud = db.session.query(stud_courses).filter_by(stud_id=current_user.username,course_id = CID)
-					if is_stud and is_stud.count() != 0:
-						attd = Attendance.query.filter_by(course_id=CID,student_id=current_user.username)
-						if not attd or attd.count() == 0:
-							flash('No record found')
-							return redirect(url_for('checkattd'))
-						else:
-							columns = Attendance.__table__.columns.keys()
-							for r in attd:
-								records.append(r)
-					else:
-						flash("You are not registered for this course")
-						return redirect(url_for('checkattd'))
+				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
+				role_id = 1
+				course = Course.query.filter(Course.Course_ID == form.CID.data) 
+				if not course:
+					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('course_user_add'))
+				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
+				if not user:
+					flash('No such TA or Faculty found')
+					return redirect(url_for('add_course_user'))
+				if role_id == fa_role.role_id:
+					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('add_course_user'))
+					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
+				elif role_id == ta_role.role_id:
+					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('add_course_user'))
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
+				elif role_id == stud_role.role_id:
+					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('add_course_user'))
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					file = request.files.getlist("photo")
+					for f in file:
+						filename = secure_filename(f.filename)
+						f.save(os.path.join(known_dir, filename))
+						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + ofile_extension
+						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
-					flash("No course with ID " + CID + " found")
-					return redirect(url_for('checkattd'))
-				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
+					flash("Not allowed for this role_id")
+					return redirect(url_for('add_course_user'))
+				db.session.execute(statement)
+				db.session.commit()
+				db.session.close()
+				flash('Mapping has been added')
+				return redirect(url_for('add_course_user'))
+			return render_template('form_entry.html', title='Course_user', form=form)
 		else:
-			flash('Not allowed')
+			flash('Only admins can access this page')
 			return redirect(url_for('home'))
 	else:
-		flash('Login please')
+		flash('Login please!!')
 		return redirect(url_for('login'))
-	return render_template('check_attendance.html',form=form,columns=columns,items=records)
 
-@APP.route('/view_courses',methods=['GET','POST'])
+@APP.route('/view_course_user',methods=['GET','POST'])
 @login_required
-def courses():
+def view_course_user():														#map course to user url
 	if current_user.is_authenticated:
-		columns = []
-		records = []
-		form = ViewCourseForm()
-		if form.validate_on_submit():
-			criteria = form.criteria.data
-			criteria = int(criteria)
-			courses = []
-			if criteria == 1:
-				value = form.match.data
-				check_dept = Department.query.filter_by(value)
-				if check_dept:
-					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
+		if current_user.role_id == admin_role.role_id:						
+			form = CourseUserForm()
+			if form.validate_on_submit():
+				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
+				role_id = 1
+				course = Course.query.filter(Course.Course_ID == form.CID.data) 
+				if not course:
+					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('view_course_user'))
+				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
+				if not user:
+					flash('No such TA or Faculty found')
+					return redirect(url_for('view_course_user'))
+				if role_id == fa_role.role_id:
+					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('view_course_user'))
+					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
+				elif role_id == ta_role.role_id:
+					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('view_course_user'))
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
+				elif role_id == stud_role.role_id:
+					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('view_course_user'))
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					file = request.files.getlist("photo")
+					for f in file:
+						filename = secure_filename(f.filename)
+						f.save(os.path.join(known_dir, filename))
+						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + ofile_extension
+						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
-					flash("No courses under department " + value + ".Ensure that the department exists")
-					return redirect(url_for('courses'))
-			elif criteria == 2:
-				value = form.match.data
-				courses = Course.query.filter_by(Course_ID=value)
-
-			elif criteria == 3:
-				courses = Course.query.all()
-
-			if courses:
-				columns = Course.__table__.columns.keys()
-				for r in courses:
-					records.append(r)
-			else:
-				flash("No Courses Found with given criteria")
-				return redirect(url_for('home'))
-		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
-
+					flash("Not allowed for this role_id")
+					return redirect(url_for('view_course_user'))
+				db.session.execute(statement)
+				db.session.commit()
+				db.session.close()
+				flash('Mapping has been added')
+				return redirect(url_for('view_course_user'))
+			return render_template('form_entry.html', title='Course_user', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
 	else:
-		flash('Login please')
+		flash('Login please!!')
 		return redirect(url_for('login'))
+
+@APP.route('/upd_course_user',methods=['GET','POST'])
+@login_required
+def upd_course_user():														#map course to user url
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:						
+			form = CourseUserForm()
+			if form.validate_on_submit():
+				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
+				role_id = 1
+				course = Course.query.filter(Course.Course_ID == form.CID.data) 
+				if not course:
+					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('upd_course_user'))
+				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
+				if not user:
+					flash('No such TA or Faculty found')
+					return redirect(url_for('upd_course_user'))
+				if role_id == fa_role.role_id:
+					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('upd_course_user'))
+					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
+				elif role_id == ta_role.role_id:
+					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('upd_course_user'))
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
+				elif role_id == stud_role.role_id:
+					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('upd_course_user'))
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					file = request.files.getlist("photo")
+					for f in file:
+						filename = secure_filename(f.filename)
+						f.save(os.path.join(known_dir, filename))
+						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + ofile_extension
+						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
+				else:
+					flash("Not allowed for this role_id")
+					return redirect(url_for('upd_course_user'))
+				db.session.execute(statement)
+				db.session.commit()
+				db.session.close()
+				flash('Mapping has been added')
+				return redirect(url_for('upd_course_user'))
+			return render_template('form_entry.html', title='Course_user', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/del_course_user',methods=['GET','POST'])
+@login_required
+def del_course_user():														#map course to user url
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:						
+			form = CourseUserForm()
+			if form.validate_on_submit():
+				#role_id = Role.query.filter_by(role = form.role.data).first().role_id
+				role_id = 1
+				course = Course.query.filter(Course.Course_ID == form.CID.data) 
+				if not course:
+					flash('This course was not found in Database.Please add this course to database and then try or enter correct course id.')
+					return redirect(url_for('del_course_user'))
+				user = User.query.filter_by(username=form.user.data,role_id=form.role.data).first()
+				if not user:
+					flash('No such TA or Faculty found')
+					return redirect(url_for('del_course_user'))
+				if role_id == fa_role.role_id:
+					check_map = db.session.query(prof_courses).filter_by(prof_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('del_course_user'))
+					statement = prof_courses.insert().values(prof_id=form.user.data,course_id=form.CID.data)
+				elif role_id == ta_role.role_id:
+					check_map = db.session.query(ta_courses).filter_by(ta_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('del_course_user'))
+					statement = ta_courses.insert().values(ta_id=form.user.data,course_id=form.CID.data)					#TA prof mapped to course
+				elif role_id == stud_role.role_id:
+					check_map = db.session.query(stud_courses).filter_by(stud_id=form.user.data,course_id = form.CID.data)
+					if check_map and check_map.count() != 0:
+						flash("Mapping already in database")
+						return redirect(url_for('del_course_user'))
+					statement = stud_courses.insert().values(stud_id=form.user.data,course_id=form.CID.data)			#for students save mapping + image corresponding to course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"								#set known dir to your required location
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					file = request.files.getlist("photo")
+					for f in file:
+						filename = secure_filename(f.filename)
+						f.save(os.path.join(known_dir, filename))
+						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + ofile_extension
+						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
+				else:
+					flash("Not allowed for this role_id")
+					return redirect(url_for('del_course_user'))
+				db.session.execute(statement)
+				db.session.commit()
+				db.session.close()
+				flash('Mapping has been added')
+				return redirect(url_for('del_course_user'))
+			return render_template('form_entry.html', title='Course_user', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/add_users',methods=['GET','POST'])
+@login_required
+def add_users():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = RegistrationForm()
+			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
+			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
+			if form.validate_on_submit():
+				check_user = User.query.filter_by(username = form.username.data)
+				if user and user.count() != 0:
+					flash('User has been added already in database')
+					return redirect(url_for('add_users'))
+				else:
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
+					user.set_password(form.password.data)
+					db.session.add(user)
+					db.session.commit()
+					db.session.close()
+					flash('User has been added')
+					return redirect(url_for('add_users'))
+			return render_template('form_entry.html', title='Register new user', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
 
 @APP.route('/view_users',methods=['GET','POST'])
 @login_required
-def users():
+def view_users():
+	if current_user.is_authenticated:
+		columns = []
+		records = []
+		title = "User"
+		form = ViewUserForm()
+		if form.validate_on_submit():
+			if current_user.role_id == admin_role.role_id:
+				criteria = form.criteria.data			
+				criteria = int(criteria)
+				if criteria == 1:
+					value = form.match.data
+					check_dept = Department.query.filter_by(value)
+					if check_dept:
+						user = db.session.query(User,Department).filter(User.dept == value).all()
+						if user:
+							columns = User.__table__.columns.keys()
+							columns.remove('password_hash')
+							for r in user:
+								records.append(r)
+						else:
+							flash("No users under department " + value + ".Ensure that the department exists")
+							return redirect(url_for('view_users'))
+					else:
+						flash("No users under department " + value + ".Ensure that the department exists")
+						return redirect(url_for('view_users'))
+				elif criteria == 2:
+					value = form.match.data
+					check_role = Role.query.filter_by(role=value).first().role_id
+					if check_role:
+						user = User.query.filter_by(role_id=value)
+						if user:
+							columns = User.__table__.columns.keys()
+							columns.remove('password_hash')
+							for r in user:
+								records.append(r)
+						else:
+							flash("No users under role " + value +". Ensure role exists")
+							return redirect(url_for('view_users'))
+					else:
+						flash("No users under role " + value +". Ensure role exists")
+						return redirect(url_for('view_users'))
+
+				elif criteria == 3:
+					value = form.match.data
+					user = User.query.filter_by(username=value)
+					if user:
+						columns = User.__table__.columns.keys()
+						columns.remove('password_hash')
+						for r in user:
+							records.append(r)
+					else:
+						flash("No Users Found with ID " + value)
+						return redirect(url_for('view_users'))
+				elif criteria == 4:
+					user = User.query.all()
+					print(user)
+					if user and len(user) != 0:
+						columns = User.__table__.columns.keys()
+						columns.remove('password_hash')
+						for r in user:
+							records.append(r)
+					else:
+						flash("No Users Found")
+						return redirect(url_for('view_users'))
+			else:
+				flash('Not allowed')
+				return redirect(url_for('home'))
+
+		return render_template('view.html',title=title,form=form,columns=columns,items=records)
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+
+@APP.route('/upd_users',methods=['GET','POST'])
+@login_required
+def upd_users():
 	if current_user.is_authenticated:
 		columns = []
 		records = []
@@ -510,6 +609,322 @@ def users():
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
+
+
+@APP.route('/del_users',methods=['GET','POST'])
+@login_required
+def del_users():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = RegistrationForm()
+			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
+			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
+			if form.validate_on_submit():
+				check_user = User.query.filter_by(username = form.username.data)
+				if user and user.count() != 0:
+					flash('User has been added already in database')
+					return redirect(url_for('del_users'))
+				else:
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
+					user.set_password(form.password.data)
+					db.session.add(user)
+					db.session.commit()
+					db.session.close()
+					flash('User has been added')
+					return redirect(url_for('del_users'))
+			return render_template('form_entry.html', title='Register new user', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+
+@APP.route('/add_courses',methods=['GET','POST'])
+@login_required
+def add_courses():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = CourseForm()
+			if form.validate_on_submit():
+				check_course = Course.query.filter_by(Course_ID = form.CID.data)
+				if check_course and check_course.count() != 0:
+					flash('Course has been added already in database')
+					return redirect(url_for('add_courses'))					
+				else:
+					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					db.session.add(course)
+					db.session.commit()
+					db.session.close()
+					flash('Course has been added')
+					return redirect(url_for('add_courses'))
+			return render_template('form_entry.html', title='Add Course', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/view_courses',methods=['GET','POST'])
+@login_required
+def view_courses():
+	if current_user.is_authenticated:
+		columns = []
+		records = []
+		form = ViewCourseForm()
+		if form.validate_on_submit():
+			criteria = form.criteria.data
+			criteria = int(criteria)
+			courses = []
+			if criteria == 1:
+				value = form.match.data
+				check_dept = Department.query.filter_by(value)
+				if check_dept:
+					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
+				else:
+					flash("No courses under department " + value + ".Ensure that the department exists")
+					return redirect(url_for('view_courses'))
+			elif criteria == 2:
+				value = form.match.data
+				courses = Course.query.filter_by(Course_ID=value)
+
+			elif criteria == 3:
+				courses = Course.query.all()
+
+			if courses:
+				columns = Course.__table__.columns.keys()
+				for r in courses:
+					records.append(r)
+			else:
+				flash("No Courses Found with given criteria")
+				return redirect(url_for('view_courses'))
+		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
+
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+
+@APP.route('/upd_courses',methods=['GET','POST'])
+@login_required
+def upd_courses():
+	if current_user.is_authenticated:
+		columns = []
+		records = []
+		form = ViewCourseForm()
+		if form.validate_on_submit():
+			criteria = form.criteria.data
+			criteria = int(criteria)
+			courses = []
+			if criteria == 1:
+				value = form.match.data
+				check_dept = Department.query.filter_by(value)
+				if check_dept:
+					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
+				else:
+					flash("No courses under department " + value + ".Ensure that the department exists")
+					return redirect(url_for('upd_courses'))
+			elif criteria == 2:
+				value = form.match.data
+				courses = Course.query.filter_by(Course_ID=value)
+
+			elif criteria == 3:
+				courses = Course.query.all()
+
+			if courses:
+				columns = Course.__table__.columns.keys()
+				for r in courses:
+					records.append(r)
+			else:
+				flash("No Courses Found with given criteria")
+				return redirect(url_for('upd_courses'))
+		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
+
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+
+@APP.route('/del_courses',methods=['GET','POST'])
+@login_required
+def del_courses():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = CourseForm()
+			if form.validate_on_submit():
+				check_course = Course.query.filter_by(Course_ID = form.CID.data)
+				if check_course and check_course.count() != 0:
+					flash('Course has been added already in database')
+					return redirect(url_for('del_courses'))					
+				else:
+					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
+					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
+					if not os.path.exists(known_dir):
+						os.makedirs(known_dir)
+					db.session.add(course)
+					db.session.commit()
+					db.session.close()
+					flash('Course has been added')
+					return redirect(url_for('del_courses'))
+			return render_template('form_entry.html', title='Add Course', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/add_dept',methods=['GET','POST'])
+@login_required
+def add_dept():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = DeptForm()
+			if form.validate_on_submit():
+				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
+				db.session.close()
+				if check_dept and check_dept.count() != 0:
+					flash('Department has been added already in database')
+					return redirect(url_for('add_dept'))
+				else:
+					dept = Department(Dept_name = form.depart.data)
+					db.session.add(dept)
+					db.session.commit()
+					db.session.close()
+					flash('Department has been added')
+					return redirect(url_for('add_dept'))
+		
+			return render_template('form_entry.html', title='Add Department', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/dept_view',methods=['GET','POST'])
+@login_required
+def view_dept():
+	if current_user.is_authenticated:
+		columns = []
+		records = []
+		form = ViewDeptForm()
+		print(form.criteria.data)
+		if form.validate_on_submit():
+			if form.criteria.data == '1':
+				dept = Department.query.all()
+			else:
+				dept = Department.query.filter_by(Dept_name=form.match.data)
+
+			if dept:
+				columns = Department.__table__.columns.keys()
+				for r in dept:
+					records.append(r)
+			else:
+				flash("No Departments Found")
+				return redirect(url_for('view_dept'))
+		return render_template('view.html',title="Department",form=form,columns=columns,items=records)
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+
+@APP.route('/upd_dept',methods=['GET','POST'])
+@login_required
+def upd_dept():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = DeptForm()
+			if form.validate_on_submit():
+				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
+				db.session.close()
+				if check_dept and check_dept.count() != 0:
+					flash('Department has been added already in database')
+					return redirect(url_for('upd_dept'))
+				else:
+					dept = Department(Dept_name = form.depart.data)
+					db.session.add(dept)
+					db.session.commit()
+					db.session.close()
+					flash('Department has been added')
+					return redirect(url_for('upd_dept'))
+		
+			return render_template('form_entry.html', title='Add Department', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/del_dept',methods=['GET','POST'])
+@login_required
+def del_dept():
+	if current_user.is_authenticated:
+		if current_user.role_id == admin_role.role_id:
+			form = DeptForm()
+			if form.validate_on_submit():
+				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
+				db.session.close()
+				if check_dept and check_dept.count() != 0:
+					flash('Department has been added already in database')
+					return redirect(url_for('del_dept'))
+				else:
+					dept = Department(Dept_name = form.depart.data)
+					db.session.add(dept)
+					db.session.commit()
+					db.session.close()
+					flash('Department has been added')
+					return redirect(url_for('del_dept'))
+		
+			return render_template('form_entry.html', title='Add Department', form=form)
+		else:
+			flash('Only admins can access this page')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please!!')
+		return redirect(url_for('login'))
+
+@APP.route('/check_attendance',methods=['GET','POST'])
+@login_required
+def checkattd():
+	if current_user.is_authenticated:
+		if current_user.role_id == stud_role.role_id:
+			form =CheckAttendanceForm()
+			columns = []
+			records = []
+			if form.validate_on_submit():
+				CID = form.courseID.data
+				course = Course.query.filter_by(Course_ID=CID).first()
+				count = 0
+				if course:
+					count = course.Classes_held
+					is_stud = db.session.query(stud_courses).filter_by(stud_id=current_user.username,course_id = CID)
+					if is_stud and is_stud.count() != 0:
+						attd = Attendance.query.filter_by(course_id=CID,student_id=current_user.username)
+						if not attd or attd.count() == 0:
+							flash('No record found')
+							return redirect(url_for('checkattd'))
+						else:
+							columns = Attendance.__table__.columns.keys()
+							for r in attd:
+								records.append(r)
+					else:
+						flash("You are not registered for this course")
+						return redirect(url_for('checkattd'))
+				else:
+					flash("No course with ID " + CID + " found")
+					return redirect(url_for('checkattd'))
+				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
+		else:
+			flash('Not allowed')
+			return redirect(url_for('home'))
+	else:
+		flash('Login please')
+		return redirect(url_for('login'))
+	return render_template('check_attendance.html',form=form,columns=columns,items=records)
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
