@@ -14,6 +14,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime,timedelta
 import re
+from app.tables import UserResults,CourseResults,MapResults,AttendanceResults,DeptTable
 
 fa_role = Role.query.filter_by(role="Faculty").first()
 ta_role = Role.query.filter_by(role="TA").first()
@@ -226,8 +227,8 @@ def add_course_user():														#map course to user url
 					for f in file:
 						filename = secure_filename(f.filename)
 						f.save(os.path.join(known_dir, filename))
-						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
-						nf = form.user.data + ofile_extension
+						filename, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + file_extension
 						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
 					flash("Not allowed for this role_id")
@@ -287,8 +288,8 @@ def view_course_user():														#map course to user url
 					for f in file:
 						filename = secure_filename(f.filename)
 						f.save(os.path.join(known_dir, filename))
-						ofilename, ofile_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
-						nf = form.user.data + ofile_extension
+						filename, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+						nf = form.user.data + file_extension
 						os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, nf))
 				else:
 					flash("Not allowed for this role_id")
@@ -298,7 +299,7 @@ def view_course_user():														#map course to user url
 				db.session.close()
 				flash('Mapping has been added')
 				return redirect(url_for('view_course_user'))
-			return render_template('form_entry.html', title='Course_user', form=form)
+			return render_template('view.html', title='Course_user', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('home'))
@@ -462,8 +463,7 @@ def add_users():
 @login_required
 def view_users():
 	if current_user.is_authenticated:
-		columns = []
-		records = []
+		table = []
 		title = "User"
 		form = ViewUserForm()
 		if form.validate_on_submit():
@@ -476,26 +476,23 @@ def view_users():
 					if check_dept:
 						user = db.session.query(User,Department).filter(User.dept == value).all()
 						if user:
-							columns = User.__table__.columns.keys()
-							columns.remove('password_hash')
-							for r in user:
-								records.append(r)
+							table = UserResults(user)
+							table.border = True
 						else:
 							flash("No users under department " + value + ".Ensure that the department exists")
 							return redirect(url_for('view_users'))
 					else:
 						flash("No users under department " + value + ".Ensure that the department exists")
 						return redirect(url_for('view_users'))
+
 				elif criteria == 2:
 					value = form.match.data
 					check_role = Role.query.filter_by(role=value).first().role_id
 					if check_role:
 						user = User.query.filter_by(role_id=value)
 						if user:
-							columns = User.__table__.columns.keys()
-							columns.remove('password_hash')
-							for r in user:
-								records.append(r)
+							table = UserResults(user)
+							table.border = True
 						else:
 							flash("No users under role " + value +". Ensure role exists")
 							return redirect(url_for('view_users'))
@@ -507,21 +504,17 @@ def view_users():
 					value = form.match.data
 					user = User.query.filter_by(username=value)
 					if user:
-						columns = User.__table__.columns.keys()
-						columns.remove('password_hash')
-						for r in user:
-							records.append(r)
+						table = UserResults(user)
+						table.border = True
 					else:
 						flash("No Users Found with ID " + value)
 						return redirect(url_for('view_users'))
+
 				elif criteria == 4:
 					user = User.query.all()
-					print(user)
 					if user and len(user) != 0:
-						columns = User.__table__.columns.keys()
-						columns.remove('password_hash')
-						for r in user:
-							records.append(r)
+						table = UserResults(user)
+						table.border = True
 					else:
 						flash("No Users Found")
 						return redirect(url_for('view_users'))
@@ -529,7 +522,7 @@ def view_users():
 				flash('Not allowed')
 				return redirect(url_for('home'))
 
-		return render_template('view.html',title=title,form=form,columns=columns,items=records)
+		return render_template('view.html',title=title,form=form,table=table)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
@@ -538,8 +531,7 @@ def view_users():
 @login_required
 def upd_users():
 	if current_user.is_authenticated:
-		columns = []
-		records = []
+		table = []
 		title = "User"
 		form = ViewUserForm()
 		if form.validate_on_submit():
@@ -605,7 +597,7 @@ def upd_users():
 				flash('Not allowed')
 				return redirect(url_for('home'))
 
-		return render_template('view.html',title=title,form=form,columns=columns,items=records)
+		return render_template('view.html',title=title,form=form,table=table)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
@@ -674,9 +666,8 @@ def add_courses():
 @login_required
 def view_courses():
 	if current_user.is_authenticated:
-		columns = []
-		records = []
 		form = ViewCourseForm()
+		table = []
 		if form.validate_on_submit():
 			criteria = form.criteria.data
 			criteria = int(criteria)
@@ -697,13 +688,12 @@ def view_courses():
 				courses = Course.query.all()
 
 			if courses:
-				columns = Course.__table__.columns.keys()
-				for r in courses:
-					records.append(r)
+				table = CourseResults(courses)
+				table.border = True
 			else:
 				flash("No Courses Found with given criteria")
 				return redirect(url_for('view_courses'))
-		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
+		return render_template('view.html',title="Courses",form=form,table=table)
 
 	else:
 		flash('Login please')
@@ -713,8 +703,7 @@ def view_courses():
 @login_required
 def upd_courses():
 	if current_user.is_authenticated:
-		columns = []
-		records = []
+		table = []
 		form = ViewCourseForm()
 		if form.validate_on_submit():
 			criteria = form.criteria.data
@@ -742,7 +731,7 @@ def upd_courses():
 			else:
 				flash("No Courses Found with given criteria")
 				return redirect(url_for('upd_courses'))
-		return render_template('view.html',title="Courses",form=form,columns=columns,items=records)
+		return render_template('view.html',title="Courses",form=form,table=table)
 
 	else:
 		flash('Login please')
@@ -809,24 +798,20 @@ def add_dept():
 @login_required
 def view_dept():
 	if current_user.is_authenticated:
-		columns = []
-		records = []
+		table = []
 		form = ViewDeptForm()
-		print(form.criteria.data)
 		if form.validate_on_submit():
 			if form.criteria.data == '1':
 				dept = Department.query.all()
 			else:
 				dept = Department.query.filter_by(Dept_name=form.match.data)
-
 			if dept:
-				columns = Department.__table__.columns.keys()
-				for r in dept:
-					records.append(r)
+				table = DeptTable(dept)
+				table.border = True
 			else:
 				flash("No Departments Found")
 				return redirect(url_for('view_dept'))
-		return render_template('view.html',title="Department",form=form,columns=columns,items=records)
+		return render_template('view.html',title="Department",form=form,table=table)
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
@@ -893,8 +878,7 @@ def checkattd():
 	if current_user.is_authenticated:
 		if current_user.role_id == stud_role.role_id:
 			form =CheckAttendanceForm()
-			columns = []
-			records = []
+			table = []
 			if form.validate_on_submit():
 				CID = form.courseID.data
 				course = Course.query.filter_by(Course_ID=CID).first()
@@ -908,23 +892,22 @@ def checkattd():
 							flash('No record found')
 							return redirect(url_for('checkattd'))
 						else:
-							columns = Attendance.__table__.columns.keys()
-							for r in attd:
-								records.append(r)
+							table = AttendanceResults(attd)
+							table.border = True
 					else:
 						flash("You are not registered for this course")
 						return redirect(url_for('checkattd'))
 				else:
 					flash("No course with ID " + CID + " found")
 					return redirect(url_for('checkattd'))
-				return render_template('check_attendance.html',form=form,columns=columns,items=records,class_count=count)
+				return render_template('check_attendance.html',form=form,table=table)
 		else:
 			flash('Not allowed')
 			return redirect(url_for('home'))
 	else:
 		flash('Login please')
 		return redirect(url_for('login'))
-	return render_template('check_attendance.html',form=form,columns=columns,items=records)
+	return render_template('check_attendance.html',form=form,table=table)
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

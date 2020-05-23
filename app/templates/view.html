@@ -4,30 +4,29 @@
 {% block app_content %}
 
 	<h1>View {{ title }}</h1>
-    <div class="row">
-        <div class="col-md-4">
-            {{ wtf.quick_form(form) }}
-        </div>
-    </div>
-    {% if columns %}
+	<div class="row">
+		<div class="col-md-4">
+			<form class="form form-horizontal" method="post" role="form">
+				{{ form.hidden_tag() }}
+				{{ form.criteria(onchange='f1()')}}
+				{{ form.match() }}
+				{{ form.submit() }}
+		</form>
+			<script>
+				function f1(){
+					var temp = document.getElementsByName('criteria');
+					if(temp[temp.length - 1].checked)
+						document.getElementById("match").disabled = true ;
+					else
+						document.getElementById("match").disabled = false ;
+				}
+			</script>
+		</div>
+	</div>
+	{% if table %}
 		<div>
-			<table class="table table-striped">
-				<thead>
-					{% for col in columns %}
-						<th> {{ col }} </th>
-					{% endfor %}
-				</thead>
-				<tbody>
-					{% for row in items %}
-					<tr>
-						{% for col in columns %}
-							<td> {{ row[col] }} </td>
-						{% endfor %}
-					</tr>
- 					{% endfor %}
- 				</tbody>
- 			</table> 
- 		</div>
- 	{% endif %}
+			{{ table }}
+		</div>
+	{% endif %}
  
 {% endblock %}
