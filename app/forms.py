@@ -4,9 +4,11 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField,RadioF
 from wtforms.validators import ValidationError,DataRequired,Email,EqualTo,Length
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User,Course,Department,Attendance,stud_courses,prof_courses,ta_courses
-from app import APP,db
+from app import db
+from flask import current_app
 import os
 
+APP = current_app._get_current_object()
 basedir = os.path.abspath(os.path.dirname(__file__))
 APP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
 photos = UploadSet('photos', IMAGES)

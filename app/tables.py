@@ -1,5 +1,5 @@
 from app.models import User,Course,Department,Attendance,stud_courses,prof_courses,ta_courses
-from app import APP,db
+from app import db
 from flask_table import Table, Col
 import os
 

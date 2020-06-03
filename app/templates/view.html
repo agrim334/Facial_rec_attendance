@@ -16,9 +16,11 @@
 				function f1(){
 					var temp = document.getElementsByName('criteria');
 					if(temp[temp.length - 1].checked)
-						document.getElementById("match").disabled = true ;
+						document.getElementById("match").style.display = "none" ;
+						document.getElementById("match").disabled = true;
 					else
-						document.getElementById("match").disabled = false ;
+						document.getElementById("match").disabled = false;
+						document.getElementById("match").style.display = "block" ;
 				}
 			</script>
 		</div>
