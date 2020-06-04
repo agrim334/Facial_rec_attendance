@@ -24,15 +24,15 @@
 				<div> <a href="{{ url_for('course_sysbp.upd_courses') }}"> Update Course </a> </div>
 				<div> <a href="{{ url_for('course_sysbp.del_courses') }}">Delete courses</a> </div>
 
-<!--				<div> <a href="{{ url_for('add_course_user') }}"> Map user to Course </a> </div>
-				<div> <a href="{{ url_for('view_course_user') }}"> View Mappings  </a> </div>
-				<div> <a href="{{ url_for('upd_course_user') }}"> Update Mappings  </a> </div>
-				<div> <a href="{{ url_for('del_course_user') }}"> Delete Mappings  </a> </div> -->
+				<div> <a href="{{ url_for('mapbp.add_course_user') }}"> Map user to Course </a> </div>
+				<div> <a href="{{ url_for('mapbp.view_course_user') }}"> View Mappings  </a> </div>
+				<div> <a href="{{ url_for('mapbp.upd_course_user') }}"> Update Mappings  </a> </div>
+				<div> <a href="{{ url_for('mapbp.del_course_user') }}"> Delete Mappings  </a> </div> 
 
-				<div> <a href="{{ url_for('dept_sys.add_dept') }}">Add Department</a> </div>
-				<div> <a href="{{ url_for('dept_sys.view_dept') }}">View Departments</a> </div>
-				<div> <a href="{{ url_for('dept_sys.upd_dept') }}">Update Department</a> </div>
-				<div> <a href="{{ url_for('dept_sys.del_dept') }}">Delete Departments</a> </div>
+				<div> <a href="{{ url_for('dept_sysbp.add_dept') }}">Add Department</a> </div>
+				<div> <a href="{{ url_for('dept_sysbp.view_dept') }}">View Departments</a> </div>
+				<div> <a href="{{ url_for('dept_sysbp.upd_dept') }}">Update Department</a> </div>
+				<div> <a href="{{ url_for('dept_sysbp.del_dept') }}">Delete Departments</a> </div>
 
 			{% endif %}
 		</div>
