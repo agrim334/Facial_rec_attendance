@@ -10,6 +10,7 @@ from logging.handlers import SMTPHandler,RotatingFileHandler
 import os
 import MySQLdb
 from flask_table import Table, Col
+from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -45,7 +46,7 @@ def create_app():
 
 		APP.logger.setLevel(logging.INFO)
 		APP.logger.info('Microblog startup')
-
+	CORS(app, resources={r'/*': {'origins': '*'}})
 	bootstrap.init_app(APP)
 	mail.init_app(APP)
 	db.init_app(APP)
@@ -57,16 +58,14 @@ def create_app():
 		from .attd_sys import attd_sysbp 
 		from .dept_sys import dept_sysbp 
 		from .course_sys import course_sysbp 
+		from .UCmaps import mapbp
 
 		APP.register_blueprint(log_sysbp)
 		APP.register_blueprint(attd_sysbp)
 		APP.register_blueprint(course_sysbp)
 		APP.register_blueprint(dept_sysbp)
-
+		APP.register_blueprint(mapbp)
+		
 	from app import models
-
-	@login.user_loader
-	def load_user(username):
-		return User.query.get(username)
 
 	return APP

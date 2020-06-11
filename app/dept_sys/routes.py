@@ -1,13 +1,15 @@
 from .. import db,errors
 from . import dept_sysbp
+from app.log_sys import log_sysbp
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm
+from app.forms import DeptForm,ViewDeptForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role
+from ..models import User,Role,Department
 from datetime import datetime,timedelta
 import re
+from app.tables import DeptTable
 
 fa_role = Role.query.filter_by(role="Faculty").first()
 ta_role = Role.query.filter_by(role="TA").first()
@@ -39,22 +41,22 @@ def add_dept():
 				db.session.close()
 				if check_dept and check_dept.count() != 0:
 					flash('Department has been added already in database')
-					return redirect(url_for('add_dept'))
+					return redirect(url_for('.add_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
 					flash('Department has been added')
-					return redirect(url_for('add_dept'))
+					return redirect(url_for('.add_dept'))
 		
 			return render_template('form_entry.html', title='Add Department', form=form)
 		else:
 			flash('Only admins can access this page')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please!!')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @dept_sysbp.route('/dept_view',methods=['GET','POST'])
 @login_required
@@ -72,11 +74,11 @@ def view_dept():
 				table.border = True
 			else:
 				flash("No Departments Found")
-				return redirect(url_for('view_dept'))
+				return redirect(url_for('.view_dept'))
 		return render_template('view.html',title="Department",form=form,table=table)
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @dept_sysbp.route('/upd_dept',methods=['GET','POST'])
 @login_required
@@ -89,22 +91,22 @@ def upd_dept():
 				db.session.close()
 				if check_dept and check_dept.count() != 0:
 					flash('Department has been added already in database')
-					return redirect(url_for('upd_dept'))
+					return redirect(url_for('.upd_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
 					flash('Department has been added')
-					return redirect(url_for('upd_dept'))
+					return redirect(url_for('.upd_dept'))
 		
 			return render_template('form_entry.html', title='Add Department', form=form)
 		else:
 			flash('Only admins can access this page')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please!!')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @dept_sysbp.route('/del_dept',methods=['GET','POST'])
 @login_required
@@ -117,19 +119,19 @@ def del_dept():
 				db.session.close()
 				if check_dept and check_dept.count() != 0:
 					flash('Department has been added already in database')
-					return redirect(url_for('del_dept'))
+					return redirect(url_for('.del_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
 					flash('Department has been added')
-					return redirect(url_for('del_dept'))
+					return redirect(url_for('.del_dept'))
 		
 			return render_template('form_entry.html', title='Add Department', form=form)
 		else:
 			flash('Only admins can access this page')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please!!')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))

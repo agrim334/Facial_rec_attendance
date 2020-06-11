@@ -1,14 +1,18 @@
 from .. import db,errors
 from . import log_sysbp
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm
+from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,ViewUserForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role
+from ..models import User,Role,Department
 from .email import send_password_reset_email
 from datetime import datetime,timedelta
 import re
+from flask import current_app
+from app.tables import UserResults
+
+APP = current_app._get_current_object()
 
 fa_role = Role.query.filter_by(role="Faculty").first()
 ta_role = Role.query.filter_by(role="TA").first()
@@ -61,11 +65,11 @@ def login():										#login page url
 		user = User.query.filter_by(username=form.username.data,role_id=form.role.data).first()  #check if credentials valid
 		if user is None or not user.check_password(form.password.data):
 			flash('Invalid username or password')
-			log_sysbp.logger.error('login failed for user ' + user.username )
+			APP.logger.error('login failed for user ' + user.username )
 			return redirect(url_for('.login'))
 		else:
 			login_user(user, remember=form.remember_me.data)
-			log_sysbp.logger.error('Successfull login for user ' + user.username )
+			APP.logger.error('Successfull login for user ' + user.username )
 			next_page = request.args.get('next')
 		
 			if not next_page or url_parse(next_page).netloc != '':							#redirect to home

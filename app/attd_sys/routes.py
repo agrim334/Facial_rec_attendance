@@ -1,9 +1,10 @@
-from app import db,errors
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
+from app import db
+from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session,current_app
 from app.forms import ManualAttendForm,CheckAttendanceForm,AttendForm
 import face_recognition
 import os
-from flask import current_app
+from . import attd_sysbp
+from app.log_sys import log_sysbp
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
@@ -13,7 +14,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime,timedelta
 import re
-from app.tables import UserResults,CourseResults,MapResults,AttendanceResults,DeptTable
+from app.tables import AttendanceResults
 
 AP = current_app._get_current_object()
 
@@ -28,12 +29,12 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
 
-@AP.before_request
+@attd_sysbp.before_request
 def make_session_permanent():
 	session.permanent = True
-	AP.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
+	attd_sysbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
-@AP.after_request
+@attd_sysbp.after_request
 def after_request(response):									#security
 	response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 	response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -42,7 +43,7 @@ def after_request(response):									#security
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
-@AP.route('/check_attendance',methods=['GET','POST'])
+@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
 @login_required
 def checkattd():
 	if current_user.is_authenticated:
@@ -60,30 +61,30 @@ def checkattd():
 						attd = Attendance.query.filter_by(course_id=CID,student_id=current_user.username)
 						if not attd or attd.count() == 0:
 							flash('No record found')
-							return redirect(url_for('checkattd'))
+							return redirect(url_for('.checkattd'))
 						else:
 							table = AttendanceResults(attd)
 							table.border = True
 					else:
 						flash("You are not registered for this course")
-						return redirect(url_for('checkattd'))
+						return redirect(url_for('.checkattd'))
 				else:
 					flash("No course with ID " + CID + " found")
-					return redirect(url_for('checkattd'))
+					return redirect(url_for('.checkattd'))
 				return render_template('check_attendance.html',form=form,table=table)
 		else:
 			flash('Not allowed')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 	return render_template('check_attendance.html',form=form,table=table)
 
 def allowed_file(filename):															#set allowed extensions for images
 	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@AP.route('/faces', methods=['GET', 'POST'])
+@attd_sysbp.route('/faces', methods=['GET', 'POST'])
 @login_required
 def upload_image():																	#upload images to mark attendance
 	if current_user.is_authenticated:
@@ -98,7 +99,7 @@ def upload_image():																	#upload images to mark attendance
 					confirm = db.session.query(prof_courses).filter_by(prof_id=current_user.username,course_id = CID)
 					if confirm and confirm.count() != 0:
 						file = request.files.getlist("photo")
-					upl_dir = os.path.join(AP.config['UPLOAD_PATH'],"uploads/")
+					upl_dir = os.path.join(attd_sysbp.config['UPLOAD_PATH'],"uploads/")
 					if not os.path.exists(upl_dir):
 						os.makedirs(upl_dir)
 
@@ -110,10 +111,10 @@ def upload_image():																	#upload images to mark attendance
 
 					else:
 						flash("You are not authorized to mark attendance for this course.")
-						return redirect(url_for('home'))
+						return redirect(url_for('log_sysbp.home'))
 				else:
 					flash("No Course found with code " + CID)
-					return redirect(url_for('home'))
+					return redirect(url_for('log_sysbp.home'))
 
 		elif current_user.role_id == ta_role.role_id:
 			form = AttendForm()
@@ -127,7 +128,7 @@ def upload_image():																	#upload images to mark attendance
 					confirm = db.session.query(ta_courses).filter_by(ta_id=current_user.username,course_id = CID)
 					if confirm and confirm.count() != 0:
 						file = request.files.getlist("photo")
-						upl_dir = os.path.join(AP.config['UPLOAD_PATH'],"uploads/")
+						upl_dir = os.path.join(attd_sysbp.config['UPLOAD_PATH'],"uploads/")
 						if not os.path.exists(upl_dir):
 							os.makedirs(upl_dir)
 
@@ -139,17 +140,17 @@ def upload_image():																	#upload images to mark attendance
 
 					else:
 						flash("You are not authorized to mark attendance for this course.")
-						return redirect(url_for('home'))
+						return redirect(url_for('log_sysbp.home'))
 				else:
 					flash("No Course found with code " + CID)
-					return redirect(url_for('home'))
+					return redirect(url_for('log_sysbp.home'))
 		else:
 			flash('Not allowed')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 		return render_template("form_entry.html",title="Automated Attendance",form=form)
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 def detect_faces_in_image(file_stream,CID,user):
 	result = []
@@ -213,14 +214,14 @@ def detect_faces_in_image(file_stream,CID,user):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
 
-		return redirect(url_for('manual_mark',CID=CID))										#redirect to manual attendance to handle missed cases
+		return redirect(url_for('.manual_mark',CID=CID))										#redirect to manual attendance to handle missed cases
 	except MemoryError as m:
 		flash("Ran out of memory.Switching to manual attendance")
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
 
-		return redirect(url_for('manual_mark',CID=CID))
+		return redirect(url_for('.manual_mark',CID=CID))
 
 	except:
 
@@ -228,9 +229,9 @@ def detect_faces_in_image(file_stream,CID,user):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
 
-		return redirect(url_for('manual_mark',CID=CID))
+		return redirect(url_for('.manual_mark',CID=CID))
 
-@AP.route('/manual', methods=['GET', 'POST'])
+@attd_sysbp.route('/manual', methods=['GET', 'POST'])
 @login_required
 def manual_mark():
 	if current_user.is_authenticated:
@@ -255,7 +256,7 @@ def manual_mark():
 								db.session.commit()
 								db.session.close()
 				flash("Attendance marked")
-				return redirect(url_for('home'))
+				return redirect(url_for('log_sysbp.home'))
 
 			return render_template('form_entry.html',title='Manual marking',form=form)
 
@@ -281,13 +282,13 @@ def manual_mark():
 								db.session.close()
 
 				flash("Attendance marked")
-				return redirect(url_for('home'))
+				return redirect(url_for('log_sysbp.home'))
 			return render_template('form_entry.html',title='Manual marking',form=form)
 
 		else:
 			flash('Not allowed')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 		return render_template('form_entry.html',title='Manual marking',form=form)
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))

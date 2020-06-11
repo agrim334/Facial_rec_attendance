@@ -1,8 +1,12 @@
-from app import db
+from app import db,login
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin
 from time import time
 import jwt
+
+@login.user_loader
+def load_user(username):
+	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
 				db.Column('stud_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),

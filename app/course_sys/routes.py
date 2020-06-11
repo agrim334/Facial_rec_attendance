@@ -1,12 +1,14 @@
 from .. import db,errors
 from . import course_sysbp
+from app.log_sys import log_sysbp
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm
+from app.forms import CourseForm,ViewCourseForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role
+from ..models import User,Role,Course,Department
 from datetime import datetime,timedelta
+from app.tables import CourseResults
 import re
 
 fa_role = Role.query.filter_by(role="Faculty").first()
@@ -38,7 +40,7 @@ def add_courses():
 				check_course = Course.query.filter_by(Course_ID = form.CID.data)
 				if check_course and check_course.count() != 0:
 					flash('Course has been added already in database')
-					return redirect(url_for('add_courses'))					
+					return redirect(url_for('.add_courses'))					
 				else:
 					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
 					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
@@ -48,14 +50,14 @@ def add_courses():
 					db.session.commit()
 					db.session.close()
 					flash('Course has been added')
-					return redirect(url_for('add_courses'))
+					return redirect(url_for('.add_courses'))
 			return render_template('form_entry.html', title='Add Course', form=form)
 		else:
 			flash('Only admins can access this page')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please!!')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @course_sysbp.route('/view_courses',methods=['GET','POST'])
 @login_required
@@ -74,7 +76,7 @@ def view_courses():
 					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
 				else:
 					flash("No courses under department " + value + ".Ensure that the department exists")
-					return redirect(url_for('view_courses'))
+					return redirect(url_for('.view_courses'))
 			elif criteria == 2:
 				value = form.match.data
 				courses = Course.query.filter_by(Course_ID=value)
@@ -87,12 +89,12 @@ def view_courses():
 				table.border = True
 			else:
 				flash("No Courses Found with given criteria")
-				return redirect(url_for('view_courses'))
+				return redirect(url_for('.view_courses'))
 		return render_template('view.html',title="Courses",form=form,table=table)
 
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @course_sysbp.route('/upd_courses',methods=['GET','POST'])
 @login_required
@@ -111,7 +113,7 @@ def upd_courses():
 					courses = db.session.query(Course,Department).filter(Course.dept_id == value & Course.dept_id == Department.Dept_ID).all()				
 				else:
 					flash("No courses under department " + value + ".Ensure that the department exists")
-					return redirect(url_for('upd_courses'))
+					return redirect(url_for('.upd_courses'))
 			elif criteria == 2:
 				value = form.match.data
 				courses = Course.query.filter_by(Course_ID=value)
@@ -125,12 +127,12 @@ def upd_courses():
 					records.append(r)
 			else:
 				flash("No Courses Found with given criteria")
-				return redirect(url_for('upd_courses'))
+				return redirect(url_for('.upd_courses'))
 		return render_template('view.html',title="Courses",form=form,table=table)
 
 	else:
 		flash('Login please')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
 
 @course_sysbp.route('/del_courses',methods=['GET','POST'])
 @login_required
@@ -142,7 +144,7 @@ def del_courses():
 				check_course = Course.query.filter_by(Course_ID = form.CID.data)
 				if check_course and check_course.count() != 0:
 					flash('Course has been added already in database')
-					return redirect(url_for('del_courses'))					
+					return redirect(url_for('.del_courses'))					
 				else:
 					course = Course(Course_ID=form.CID.data, Course_name=form.Cname.data)       #add new course and correspondingly directory for students attending the course
 					known_dir = "/home/agrim/Downloads/known/" + str(form.CID.data) +"/"
@@ -152,11 +154,11 @@ def del_courses():
 					db.session.commit()
 					db.session.close()
 					flash('Course has been added')
-					return redirect(url_for('del_courses'))
+					return redirect(url_for('.del_courses'))
 			return render_template('form_entry.html', title='Add Course', form=form)
 		else:
 			flash('Only admins can access this page')
-			return redirect(url_for('home'))
+			return redirect(url_for('log_sysbp.home'))
 	else:
 		flash('Login please!!')
-		return redirect(url_for('login'))
+		return redirect(url_for('log_sysbp.login'))
