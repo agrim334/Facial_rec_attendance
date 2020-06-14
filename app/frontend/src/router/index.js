@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import LogForm from '../views/Login.vue';
-import UserTable from '../views/UserView.vue';
+import UserTable from '../views/UserRUD.vue';
 import Reg from '../views/Register.vue';
 
 Vue.use(VueRouter);

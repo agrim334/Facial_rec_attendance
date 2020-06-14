@@ -1,42 +1,41 @@
 <template>
   <div id="register-form">
-    <form>
+    <form @submit.prevent="handle">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'userid' />
+    <input type="text" placeholder = "Enter UID" v-model = 'newuser.userid' />
     <br>
 
     <label>First name</label>
-    <input type="text" placeholder = "Enter first name" v-model = 'fname' />
+    <input type="text" placeholder = "Enter first name" v-model = 'newuser.fname' />
     <br>
 
     <label>Last name</label>
-    <input type="text" placeholder = "Enter last name" v-model = 'lname' />
+    <input type="text" placeholder = "Enter last name" v-model = 'newuser.lname' />
     <br>
 
     <label> User Email </label>
-    <input type="text" placeholder = "Enter email id" v-model = 'email' />
+    <input type="text" placeholder = "Enter email id" v-model = 'newuser.email' />
     <br>
 
     <label> Role </label>
     <div id = 'rolerad' v-for='role in roles' :key='role.id'>
-      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'rolec'>
+      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'newuser.rolec'>
       <label> {{role.name}} </label>
     </div>
     <br>
 
     <label> Department </label>
     <div id = 'deptrad' v-for='dept in depts' :key='dept.id'>
-      <input type="radio"  name= 'dept.name' :value = 'dept.id' v-model = 'deptc'>
+      <input type="radio"  name= 'dept.name' :value = 'dept.id' v-model = 'newuser.deptc'>
       <label> {{dept.name}} </label>
     </div>
     <br>
-    <p> {{deptc}} </p>
     <label> Enter Password </label>
-    <input type="passsword" v-model = 'pass' />
+    <input type="passsword" v-model = 'newuser.pass' />
     <br>
 
     <label> Confirm Password </label>
-    <input type="passsword" v-model = 'confirmpass' />
+    <input type="passsword" v-model = 'newuser.confirmpass' />
     <br>
 
     <button>Add User</button>
@@ -47,19 +46,18 @@
 <script>
 export default {
   name: 'RegisterForm',
+  props: { depts: Array, roles: Array },
   data() {
     return {
-      userid: '',
-      fname: '',
-      lname: '',
-      email: '',
-      roles: [{ id: 1, name: 'Student' }, { id: 2, name: 'Admin' }, { id: 3, name: 'Prof' }, { id: 4, name: 'TA' }],
-      depts: [{ id: 1, name: 'EE' }, { id: 2, name: 'ECE' }, { id: 3, name: 'Prod' }, { id: 4, name: 'CSE' }],
-      rolec: '',
-      deptc: '',
-      pass: '',
-      confirmpass: '',
+      newuser: {
+        userid: '', fname: '', lname: '', email: '', rolec: '', deptc: '', pass: '', confirmpass: '',
+      },
     };
+  },
+  methods: {
+    handle() {
+      this.$emit('userreg', this.newuser);
+    },
   },
 };
 </script>
