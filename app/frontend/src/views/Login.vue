@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-	<LogForm></LogForm>
+    <LogForm></LogForm>
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import LogForm from '@/components/LogForm.vue';
 export default {
   name: 'Form',
   components: {
-	LogForm,
+    LogForm,
   },
 };
 </script>

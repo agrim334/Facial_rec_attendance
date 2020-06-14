@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-import LogForm from '../views/LogForm.vue';
+import LogForm from '../views/Login.vue';
+import UserTable from '../views/UserView.vue';
+import Reg from '../views/Register.vue';
 
 Vue.use(VueRouter);
 
@@ -15,6 +17,16 @@ const routes = [
     path: '/logform',
     name: 'LogForm',
     component: LogForm,
+  },
+  {
+    path: '/usertable',
+    name: 'UserTable',
+    component: UserTable,
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Reg,
   },
   {
     path: '/about',

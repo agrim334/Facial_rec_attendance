@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  name: 'LogForm',
+  name: 'EditUser',
   data() {
     return { user: '', pass: '', rem: false };
   },
