@@ -10,6 +10,12 @@
         <td>{{ user.role }}</td>
       </tr>
     </tbody>
+    <div>
+      <button @click="add"> Add User </button>
+    </div>
+    <div>
+      <button @click="deleteall"> Remove All records </button>
+    </div>
   </table>
  </div>
 </template>
@@ -19,6 +25,20 @@ export default {
   name: 'UserTable',
   data() {
     return { user: Array };
+  },
+  methods: {
+    update(){
+      console.log('dummy');
+    }
+    delete(){
+      console.log('dummy');
+    }
+    add(){
+      console.log('dummy');
+    }
+    deleteall(){
+      console.log('dummy');
+    }
   },
 };
 </script>

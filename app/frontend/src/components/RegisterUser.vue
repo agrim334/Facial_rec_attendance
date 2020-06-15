@@ -31,14 +31,13 @@
     </div>
     <br>
     <label> Enter Password </label>
-    <input type="passsword" v-model = 'newuser.pass' />
+    <input type="password" v-model = 'newuser.pass' />
     <br>
 
     <label> Confirm Password </label>
-    <input type="passsword" v-model = 'newuser.confirmpass' />
+    <input type="password" v-model = 'newuser.confirmpass' />
     <br>
-
-    <button>Add User</button>
+    <input type="submit" value="Add user" />
     </form>
   </div>
 </template>
