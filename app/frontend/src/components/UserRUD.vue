@@ -1,44 +1,26 @@
 <template>
  <div>
-  <table>
-    <tbody>
-      <tr v-for='user in users' :key='user.id'>
-        <td>{{ user.id }}</td>
-        <td>{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.dept }}</td>
-        <td>{{ user.role }}</td>
-      </tr>
-    </tbody>
-    <div>
-      <button @click="add"> Add User </button>
-    </div>
-    <div>
-      <button @click="deleteall"> Remove All records </button>
-    </div>
-  </table>
+    {{ user.id }}
+    {{ user.username }}
+    {{ user.email }}
+    {{ user.dept }}
+    {{ user.role }}
+    <button @click="deleterec"> Delete </button>
+    <button @click="updaterec"> Update </button>
  </div>
 </template>
 
 <script>
 export default {
-  name: 'UserTable',
-  data() {
-    return { user: Array };
-  },
+  name: 'UserRecord',
+  props: { user: Array },
   methods: {
-    update(){
-      console.log('dummy');
-    }
-    delete(){
-      console.log('dummy');
-    }
-    add(){
-      console.log('dummy');
-    }
-    deleteall(){
-      console.log('dummy');
-    }
+    updaterec() {
+      this.$emit('updrec', this.user);
+    },
+    deleterec() {
+      this.$emit('delrec', this.user);
+    },
   },
 };
 </script>

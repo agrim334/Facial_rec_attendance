@@ -1,17 +1,37 @@
 <template>
   <div class="home">
-  <LogForm></LogForm>
+    <table>
+      <tr v-for='user in users' :key='user.userid'>
+        <UserRecord :user='user' @updrec='updaterec' @delrec='deleterec'></UserRecord>
+      </tr>
+    </table>
+    <button id='add' @click='addrec'>Add Users</button>
   </div>
+
 </template>
 
 <script>
 // @ is an alias to /src
-import LogForm from '@/components/LogForm.vue';
+import UserRecord from '@/components/UserRUD.vue';
 
 export default {
-  name: 'Form',
+  name: 'UserTable',
+  props: {
+    users: Array,
+  },
   components: {
-    LogForm,
+    UserRecord,
+  },
+  methods: {
+    updaterec(userdat) {
+      alert(userdat);
+    },
+    deleterec(userdat) {
+      alert(userdat);
+    },
+    addrec() {
+      alert('sdcf');
+    },
   },
 };
 </script>
