@@ -4,6 +4,7 @@ import Home from '../views/Home.vue';
 import LogForm from '../views/Login.vue';
 import UserTable from '../views/UserRUD.vue';
 import Reg from '../views/Register.vue';
+import UserModify from '../views/UserModify.vue';
 
 Vue.use(VueRouter);
 
@@ -27,6 +28,11 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Reg,
+  },
+  {
+    path: '/userupd',
+    name: 'UserModify',
+    component: UserModify,
   },
   {
     path: '/about',
