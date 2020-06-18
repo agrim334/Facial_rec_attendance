@@ -1,32 +1,32 @@
 <template>
   <div id="register-form">
     <form @submit.prevent="handle">
-    <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'course.cid' />
+    <label>Department ID</label>
+    <input type="text" placeholder = "Enter Department ID" v-model = 'dept.did' />
     <br>
 
-    <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'course.name' />
+    <label>Department name</label>
+    <input type="text" placeholder = "Enter Department Name" v-model = 'dept.name' />
     <br>
 
-    <input type="submit" value="Add Course" />
+    <input type="submit" value="Add deptartment" />
     </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'AddCourseForm',
+  name: 'AddDeptForm',
   data() {
     return {
-      course: {
-        cid: '', name: '',
+      dept: {
+        did: '', name: '',
       },
     };
   },
   methods: {
     handle() {
-      this.$emit('courseadd', this.course);
+      this.$emit('deptadd', this.dept);
     },
   },
 };

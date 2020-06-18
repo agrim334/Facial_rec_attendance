@@ -1,25 +1,25 @@
 <template>
   <div class="home">
-    <ModifyCourseForm :courserec = 'course' @courseupd='updaterec'> </ModifyCourseForm>
+    <ModifyDeptForm :deptrec = 'dept' @deptupd='updaterec'> </ModifyDeptForm>
   </div>
 
 </template>
 
 <script>
 // @ is an alias to /src
-import ModifyCourseForm from '@/components/ModifyCourse.vue';
+import ModifyDeptForm from '@/components/ModifyDept.vue';
 
 export default {
-  name: 'CourseModify',
+  name: 'DeptModify',
   props: {
-    course: Array,
+    dept: Array,
   },
   components: {
-    ModifyCourseForm,
+    ModifyDeptForm,
   },
   methods: {
-    updaterec(modcourse) {
-      alert(modcourse);
+    updaterec(modDept) {
+      alert(modDept);
     },
   },
 };

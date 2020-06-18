@@ -8,6 +8,9 @@ import UserModify from '../views/UserModify.vue';
 import CourseTable from '../views/CourseRUD.vue';
 import AddCourse from '../views/CourseAdd.vue';
 import CourseModify from '../views/CourseModify.vue';
+import DeptTable from '../views/DeptRUD.vue';
+import AddDept from '../views/DeptAdd.vue';
+import DeptModify from '../views/DeptModify.vue';
 
 Vue.use(VueRouter);
 
@@ -23,14 +26,24 @@ const routes = [
     component: LogForm,
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: Reg,
+  },
+  {
+    path: '/userupd',
+    name: 'UserModify',
+    component: UserModify,
+  },
+  {
     path: '/usertable',
     name: 'UserTable',
     component: UserTable,
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: Reg,
+    path: '/addcourse',
+    name: 'AddCourse',
+    component: AddCourse,
   },
   {
     path: '/courseupd',
@@ -43,14 +56,19 @@ const routes = [
     component: CourseTable,
   },
   {
-    path: '/addcourse',
-    name: 'AddCourse',
-    component: AddCourse,
+    path: '/adddept',
+    name: 'AddDept',
+    component: AddDept,
   },
   {
-    path: '/userupd',
-    name: 'UserModify',
-    component: UserModify,
+    path: '/deptupd',
+    name: 'DeptModify',
+    component: DeptModify,
+  },
+  {
+    path: '/depttable',
+    name: 'DeptTable',
+    component: DeptTable,
   },
   {
     path: '/about',

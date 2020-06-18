@@ -1,10 +1,11 @@
 <template>
  <div>
-    {{ user.id }}
-    {{ user.username }}
-    {{ user.email }}
-    {{ user.dept }}
-    {{ user.role }}
+    {{ attd.markerid }}
+    {{ attd.markeeid }}    
+    {{ attd.courseid }}
+    {{ attd.date }}
+    {{ attd.presentstat }}
+    {{ attd.role }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>
  </div>
@@ -12,14 +13,14 @@
 
 <script>
 export default {
-  name: 'UserRecord',
-  props: { user: Array },
+  name: 'AttdRecord',
+  props: { attd: Array },
   methods: {
     updaterec() {
-      this.$emit('updrec', this.user);
+      this.$emit('updrec', this.attd);
     },
     deleterec() {
-      this.$emit('delrec', this.user);
+      this.$emit('delrec', this.attd);
     },
   },
 };

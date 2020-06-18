@@ -9,14 +9,14 @@
 
 <script>
 export default {
-  name: 'courserec',
-  props: { course: Array },
+  name: 'deptrec',
+  props: { dept: Array },
   methods: {
     updaterec() {
-      this.$emit('updrec', this.course);
+      this.$emit('updrec', this.dept);
     },
     deleterec() {
-      this.$emit('delrec', this.course);
+      this.$emit('delrec', this.dept);
     },
   },
 };

@@ -1,35 +1,35 @@
 <template>
   <div id="modify-form">
     <form @submit.prevent="handle">
-    <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'modcourse.cid'
-    value = 'courserec.cid' />
+    <label>dept ID</label>
+    <input type="text" placeholder = "Enter Department ID" v-model = 'moddept.did'
+    value = 'deptrec.did' />
     <br>
 
-    <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'modcourse.name'
-    value = 'courserec.name'/>
+    <label>dept name</label>
+    <input type="text" placeholder = "Enter Deptartment name" v-model = 'moddept.name'
+    value = 'deptrec.name'/>
     <br>
 
-    <input type="submit" value="Update Course" />
+    <input type="submit" value="Update dept" />
     </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ModifyCourseForm',
-  props: { courserec: Array },
+  name: 'ModifyDeptForm',
+  props: { deptrec: Array },
   data() {
     return {
-      modcourse: {
-        cid: '', name: '',
+      moddept: {
+        did: '', name: '',
       },
     };
   },
   methods: {
     handle() {
-      this.$emit('courseupd', this.modcourse);
+      this.$emit('deptupd', this.moddept);
     },
   },
 };

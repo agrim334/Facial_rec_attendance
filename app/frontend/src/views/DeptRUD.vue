@@ -1,33 +1,33 @@
 <template>
   <div class="home">
     <table>
-      <tr v-for='course in courses' :key='course.cid'>
-        <courserec :course='course' @updrec='updaterec' @delrec='deleterec'></courserec>
+      <tr v-for='dept in depts' :key='dept.did'>
+        <deptrec :dept='dept' @updrec='updaterec' @delrec='deleterec'></Deptrec>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add courses</button>
+    <button id='add' @click='addrec'>Add Depts</button>
   </div>
 
 </template>
 
 <script>
 // @ is an alias to /src
-import courserec from '@/components/RUDCourse.vue';
+import deptrec from '@/components/RUDDept.vue';
 
 export default {
-  name: 'CourseTable',
+  name: 'DeptTable',
   props: {
-    courses: Array,
+    depts: Array,
   },
   components: {
-    courserec,
+    deptrec,
   },
   methods: {
-    updaterec(coursedat) {
-      alert(coursedat);
+    updaterec(Deptdat) {
+      alert(Deptdat);
     },
-    deleterec(coursedat) {
-      alert(coursedat);
+    deleterec(Deptdat) {
+      alert(Deptdat);
     },
     addrec() {
       alert('sdcf');
