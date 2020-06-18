@@ -12,7 +12,7 @@
 
 <script>
 // @ is an alias to /src
-import UserRecord from '@/components/UserRUD.vue';
+import UserRecord from '@/components/RUDUser.vue';
 
 export default {
   name: 'UserTable',

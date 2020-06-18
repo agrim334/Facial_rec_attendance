@@ -3,10 +3,10 @@ import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import LogForm from '../views/Login.vue';
 import UserTable from '../views/UserRUD.vue';
-import Reg from '../views/Register.vue';
+import Reg from '../views/UserAdd.vue';
 import UserModify from '../views/UserModify.vue';
 import CourseTable from '../views/CourseRUD.vue';
-import AddCourse from '../views/AddCourse.vue';
+import AddCourse from '../views/CourseAdd.vue';
 import CourseModify from '../views/CourseModify.vue';
 
 Vue.use(VueRouter);

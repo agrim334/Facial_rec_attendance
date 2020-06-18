@@ -12,7 +12,7 @@
 
 <script>
 // @ is an alias to /src
-import courserec from '@/components/CourseRUD.vue';
+import courserec from '@/components/RUDCourse.vue';
 
 export default {
   name: 'CourseTable',

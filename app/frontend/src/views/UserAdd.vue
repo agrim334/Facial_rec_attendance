@@ -7,7 +7,7 @@
 
 <script>
 // @ is an alias to /src
-import RegisterForm from '@/components/RegisterUser.vue';
+import RegisterForm from '@/components/AddUser.vue';
 
 const validator = require('email-validator');
 
