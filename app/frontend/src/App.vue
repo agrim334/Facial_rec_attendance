@@ -4,8 +4,13 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/about"> About </router-link> |
       <router-link to="/logform"> Login </router-link> |
-      <router-link to="/usertable"> View Users </router-link>
-      <router-link to="/register"> Add Users </router-link>
+      <router-link to="/usertable"> User List </router-link> |
+      <router-link to="/register"> Add Users </router-link> |
+      <router-link to="/userupd"> Modify User </router-link> |
+      <router-link to="/courseupd"> Modify Course </router-link> |
+      <router-link to="/addcourse"> Add Course </router-link> |
+      <router-link to="/coursetable"> Course List </router-link>
+
     </div>
     <router-view/>
   </div>

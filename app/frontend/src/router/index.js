@@ -5,6 +5,9 @@ import LogForm from '../views/Login.vue';
 import UserTable from '../views/UserRUD.vue';
 import Reg from '../views/Register.vue';
 import UserModify from '../views/UserModify.vue';
+import CourseTable from '../views/CourseRUD.vue';
+import AddCourse from '../views/AddCourse.vue';
+import CourseModify from '../views/CourseModify.vue';
 
 Vue.use(VueRouter);
 
@@ -28,6 +31,21 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Reg,
+  },
+  {
+    path: '/courseupd',
+    name: 'CourseModify',
+    component: CourseModify,
+  },
+  {
+    path: '/coursetable',
+    name: 'CourseTable',
+    component: CourseTable,
+  },
+  {
+    path: '/addcourse',
+    name: 'AddCourse',
+    component: AddCourse,
   },
   {
     path: '/userupd',
