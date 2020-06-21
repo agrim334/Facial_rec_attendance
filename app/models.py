@@ -27,18 +27,34 @@ class Role(db.Model):
 	role_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
 	role = db.Column(db.String(20))
 	users_role = db.relationship('User', backref='role')
+	def to_dict(self):
+		return dict(id = self.role_id,
+					role = self.role,
+					users_role=[user.to_dict() for user in self.users_role])
 
 class Department(db.Model):
 	Dept_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
 	Dept_name = db.Column(db.String(64))
 	users_dept = db.relationship('User', backref='udept')
 	courses_dept = db.relationship('Course', backref='cdept')
+	def to_dict(self):
+		return dict(id = self.Dept_ID,
+					name = self.Dept_name,
+					users_dept=[user.to_dict() for user in self.users_dept],
+					courses_dept=[course.to_dict() for course in self.courses_dept],
+					)
 
 class Course(db.Model):
 	Course_ID = db.Column(db.String(64), primary_key=True)
 	Course_name = db.Column(db.String(64))
 	Classes_held = db.Column(db.Integer,default=0)
 	dept_id = db.Column(db.Integer, db.ForeignKey('department.Dept_ID',onupdate="CASCADE",ondelete="CASCADE"))
+	def to_dict(self):
+		return dict(id = self.Course_ID,
+					name = self.Course_name,
+					count = self.Classes_held,
+					dept_id = self.dept_id,
+					)
 
 class User(UserMixin,db.Model):
 	username = db.Column(db.String(64), index=True, primary_key=True)
@@ -70,6 +86,18 @@ class User(UserMixin,db.Model):
 			backref = db.backref('studied_by',lazy='dynamic'),
 			lazy = 'dynamic')
 	
+	def to_dict(self):
+		return dict(username = self.username,
+					email = self.email,
+					fname = self.fname,
+					lname = self.lname,
+					dept = self.dept,
+					role = self.role_id,
+					prof_course = [course.to_dict() for course in self.facult],
+					TA_course = [course.to_dict() for course in self.tutoring],
+					stud_course = [course.to_dict() for course in self.opted],
+					)
+
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    
 	def set_password(self, password):
@@ -106,3 +134,10 @@ class Attendance(db.Model):													#attendance records
 	timestamp = db.Column(db.Date,primary_key=True)
 	faculty_id = db.Column(db.String(64),db.ForeignKey('prof_courses.prof_id'))
 	TA_id = db.Column(db.String(64),db.ForeignKey('ta_courses.ta_id'))
+
+	def to_dict(self):
+		return dict(cid = self.course_id,
+					stud_id = self.student_id,
+					prof_id = self.faculty_id,
+					ta_id = self.TA_id,
+					time = self.timestamp)

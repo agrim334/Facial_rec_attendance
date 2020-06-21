@@ -11,6 +11,9 @@ import CourseModify from '../views/CourseModify.vue';
 import DeptTable from '../views/DeptRUD.vue';
 import AddDept from '../views/DeptAdd.vue';
 import DeptModify from '../views/DeptModify.vue';
+import AttdTable from '../views/AttdRUD.vue';
+import AddAttd from '../views/AttdAdd.vue';
+import AttdModify from '../views/AttdModify.vue';
 
 Vue.use(VueRouter);
 
@@ -69,6 +72,21 @@ const routes = [
     path: '/depttable',
     name: 'DeptTable',
     component: DeptTable,
+  },
+  {
+    path: '/addattd',
+    name: 'AddAttd',
+    component: AddAttd,
+  },
+  {
+    path: '/attdupd',
+    name: 'AttdModify',
+    component: AttdModify,
+  },
+  {
+    path: '/atddtable',
+    name: 'AttdTable',
+    component: AttdTable,
   },
   {
     path: '/about',

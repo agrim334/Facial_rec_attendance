@@ -12,9 +12,9 @@ from app.tables import CourseResults
 import re
 
 fa_role = Role.query.filter_by(role="Faculty").first()
+stud_role = Role.query.filter_by(role="Student").first()
 ta_role = Role.query.filter_by(role="TA").first()
 admin_role = Role.query.filter_by(role="Admin").first()
-stud_role = Role.query.filter_by(role="Student").first()
 
 @course_sysbp.before_request
 def make_session_permanent():

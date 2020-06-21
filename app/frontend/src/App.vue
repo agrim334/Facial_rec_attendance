@@ -13,6 +13,9 @@
       <router-link to="/deptupd"> Modify Department </router-link> |
       <router-link to="/adddept"> Add Department </router-link> |
       <router-link to="/depttable"> Department List </router-link>
+      <router-link to="/attdupd"> Modify Attendance </router-link> |
+      <router-link to="/addattd"> Mark Attendance </router-link> |
+      <router-link to="/attdtable"> Attendance List </router-link>
 
     </div>
     <router-view/>

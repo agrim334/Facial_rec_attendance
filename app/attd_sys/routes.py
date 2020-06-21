@@ -43,6 +43,25 @@ def after_request(response):									#security
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
+@attd_sysbp.route('/check_attendance_json',methods=['GET','POST'])
+@login_required
+def checkattd():
+	atttdrec = [attd.to_dict() for attd in Attendance.query.all()]
+	response = { records: attdrec}
+	return jsonify(attdrec)
+
+@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
+@login_required
+def checkattd():
+
+@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
+@login_required
+def checkattd():
+
+@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
+@login_required
+def checkattd():
+
 @attd_sysbp.route('/check_attendance',methods=['GET','POST'])
 @login_required
 def checkattd():

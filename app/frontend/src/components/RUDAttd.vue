@@ -1,11 +1,10 @@
 <template>
  <div>
     {{ attd.markerid }}
-    {{ attd.markeeid }}    
+    {{ attd.markeeid }}
     {{ attd.courseid }}
-    {{ attd.date }}
-    {{ attd.presentstat }}
     {{ attd.role }}
+    {{ attd.date }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>
  </div>

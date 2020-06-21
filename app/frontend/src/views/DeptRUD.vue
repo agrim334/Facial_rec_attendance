@@ -2,7 +2,7 @@
   <div class="home">
     <table>
       <tr v-for='dept in depts' :key='dept.did'>
-        <deptrec :dept='dept' @updrec='updaterec' @delrec='deleterec'></Deptrec>
+        <deptrec :dept='dept' @updrec='updaterec' @delrec='deleterec'></deptrec>
       </tr>
     </table>
     <button id='add' @click='addrec'>Add Depts</button>

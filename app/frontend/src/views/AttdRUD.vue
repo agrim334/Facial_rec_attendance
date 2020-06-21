@@ -1,36 +1,33 @@
 <template>
   <div class="home">
     <table>
-      <tr v-for='course in courses' :key='course.cid'>
-        <courserec :course='course' @updrec='updaterec' @delrec='deleterec'></courserec>
+      <tr v-for='attd in attds' :key='attd.cid'>
+        <AttdRecord :attd='attd' @updrec='updaterec' @delrec='deleterec'></AttdRecord>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add courses</button>
+    <button id='add' @click='addrec'>Add attds</button>
   </div>
 
 </template>
 
 <script>
 // @ is an alias to /src
-import courserec from '@/components/RUDCourse.vue';
+import AttdRecord from '@/components/RUDAttd.vue';
 
 export default {
-  name: 'CourseTable',
+  name: 'AttdTable',
   props: {
-    courses: Array,
+    attds: Array,
   },
   components: {
-    courserec,
+    AttdRecord,
   },
   methods: {
-    updaterec(coursedat) {
-      alert(coursedat);
+    updaterec(attddat) {
+      alert(attddat);
     },
-    deleterec(coursedat) {
-      alert(coursedat);
-    },
-    addrec() {
-      alert('sdcf');
+    deleterec(attddat) {
+      alert(attddat);
     },
   },
 };

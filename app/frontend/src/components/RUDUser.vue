@@ -1,7 +1,6 @@
 <template>
  <div>
     {{ user.id }}
-    {{ user.username }}
     {{ user.email }}
     {{ user.dept }}
     {{ user.role }}

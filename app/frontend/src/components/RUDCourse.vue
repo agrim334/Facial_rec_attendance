@@ -1,7 +1,8 @@
 <template>
  <div>
     {{ course.id }}
-    {{ course.coursename }}
+    {{ course.name }}
+    {{ course.class_num }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>
  </div>

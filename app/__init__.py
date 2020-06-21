@@ -46,7 +46,7 @@ def create_app():
 
 		APP.logger.setLevel(logging.INFO)
 		APP.logger.info('Microblog startup')
-	CORS(app, resources={r'/*': {'origins': '*'}})
+	CORS(APP, resources={r'/*': {'origins': '*'}})
 	bootstrap.init_app(APP)
 	mail.init_app(APP)
 	db.init_app(APP)
@@ -60,11 +60,11 @@ def create_app():
 		from .course_sys import course_sysbp 
 		from .UCmaps import mapbp
 
-		APP.register_blueprint(log_sysbp)
-		APP.register_blueprint(attd_sysbp)
-		APP.register_blueprint(course_sysbp)
-		APP.register_blueprint(dept_sysbp)
-		APP.register_blueprint(mapbp)
+		APP.register_blueprint(log_sysbp,url_prefix='/users')
+		APP.register_blueprint(attd_sysbp,url_prefix='/attd')
+		APP.register_blueprint(course_sysbp,url_prefix='/courses')
+		APP.register_blueprint(dept_sysbp,url_prefix='/dept')
+		APP.register_blueprint(mapbp,url_prefix='/map')
 		
 	from app import models
 

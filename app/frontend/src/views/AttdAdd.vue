@@ -1,27 +1,30 @@
 <template>
   <div class="home">
-    <AddCourseForm @courseadd="validate">
-    </AddCourseForm>
+    <MarkAttdFaceForm @attdmark="validate">
+    </MarkAttdFaceForm>
+    <table>
+      <tr v-for='stud in studlist' :key = 'stud.id'>
+         <ManAttdList :stud='stud'> </ManAttdList>
+      </tr>
+    </table>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import AddCourseForm from '@/components/AddCourse.vue';
+import MarkAttdFaceForm from '@/components/AddAttdFaceRec.vue';
+import ManAttdList from '@/components/AddAttdManual.vue';
 
 export default {
-  name: 'AddCourse',
+  name: 'AddAttdFace',
+  props: { studlist: Array },
   components: {
-    AddCourseForm,
+    MarkAttdFaceForm,
+    ManAttdList,
   },
   methods: {
-    validate(newcourse) {
-      if (newcourse.cid === null || newcourse.cid === '') {
-        alert('Fill in user name');
-      }
-      if (newcourse.name === null || newcourse.name === '') {
-        alert('Fill in first name');
-      }
+    validate(attdrec) {
+      alert(attdrec);
     },
   },
 };

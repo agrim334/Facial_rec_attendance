@@ -1,23 +1,23 @@
 <template>
   <div id="modify-form">
     <form @submit.prevent="handle">
-    <label>attd ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'modattd.markerid'
-    value = 'attdrec.attdid' />
+    <label>Prof/TA ID</label>
+    <input type="text" placeholder = "Enter New MarkerID" v-model = 'modattd.markerid'
+    value = 'attdrec.markerid' />
     <br>
 
-    <label>First name</label>
-    <input type="text" placeholder = "Enter first name" v-model = 'modattd.markeeid'
-    value = 'attdrec.fname'/>
+    <label>Student ID</label>
+    <input type="text" placeholder = "Enter New Student ID" v-model = 'modattd.markeeid'
+    value = 'attdrec.markeeid'/>
     <br>
 
-    <label>Last name</label>
-    <input type="text" placeholder = "Enter last name" v-model = 'modattd.lname'
-    value = 'attdrec.lname'/>
+    <label>Course ID</label>
+    <input type="text" placeholder = "Enter new Course ID" v-model = 'modattd.cid'
+    value = 'attdrec.cid'/>
     <br>
 
-    <label> attd Email </label>
-    <input type="text" placeholder = "Enter email id" v-model = 'modattd.email'
+    <label>TimeStamp(Date of class) </label>
+    <input type="text" placeholder = "Enter new Timestamp" v-model = 'modattd.ts'
     value = 'attdrec.email'/>
     <br>
 
@@ -28,12 +28,6 @@
     </div>
     <br>
 
-    <label> Department </label>
-    <div id = 'deptrad' v-for='dept in depts' :key='dept.id'>
-      <input type="radio"  name= 'dept.name' :value = 'dept.id' v-model = 'modattd.deptc'>
-      <label> {{dept.name}} </label>
-    </div>
-    <br>
     <input type="submit" value="Modify attd" />
     </form>
   </div>
@@ -41,12 +35,12 @@
 
 <script>
 export default {
-  name: 'Modifyattd',
-  props: { attdrec: Array, depts: Array, roles: Array },
+  name: 'ModifyAttdForm',
+  props: { attdrec: Array, roles: Array },
   data() {
     return {
       modattd: {
-        attdid: '', fname: '', lname: '', email: '', rolec: '', deptc: '',
+        markerid: '', markeeid: '', cid: '', ts: '', rolec: '',
       },
     };
   },

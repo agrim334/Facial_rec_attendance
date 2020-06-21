@@ -2,7 +2,7 @@
   <div id="register-form">
     <form @submit.prevent="handle">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.userid' value = "user" />
+    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.userid' value = 'user' />
     <br>
 
     <label>Course ID</label>
@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     handle() {
-      this.$emit('userreg', this.attdrec);
+      this.$emit('attdmark', this.attdrec);
     },
   },
 };
