@@ -12,12 +12,15 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import UserRecord from '@/components/RUDUser.vue';
 
 export default {
   name: 'UserTable',
-  props: {
-    users: Array,
+  data() {
+    return {
+      users: [],
+    };
   },
   components: {
     UserRecord,
@@ -32,6 +35,20 @@ export default {
     addrec() {
       alert('sdcf');
     },
+    getUsers() {
+      const path = 'http://localhost:5000/users/check_user_json';
+      console.log(path);
+      axios.get(path)
+        .then((res) => {
+          this.users = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getUsers();
   },
 };
 </script>

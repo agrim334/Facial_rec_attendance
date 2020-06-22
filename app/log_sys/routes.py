@@ -34,35 +34,32 @@ def after_request(response):									#security
 	return response
 
 @log_sysbp.route('/check_user_json',methods=['GET','POST'])
-@login_required
 def checklogjson():
-	logrec = [user.to_dict() for user in User.query.all()]
+	logrec = [user.to_json() for user in User.query.all()]
 	response = { 'records': logrec }
+	print(response)
 	return jsonify(response)
 
 @log_sysbp.route('/mark_log_json',methods=['POST'])
-@login_required
 def marklogjson():
 	user = User.from_json(request.json)
 	db.session.add(user)
 	db.session.commit()
-	return jsonify(user.to_dict())
+	return jsonify(user.to_json())
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
-@login_required
 def modifylogjson():
 	user = User.from_json(request.json)
 	db.session.add(user)
 	db.session.commit()
-	return jsonify(user.to_dict())
+	return jsonify(user.to_json())
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
-@login_required
 def dellogjson():
 	user = User.from_json(request.json)
 	db.session.add(user)
 	db.session.commit()
-	return jsonify(user.to_dict())
+	return jsonify(user.to_json())
 
 @log_sysbp.route('/')
 @login_required
