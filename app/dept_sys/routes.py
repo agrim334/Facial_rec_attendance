@@ -30,6 +30,37 @@ def after_request(response):									#security
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
+@dept_sysbp.route('/check_dept_json',methods=['GET','POST'])
+@login_required
+def checkdeptjson():
+	deptrec = [dept.to_dict() for dept in Department.query.all()]
+	response = { 'records': deptrec }
+	return jsonify(response)
+
+@dept_sysbp.route('/mark_dept_json',methods=['POST'])
+@login_required
+def markdeptjson():
+	dept = Department.from_json(request.json)
+	db.session.add(dept)
+	db.session.commit()
+	return jsonify(Department.to_dict())
+
+@dept_sysbp.route('/modify_dept_json',methods=['POST'])
+@login_required
+def modifydeptjson():
+	dept = Department.from_json(request.json)
+	db.session.add(dept)
+	db.session.commit()
+	return jsonify(Department.to_dict())
+
+@dept_sysbp.route('/delete_dept_json',methods=['POST'])
+@login_required
+def deldeptjson():
+	dept = Department.from_json(request.json)
+	db.session.add(dept)
+	db.session.commit()
+	return jsonify(Department.to_dict())
+
 @dept_sysbp.route('/add_dept',methods=['GET','POST'])
 @login_required
 def add_dept():
@@ -39,18 +70,18 @@ def add_dept():
 			if form.validate_on_submit():
 				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
 				db.session.close()
-				if check_dept and check_dept.count() != 0:
-					flash('Department has been added already in database')
+				if check_dept and check_Department.count() != 0:
+					flash('Department. has been added already in database')
 					return redirect(url_for('.add_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
-					flash('Department has been added')
+					flash('Department. has been added')
 					return redirect(url_for('.add_dept'))
 		
-			return render_template('form_entry.html', title='Add Department', form=form)
+			return render_template('form_entry.html', title='Add Department.', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('log_sysbp.home'))
@@ -73,9 +104,9 @@ def view_dept():
 				table = DeptTable(dept)
 				table.border = True
 			else:
-				flash("No Departments Found")
+				flash("No Department.s Found")
 				return redirect(url_for('.view_dept'))
-		return render_template('view.html',title="Department",form=form,table=table)
+		return render_template('view.html',title="Department.",form=form,table=table)
 	else:
 		flash('Login please')
 		return redirect(url_for('log_sysbp.login'))
@@ -89,18 +120,18 @@ def upd_dept():
 			if form.validate_on_submit():
 				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
 				db.session.close()
-				if check_dept and check_dept.count() != 0:
-					flash('Department has been added already in database')
+				if check_dept and check_Department.count() != 0:
+					flash('Department. has been added already in database')
 					return redirect(url_for('.upd_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
-					flash('Department has been added')
+					flash('Department. has been added')
 					return redirect(url_for('.upd_dept'))
 		
-			return render_template('form_entry.html', title='Add Department', form=form)
+			return render_template('form_entry.html', title='Add Department.', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('log_sysbp.home'))
@@ -117,18 +148,18 @@ def del_dept():
 			if form.validate_on_submit():
 				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
 				db.session.close()
-				if check_dept and check_dept.count() != 0:
-					flash('Department has been added already in database')
+				if check_dept and check_Department.count() != 0:
+					flash('Department. has been added already in database')
 					return redirect(url_for('.del_dept'))
 				else:
 					dept = Department(Dept_name = form.depart.data)
 					db.session.add(dept)
 					db.session.commit()
 					db.session.close()
-					flash('Department has been added')
+					flash('Department. has been added')
 					return redirect(url_for('.del_dept'))
 		
-			return render_template('form_entry.html', title='Add Department', form=form)
+			return render_template('form_entry.html', title='Add Department.', form=form)
 		else:
 			flash('Only admins can access this page')
 			return redirect(url_for('log_sysbp.home'))

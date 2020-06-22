@@ -43,6 +43,14 @@ class Department(db.Model):
 					users_dept=[user.to_dict() for user in self.users_dept],
 					courses_dept=[course.to_dict() for course in self.courses_dept],
 					)
+	def from_json(json_data):
+		Dept_ID = json_data.get('Dept_ID')
+		Dept_name = json_data.get('Dept_name')
+		if Dept_ID and Dept_name:
+			return Department(Dept_ID=Dept_ID,Dept_name=Dept_name)
+		else:
+			pass
+
 
 class Course(db.Model):
 	Course_ID = db.Column(db.String(64), primary_key=True)
@@ -55,6 +63,15 @@ class Course(db.Model):
 					count = self.Classes_held,
 					dept_id = self.dept_id,
 					)
+	def from_json(json_data):
+		Course_ID = json_data.get('Course_ID')
+		Course_name = json_data.get('Course_name')
+		dept_id = json_data.get('dept_id')
+		if dept_id and Course_ID and Course_name:
+			return Course(dept_id=dept_id,Course_ID=Course_ID,Course_name=Course_name)
+		else:
+			pass
+
 
 class User(UserMixin,db.Model):
 	username = db.Column(db.String(64), index=True, primary_key=True)
@@ -97,6 +114,17 @@ class User(UserMixin,db.Model):
 					TA_course = [course.to_dict() for course in self.tutoring],
 					stud_course = [course.to_dict() for course in self.opted],
 					)
+
+	def from_json(json_data):
+		username = json_data.get('username')
+		email = json_data.get('email')
+		fname = json_data.get('fname')
+		lname = json_data.get('lname')		
+		dept = json_data.get('dept')
+		if username and email and fname and lname and dept:
+			return User(username=username,email=email,fname=fname,lname=lname,dept=dept)
+		else:
+			pass
 
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    
@@ -141,3 +169,13 @@ class Attendance(db.Model):													#attendance records
 					prof_id = self.faculty_id,
 					ta_id = self.TA_id,
 					time = self.timestamp)
+	def from_json(json_data):
+		course_ID = json_data.get('course_ID')
+		student_id = json_data.get('student_id')
+		TA_id = json_data.get('TA_id')
+		timestamp = json_data.get('timestamp')
+		faculty_id = json_data.get('faculty_id')
+		if TA_ID and course_ID and timestamp and faculty_id and student_id:
+			return Attendance(faculty_id=faculty_id,TA_id=TA_id,dept_id=dept_id,course_ID=course_ID,student_id=student_id)
+		else:
+			pass

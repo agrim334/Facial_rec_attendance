@@ -33,6 +33,37 @@ def after_request(response):									#security
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
+@log_sysbp.route('/check_user_json',methods=['GET','POST'])
+@login_required
+def checklogjson():
+	logrec = [user.to_dict() for user in User.query.all()]
+	response = { 'records': logrec }
+	return jsonify(response)
+
+@log_sysbp.route('/mark_log_json',methods=['POST'])
+@login_required
+def marklogjson():
+	user = User.from_json(request.json)
+	db.session.add(user)
+	db.session.commit()
+	return jsonify(user.to_dict())
+
+@log_sysbp.route('/modify_log_json',methods=['POST'])
+@login_required
+def modifylogjson():
+	user = User.from_json(request.json)
+	db.session.add(user)
+	db.session.commit()
+	return jsonify(user.to_dict())
+
+@log_sysbp.route('/delete_log_json',methods=['POST'])
+@login_required
+def dellogjson():
+	user = User.from_json(request.json)
+	db.session.add(user)
+	db.session.commit()
+	return jsonify(user.to_dict())
+
 @log_sysbp.route('/')
 @login_required
 def home():													#home page url
@@ -169,7 +200,7 @@ def add_users():
 	if current_user.is_authenticated:
 		if current_user.role_id == admin_role.role_id:
 			form = RegistrationForm()
-			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
+			form.log.choices = [(int(log.log_ID), log.log_name) for log in Department.query.all()]
 			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
 			if form.validate_on_submit():
 				check_user = User.query.filter_by(username = form.username.data)
@@ -177,7 +208,7 @@ def add_users():
 					flash('User has been added already in database')
 					return redirect(url_for('.add_users'))
 				else:
-					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,log=int(form.log.data))
 					user.set_password(form.password.data)
 					db.session.add(user)
 					db.session.commit()
@@ -205,9 +236,9 @@ def view_users():
 				criteria = int(criteria)
 				if criteria == 1:
 					value = form.match.data
-					check_dept = Department.query.filter_by(value)
-					if check_dept:
-						user = db.session.query(User,Department).filter(User.dept == value).all()
+					check_log = Department.query.filter_by(value)
+					if check_log:
+						user = db.session.query(User,Department).filter(User.log == value).all()
 						if user:
 							table = UserResults(user)
 							table.border = True
@@ -273,9 +304,9 @@ def upd_users():
 				criteria = int(criteria)
 				if criteria == 1:
 					value = form.match.data
-					check_dept = Department.query.filter_by(value)
-					if check_dept:
-						user = db.session.query(User,Department).filter(User.dept == value).all()
+					check_log = Department.query.filter_by(value)
+					if check_log:
+						user = db.session.query(User,Department).filter(User.log == value).all()
 						if user:
 							columns = User.__table__.columns.keys()
 							columns.remove('password_hash')
@@ -342,7 +373,7 @@ def del_users():
 	if current_user.is_authenticated:
 		if current_user.role_id == admin_role.role_id:
 			form = RegistrationForm()
-			form.dept.choices = [(int(dept.Dept_ID), dept.Dept_name) for dept in Department.query.all()]
+			form.log.choices = [(int(log.log_ID), log.log_name) for log in Department.query.all()]
 			form.role.choices = [(int(role.role_id), role.role) for role in Role.query.all()]
 			if form.validate_on_submit():
 				check_user = User.query.filter_by(username = form.username.data)
@@ -350,7 +381,7 @@ def del_users():
 					flash('User has been added already in database')
 					return redirect(url_for('del_users'))
 				else:
-					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,dept=int(form.dept.data))
+					user = User(username=form.username.data, fname=form.fname.data, lname=form.lname.data,email=form.email.data,role_id=form.role.data,log=int(form.log.data))
 					user.set_password(form.password.data)
 					db.session.add(user)
 					db.session.commit()
