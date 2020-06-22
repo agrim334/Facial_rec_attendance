@@ -1,27 +1,22 @@
 <template>
   <div class="home">
-    <AddCourseForm @courseadd="validate">
-    </AddCourseForm>
+    <AddMapForm @mapadd="validate">
+    </AddMapForm>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import AddCourseForm from '@/components/AddCourse.vue';
+import AddMapForm from '@/components/AddMap.vue';
 
 export default {
-  name: 'AddCourse',
+  name: 'AddMap',
   components: {
-    AddCourseForm,
+    AddMapForm,
   },
   methods: {
-    validate(newcourse) {
-      if (newcourse.cid === null || newcourse.cid === '') {
-        alert('Fill in user name');
-      }
-      if (newcourse.name === null || newcourse.name === '') {
-        alert('Fill in first name');
-      }
+    validate(newmap) {
+      alert(newmap);
     },
   },
 };

@@ -14,6 +14,9 @@ import DeptModify from '../views/DeptModify.vue';
 import AttdTable from '../views/AttdRUD.vue';
 import AddAttd from '../views/AttdAdd.vue';
 import AttdModify from '../views/AttdModify.vue';
+import MapTable from '../views/MapRUD.vue';
+import AddMap from '../views/MapAdd.vue';
+import MapModify from '../views/MapModify.vue';
 
 Vue.use(VueRouter);
 
@@ -84,9 +87,24 @@ const routes = [
     component: AttdModify,
   },
   {
-    path: '/atddtable',
+    path: '/attdtable',
     name: 'AttdTable',
     component: AttdTable,
+  },
+  {
+    path: '/addmap',
+    name: 'AddMap',
+    component: AddMap,
+  },
+  {
+    path: '/mapupd',
+    name: 'MapModify',
+    component: MapModify,
+  },
+  {
+    path: '/maptable',
+    name: 'MapTable',
+    component: MapTable,
   },
   {
     path: '/about',

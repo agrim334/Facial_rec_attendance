@@ -45,22 +45,15 @@ def after_request(response):									#security
 
 @attd_sysbp.route('/check_attendance_json',methods=['GET','POST'])
 @login_required
-def checkattd():
+def checkattdjson():
 	atttdrec = [attd.to_dict() for attd in Attendance.query.all()]
-	response = { records: attdrec}
+	response = { records: attdrec }
 	return jsonify(attdrec)
 
-@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
+@attd_sysbp.route('/mark_attendance_json',methods=['POST'])
 @login_required
-def checkattd():
-
-@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
-@login_required
-def checkattd():
-
-@attd_sysbp.route('/check_attendance',methods=['GET','POST'])
-@login_required
-def checkattd():
+def markattdjson():
+	pass
 
 @attd_sysbp.route('/check_attendance',methods=['GET','POST'])
 @login_required

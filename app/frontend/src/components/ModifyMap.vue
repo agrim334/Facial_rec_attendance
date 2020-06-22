@@ -1,35 +1,38 @@
 <template>
-  <div id="modify-form">
+  <div id="register-form">
     <form @submit.prevent="handle">
-    <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'modcourse.cid'
-    value = 'courserec.cid' />
+    <label>Map ID</label>
+    <input type="text" placeholder = "Enter CID" v-model = 'modmap.cid' value = 'maprec.cid' />
     <br>
 
-    <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'modcourse.name'
-    value = 'courserec.name'/>
+    <label>Map name</label>
+    <input type="text" placeholder = "Enter UID" v-model = 'modmap.uid' value = 'maprec.uid'/>
     <br>
 
-    <input type="submit" value="Update Course" />
+    <label>Map name</label>
+    <input type="text" placeholder = "Enter User Role"
+    v-model = 'modmap.role' value = 'maprec.role' />
+    <br>
+
+    <input type="submit" value="Modify map" />
     </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ModifyCourseForm',
-  props: { courserec: Array },
+  name: 'ModifyMapForm',
+  props: { maprec: Array },
   data() {
     return {
-      modcourse: {
-        cid: '', name: '',
+      modmap: {
+        cid: '', uid: '', role: '',
       },
     };
   },
   methods: {
     handle() {
-      this.$emit('courseupd', this.modcourse);
+      this.$emit('mapupd', this.modmap);
     },
   },
 };

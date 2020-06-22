@@ -1,7 +1,8 @@
 <template>
  <div>
-    {{ course.id }}
-    {{ course.coursename }}
+    {{ map.cid }}
+    {{ map.uid }}
+    {{ map.role }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>
  </div>
@@ -9,14 +10,16 @@
 
 <script>
 export default {
-  name: 'courserec',
-  props: { course: Array },
+  name: 'MapRecord',
+  props: {
+    map: Array,
+  },
   methods: {
     updaterec() {
-      this.$emit('updrec', this.course);
+      this.$emit('updrec', this.map);
     },
     deleterec() {
-      this.$emit('delrec', this.course);
+      this.$emit('delrec', this.map);
     },
   },
 };

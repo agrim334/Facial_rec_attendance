@@ -16,7 +16,9 @@
       <router-link to="/attdupd"> Modify Attendance </router-link> |
       <router-link to="/addattd"> Mark Attendance </router-link> |
       <router-link to="/attdtable"> Attendance List </router-link>
-
+      <router-link to="/mapupd"> Modify Mapping </router-link> |
+      <router-link to="/addmap"> Add Mapping </router-link> |
+      <router-link to="/maptable"> Mapping List </router-link>
     </div>
     <router-view/>
   </div>

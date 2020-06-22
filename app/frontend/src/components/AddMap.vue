@@ -1,32 +1,37 @@
 <template>
   <div id="register-form">
     <form @submit.prevent="handle">
-    <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'course.cid' />
+    <label>map ID</label>
+    <input type="text" placeholder = "Enter CID" v-model = 'map.cid' />
     <br>
 
-    <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'course.name' />
+    <label>map name</label>
+    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
     <br>
 
-    <input type="submit" value="Add Course" />
+    <label>map name</label>
+    <input type="text" placeholder = "Enter User Role" v-model = 'map.role' />
+    <br>
+
+    <input type="submit" value="Add map" />
     </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'AddCourseForm',
+  name: 'AddMapForm',
+  props: { roles: Array },
   data() {
     return {
-      course: {
-        cid: '', name: '',
+      map: {
+        cid: '', uid: '', role: '',
       },
     };
   },
   methods: {
     handle() {
-      this.$emit('courseadd', this.course);
+      this.$emit('mapadd', this.map);
     },
   },
 };
