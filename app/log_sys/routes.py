@@ -39,19 +39,26 @@ def checklogjson():
 	response = { 'records': logrec }
 	return jsonify(response)
 
-@log_sysbp.route('/mark_log_json',methods=['POST'])
+@log_sysbp.route('/add_log_json',methods=['POST'])
 def marklogjson():
+	print(request.json)
 	user = User.from_json(request.json)
+	user.set_password(request.json.get('pass'))
+	if user is None:
+		return jsonify({ 'error' : 'bad info'})
+
 	db.session.add(user)
 	db.session.commit()
-	return jsonify(user.to_json())
+	return jsonify({ 'status' : 'success'})
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
 def modifylogjson():
-	user = User.from_json(request.json)
-	db.session.add(user)
-	db.session.commit()
-	return jsonify(user.to_json())
+	print(request)
+	if user is None:
+		return jsonify({ 'error' : 'bad info'})
+#	User.query.filter_by(id=uid).delete()
+#	db.session.commit()
+	return jsonify({'status' : 'success'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
 def dellogjson():

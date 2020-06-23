@@ -27,10 +27,19 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      alert(userdat);
+      this.$router.push('userupd', { params: { user: userdat } });
     },
     deleterec(userdat) {
-      alert(userdat);
+      const path = 'http://localhost:5000/users/delete_log_json';
+      console.log(userdat.username);
+      axios.post(path, userdat)
+        .then((res) => {
+          this.users = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      this.getUsers();
     },
     addrec() {
       alert('sdcf');
@@ -48,9 +57,6 @@ export default {
     },
   },
   created() {
-    this.getUsers();
-  },
-  updated() {
     this.getUsers();
   },
 };

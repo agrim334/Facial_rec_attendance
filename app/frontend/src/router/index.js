@@ -40,11 +40,13 @@ const routes = [
     path: '/userupd',
     name: 'UserModify',
     component: UserModify,
+    props: true,
   },
   {
     path: '/usertable',
     name: 'UserTable',
     component: UserTable,
+    props: true,
   },
   {
     path: '/addcourse',
@@ -55,11 +57,13 @@ const routes = [
     path: '/courseupd',
     name: 'CourseModify',
     component: CourseModify,
+    props: true,
   },
   {
     path: '/coursetable',
     name: 'CourseTable',
     component: CourseTable,
+    props: true,
   },
   {
     path: '/adddept',
@@ -70,6 +74,7 @@ const routes = [
     path: '/deptupd',
     name: 'DeptModify',
     component: DeptModify,
+    props: true,
   },
   {
     path: '/depttable',
@@ -85,11 +90,13 @@ const routes = [
     path: '/attdupd',
     name: 'AttdModify',
     component: AttdModify,
+    props: true,
   },
   {
     path: '/attdtable',
     name: 'AttdTable',
     component: AttdTable,
+    props: true,
   },
   {
     path: '/addmap',
@@ -100,11 +107,13 @@ const routes = [
     path: '/mapupd',
     name: 'MapModify',
     component: MapModify,
+    props: true,
   },
   {
     path: '/maptable',
     name: 'MapTable',
     component: MapTable,
+    props: true,
   },
   {
     path: '/about',

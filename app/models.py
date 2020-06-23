@@ -117,11 +117,12 @@ class User(UserMixin,db.Model):
 		return user_obj
 
 	def from_json(json_data):
-		username = json_data.get('username')
+		username = json_data.get('userid')
 		email = json_data.get('email')
 		fname = json_data.get('fname')
 		lname = json_data.get('lname')		
-		dept = json_data.get('dept')
+		dept = json_data.get('deptc')
+		print(dept)
 		if username and email and fname and lname and dept:
 			return User(username=username,email=email,fname=fname,lname=lname,dept=dept)
 		else:
