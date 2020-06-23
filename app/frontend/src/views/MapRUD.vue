@@ -12,6 +12,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import MapRecord from '@/components/RUDMap.vue';
 
 export default {
@@ -32,6 +33,23 @@ export default {
     addrec() {
       alert('sdcf');
     },
+    getMaps() {
+      const path = 'http://localhost:5000/map/check_map_json';
+      console.log(path);
+      axios.get(path)
+        .then((res) => {
+          this.maps = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getMaps();
+  },
+  updated() {
+    this.getMaps();
   },
 };
 </script>

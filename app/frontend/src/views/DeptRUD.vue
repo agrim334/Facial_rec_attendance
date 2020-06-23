@@ -12,6 +12,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import deptrec from '@/components/RUDDept.vue';
 
 export default {
@@ -32,6 +33,23 @@ export default {
     addrec() {
       alert('sdcf');
     },
+    getDept() {
+      const path = 'http://localhost:5000/dept/check_dept_json';
+      console.log(path);
+      axios.get(path)
+        .then((res) => {
+          this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getDept();
+  },
+  updated() {
+    this.getDept();
   },
 };
 </script>

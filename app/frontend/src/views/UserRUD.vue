@@ -50,5 +50,8 @@ export default {
   created() {
     this.getUsers();
   },
+  updated() {
+    this.getUsers();
+  },
 };
 </script>

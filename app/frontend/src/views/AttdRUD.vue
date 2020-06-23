@@ -12,6 +12,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import AttdRecord from '@/components/RUDAttd.vue';
 
 export default {
@@ -29,6 +30,23 @@ export default {
     deleterec(attddat) {
       alert(attddat);
     },
+    getAttd() {
+      const path = 'http://localhost:5000/attd/check_attendance_json';
+      console.log(path);
+      axios.get(path)
+        .then((res) => {
+          this.attds = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getAttd();
+  },
+  updated() {
+    this.getAttd();
   },
 };
 </script>

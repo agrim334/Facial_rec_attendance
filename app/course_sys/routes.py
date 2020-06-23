@@ -31,35 +31,31 @@ def after_request(response):									#security
 	return response
 
 @course_sysbp.route('/check_course_json',methods=['GET','POST'])
-@login_required
 def checkcoursejson():
-	courserec = [course.to_dict() for course in Course.query.all()]
+	courserec = [course.to_json() for course in Course.query.all()]
 	response = { 'records': courserec }
 	return jsonify(repsonse)
 
 @course_sysbp.route('/mark_course_json',methods=['POST'])
-@login_required
 def markcoursejson():
 	course = Course.from_json(request.json)
 	db.session.add(course)
 	db.session.commit()
-	return jsonify(course.to_dict())
+	return jsonify(course.to_json())
 
 @course_sysbp.route('/modify_course_json',methods=['POST'])
-@login_required
 def modifycoursejson():
 	course = Course.from_json(request.json)
 	db.session.add(course)
 	db.session.commit()
-	return jsonify(course.to_dict())
+	return jsonify(course.to_json())
 
 @course_sysbp.route('/delete_course_json',methods=['POST'])
-@login_required
 def delcoursejson():
 	course = Course.from_json(request.json)
 	db.session.add(course)
 	db.session.commit()
-	return jsonify(course.to_dict())
+	return jsonify(course.to_json())
 
 @course_sysbp.route('/add_courses',methods=['GET','POST'])
 @login_required

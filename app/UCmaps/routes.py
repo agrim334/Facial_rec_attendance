@@ -31,38 +31,34 @@ def after_request(response):									#security
 	return response
 
 @mapbp.route('/check_map_json',methods=['GET','POST'])
-@login_required
 def checkmapjson():
-	maprec = [tup.to_dict() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_dict() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_dict() for tup in db.session.query(stud_courses).all()])	
+	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
+	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
+	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
 	response = { 'records': maprec }
 	return jsonify(response)
 
 @mapbp.route('/mark_map_json',methods=['POST'])
-@login_required
 def markmapjson():
-	maprec = [tup.to_dict() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_dict() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_dict() for tup in db.session.query(stud_courses).all()])	
+	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
+	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
+	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
 	response = { 'records': maprec }
 	return jsonify(response)
 
 @mapbp.route('/modify_map_json',methods=['POST'])
-@login_required
 def modifymapjson():
-	maprec = [tup.to_dict() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_dict() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_dict() for tup in db.session.query(stud_courses).all()])	
+	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
+	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
+	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
 	response = { 'records': maprec }
 	return jsonify(response)
 
 @mapbp.route('/delete_map_json',methods=['POST'])
-@login_required
 def delmapjson():
-	maprec = [tup.to_dict() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_dict() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_dict() for tup in db.session.query(stud_courses).all()])	
+	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
+	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
+	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
 	response = { 'records': maprec }
 	return jsonify(response)
 

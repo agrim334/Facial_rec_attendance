@@ -12,6 +12,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import courserec from '@/components/RUDCourse.vue';
 
 export default {
@@ -32,6 +33,23 @@ export default {
     addrec() {
       alert('sdcf');
     },
+    getCourse() {
+      const path = 'http://localhost:5000/courses/check_course_json';
+      console.log(path);
+      axios.get(path)
+        .then((res) => {
+          this.courses = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+  created() {
+    this.getCourse();
+  },
+  updated() {
+    this.getCourse();
   },
 };
 </script>

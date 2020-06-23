@@ -44,35 +44,31 @@ def after_request(response):									#security
 	return response
 
 @attd_sysbp.route('/check_attendance_json',methods=['GET','POST'])
-@login_required
 def checkattdjson():
-	attdrec = [attd.to_dict() for attd in Attendance.query.all()]
+	attdrec = [attd.to_json() for attd in Attendance.query.all()]
 	response = { 'records': attdrec }
 	return jsonify(response)
 
 @attd_sysbp.route('/mark_attendance_json',methods=['POST'])
-@login_required
 def markattdjson():
 	attd = Attendance.from_json(request.json)
 	db.session.add(attd)
 	db.session.commit()
-	return jsonify(attd.to_dict())
+	return jsonify(attd.to_json())
 
 @attd_sysbp.route('/modify_attendance_json',methods=['POST'])
-@login_required
 def modifyattdjson():
 	attd = Attendance.from_json(request.json)
 	db.session.add(attd)
 	db.session.commit()
-	return jsonify(attd.to_dict())
+	return jsonify(attd.to_json())
 
 @attd_sysbp.route('/delete_attendance_json',methods=['POST'])
-@login_required
 def delattdjson():
 	attd = Attendance.from_json(request.json)
 	db.session.add(attd)
 	db.session.commit()
-	return jsonify(attd.to_dict())
+	return jsonify(attd.to_json())
 
 @attd_sysbp.route('/check_attendance',methods=['GET','POST'])
 @login_required

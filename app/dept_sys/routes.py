@@ -31,35 +31,31 @@ def after_request(response):									#security
 	return response
 
 @dept_sysbp.route('/check_dept_json',methods=['GET','POST'])
-@login_required
 def checkdeptjson():
-	deptrec = [dept.to_dict() for dept in Department.query.all()]
+	deptrec = [dept.to_json() for dept in Department.query.all()]
 	response = { 'records': deptrec }
 	return jsonify(response)
 
 @dept_sysbp.route('/mark_dept_json',methods=['POST'])
-@login_required
 def markdeptjson():
 	dept = Department.from_json(request.json)
 	db.session.add(dept)
 	db.session.commit()
-	return jsonify(Department.to_dict())
+	return jsonify(Department.to_json())
 
 @dept_sysbp.route('/modify_dept_json',methods=['POST'])
-@login_required
 def modifydeptjson():
 	dept = Department.from_json(request.json)
 	db.session.add(dept)
 	db.session.commit()
-	return jsonify(Department.to_dict())
+	return jsonify(Department.to_json())
 
 @dept_sysbp.route('/delete_dept_json',methods=['POST'])
-@login_required
 def deldeptjson():
 	dept = Department.from_json(request.json)
 	db.session.add(dept)
 	db.session.commit()
-	return jsonify(Department.to_dict())
+	return jsonify(Department.to_json())
 
 @dept_sysbp.route('/add_dept',methods=['GET','POST'])
 @login_required
