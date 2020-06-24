@@ -8,12 +8,13 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import ModifyUser from '@/components/ModifyUser.vue';
 
 export default {
   name: 'UserModify',
   props: {
-    user: Array,
+    user: Object,
     depts: Array,
     roles: Array,
   },
@@ -22,8 +23,30 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      alert(userdat);
+      const path = 'http://localhost:5000/users/modify_log_json';
+      axios.post(path, { old: this.user, new: userdat })
+        .then((res) => {
+          this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    getDept() {
+      const path = 'http://localhost:5000/dept/check_dept_json';
+      axios.get(path)
+        .then((res) => {
+          this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
+  created() {
+    console.log(this.user.username);
+    this.getDept();
+  },
+
 };
 </script>

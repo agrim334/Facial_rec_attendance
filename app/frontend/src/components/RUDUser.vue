@@ -12,7 +12,7 @@
 <script>
 export default {
   name: 'UserRecord',
-  props: { user: Array },
+  props: { user: Object },
   methods: {
     updaterec() {
       this.$emit('updrec', this.user);

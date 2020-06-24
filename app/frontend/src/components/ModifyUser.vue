@@ -2,23 +2,19 @@
   <div id="modify-form">
     <form @submit.prevent="handle">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'moduser.userid'
-    value = 'userrec.userid' />
+    <input type="text" placeholder = "Enter UID" v-model = 'moduser.username'/>
     <br>
 
     <label>First name</label>
-    <input type="text" placeholder = "Enter first name" v-model = 'moduser.fname'
-    value = 'userrec.fname'/>
+    <input type="text" placeholder = "Enter first name" v-model = 'moduser.fname'/>
     <br>
 
     <label>Last name</label>
-    <input type="text" placeholder = "Enter last name" v-model = 'moduser.lname'
-    value = 'userrec.lname'/>
+    <input type="text" placeholder = "Enter last name" v-model = 'moduser.lname'/>
     <br>
 
     <label> User Email </label>
-    <input type="text" placeholder = "Enter email id" v-model = 'moduser.email'
-    value = 'userrec.email'/>
+    <input type="text" placeholder = "Enter email id" v-model = 'moduser.email'/>
     <br>
 
     <label> Role </label>
@@ -46,7 +42,12 @@ export default {
   data() {
     return {
       moduser: {
-        userid: '', fname: '', lname: '', email: '', rolec: '', deptc: '',
+        username: this.userrec.username,
+        fname: this.userrec.fname,
+        lname: this.userrec.lname,
+        email: this.userrec.email,
+        rolec: this.userrec.role_id,
+        deptc: this.userrec.dept_id,
       },
     };
   },

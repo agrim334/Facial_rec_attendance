@@ -26,11 +26,10 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      this.$router.push('userupd', { params: { user: userdat } });
+      this.$router.push({ name: 'UserModify', params: { user: userdat } });
     },
     deleterec(userdat) {
       const path = 'http://localhost:5000/users/delete_log_json';
-      console.log(userdat.username);
       axios.post(path, userdat.username)
         .then(() => {
           this.getUsers();

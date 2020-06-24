@@ -52,10 +52,14 @@ def marklogjson():
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
 def modifylogjson():
-	if user is None:
-		return jsonify({ 'error' : 'bad info'})
-#	User.query.filter_by(id=uid).delete()
-#	db.session.commit()
+	user = User.query.filter_by(username=request.json['old'].get('username')).first_or_404()
+	print(request.json['new'])
+	user.username = request.json['new'].get('username')
+	user.fname = request.json['new'].get('fname')
+	user.lname = request.json['new'].get('lname')
+	user.email = request.json['new'].get('email')
+
+	db.session.commit()
 	return jsonify({'status' : 'success'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
