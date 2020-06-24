@@ -7,7 +7,6 @@
     </table>
     <button id='add' @click='addrec'>Add Users</button>
   </div>
-
 </template>
 
 <script>
@@ -32,21 +31,19 @@ export default {
     deleterec(userdat) {
       const path = 'http://localhost:5000/users/delete_log_json';
       console.log(userdat.username);
-      axios.post(path, userdat)
-        .then((res) => {
-          this.users = res.data.records;
+      axios.post(path, userdat.username)
+        .then(() => {
+          this.getUsers();
         })
         .catch((error) => {
           console.error(error);
         });
-      this.getUsers();
     },
     addrec() {
       alert('sdcf');
     },
     getUsers() {
       const path = 'http://localhost:5000/users/check_user_json';
-      console.log(path);
       axios.get(path)
         .then((res) => {
           this.users = res.data.records;

@@ -35,7 +35,6 @@ export default {
     },
     getMaps() {
       const path = 'http://localhost:5000/map/check_map_json';
-      console.log(path);
       axios.get(path)
         .then((res) => {
           this.maps = res.data.records;
@@ -46,9 +45,6 @@ export default {
     },
   },
   created() {
-    this.getMaps();
-  },
-  updated() {
     this.getMaps();
   },
 };

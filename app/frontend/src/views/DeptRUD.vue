@@ -28,14 +28,20 @@ export default {
       alert(Deptdat);
     },
     deleterec(Deptdat) {
-      alert(Deptdat);
+      const path = 'http://localhost:5000/dept/delete_dept_json';
+      axios.post(path, Deptdat)
+        .then((res) => {
+          this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     addrec() {
       alert('sdcf');
     },
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
-      console.log(path);
       axios.get(path)
         .then((res) => {
           this.depts = res.data.records;
@@ -46,9 +52,6 @@ export default {
     },
   },
   created() {
-    this.getDept();
-  },
-  updated() {
     this.getDept();
   },
 };

@@ -20,7 +20,7 @@ bootstrap = Bootstrap()
 login.login_view = 'log_sysbp.login'
 
 def create_app():
-	APP = Flask(__name__,static_folder='./frontend/src')
+	APP = Flask(__name__)
 	APP.config.from_object(Config)
 	if not APP.debug:
 		if APP.config['MAIL_SERVER']:

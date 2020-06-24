@@ -35,7 +35,6 @@ export default {
     },
     getCourse() {
       const path = 'http://localhost:5000/courses/check_course_json';
-      console.log(path);
       axios.get(path)
         .then((res) => {
           this.courses = res.data.records;
@@ -46,9 +45,6 @@ export default {
     },
   },
   created() {
-    this.getCourse();
-  },
-  updated() {
     this.getCourse();
   },
 };

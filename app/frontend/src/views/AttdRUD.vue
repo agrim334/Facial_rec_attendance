@@ -45,8 +45,5 @@ export default {
   created() {
     this.getAttd();
   },
-  updated() {
-    this.getAttd();
-  },
 };
 </script>
