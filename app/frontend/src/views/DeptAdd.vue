@@ -1,12 +1,13 @@
 <template>
   <div class="home">
-    <AddDeptForm @courseadd="validate">
+    <AddDeptForm @deptadd="validate">
     </AddDeptForm>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import AddDeptForm from '@/components/AddDept.vue';
 
 export default {
@@ -16,12 +17,24 @@ export default {
   },
   methods: {
     validate(newdept) {
-      if (newdept.did === null || newdept.did === '') {
-        alert('Fill in user name');
+      console.log(newdept);
+      if (newdept.id === null || newdept.id === '') {
+        alert('Fill in id');
       }
       if (newdept.name === null || newdept.name === '') {
-        alert('Fill in first name');
+        alert('Fill in name');
       }
+      this.add(newdept);
+    },
+    add(data) {
+      const path = 'http://localhost:5000/dept/add_dept_json';
+      axios.post(path, data)
+        .then((res) => {
+          alert(res.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };

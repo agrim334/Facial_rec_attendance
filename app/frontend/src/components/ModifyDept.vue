@@ -2,13 +2,13 @@
   <div id="modify-form">
     <form @submit.prevent="handle">
     <label>dept ID</label>
-    <input type="text" placeholder = "Enter Department ID" v-model = 'moddept.did'
-    value = 'deptrec.did' />
+    <input type="text" placeholder = "Enter Department ID" v-model = 'moddept.ID'
+     />
     <br>
 
     <label>dept name</label>
     <input type="text" placeholder = "Enter Deptartment name" v-model = 'moddept.name'
-    value = 'deptrec.name'/>
+    />
     <br>
 
     <input type="submit" value="Update dept" />
@@ -23,7 +23,8 @@ export default {
   data() {
     return {
       moddept: {
-        did: '', name: '',
+        ID: this.deptrec.ID,
+        name: this.deptrec.name,
       },
     };
   },

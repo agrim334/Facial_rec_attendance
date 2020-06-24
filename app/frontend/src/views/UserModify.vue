@@ -25,8 +25,8 @@ export default {
     updaterec(userdat) {
       const path = 'http://localhost:5000/users/modify_log_json';
       axios.post(path, { old: this.user, new: userdat })
-        .then((res) => {
-          this.depts = res.data.records;
+        .then(() => {
+          console.log(this);
         })
         .catch((error) => {
           console.error(error);
@@ -44,7 +44,6 @@ export default {
     },
   },
   created() {
-    console.log(this.user.username);
     this.getDept();
   },
 

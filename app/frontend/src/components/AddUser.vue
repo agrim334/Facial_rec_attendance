@@ -2,7 +2,7 @@
   <div id="register-form">
     <form @submit.prevent="handle">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'newuser.userid' />
+    <input type="text" placeholder = "Enter UID" v-model = 'newuser.username' />
     <br>
 
     <label>First name</label>
@@ -49,7 +49,7 @@ export default {
   data() {
     return {
       newuser: {
-        userid: '', fname: '', lname: '', email: '', rolec: '', deptc: '', pass: '', confirmpass: '',
+        username: '', fname: '', lname: '', email: '', rolec: '', deptc: '', pass: '', confirmpass: '',
       },
     };
   },

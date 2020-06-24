@@ -11,10 +11,10 @@ from datetime import datetime,timedelta
 import re
 from app.tables import DeptTable
 
-fa_role = Role.query.filter_by(role="Faculty").first()
-ta_role = Role.query.filter_by(role="TA").first()
-admin_role = Role.query.filter_by(role="Admin").first()
-stud_role = Role.query.filter_by(role="Student").first()
+#fa_role = Role.query.filter_by(name="Faculty").first()
+#ta_role = Role.query.filter_by(name="TA").first()
+#admin_role = Role.query.filter_by(name="Admin").first()
+#stud_role = Role.query.filter_by(name="Student").first()
 
 @dept_sysbp.before_request
 def make_session_permanent():
@@ -36,129 +36,33 @@ def checkdeptjson():
 	response = { 'records': deptrec }
 	return jsonify(response)
 
-@dept_sysbp.route('/mark_dept_json',methods=['POST'])
-def markdeptjson():
+@dept_sysbp.route('/add_dept_json',methods=['POST'])
+def adddeptjson():
+	print(request.json)
 	dept = Department.from_json(request.json)
+	if dept is None:
+		return jsonify({ 'error' : 'bad info'})
+
 	db.session.add(dept)
 	db.session.commit()
-	return jsonify(Department.to_json())
+	return jsonify({'status' : 'success'})
 
 @dept_sysbp.route('/modify_dept_json',methods=['POST'])
 def modifydeptjson():
-	dept = Department.from_json(request.json)
-	db.session.add(dept)
+	dept = Department.query.filter_by(name=request.json['old'].get('name')).first_or_404()
+	if dept is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	dept.ID = dept.ID or request.json['new'].get('ID') 
+	dept.name = dept.name or request.json['new'].get('ID') 
+	dept.classes_held = dept.classes_held or request.json['new'].get('ID') 
+
 	db.session.commit()
-	return jsonify(Department.to_json())
+	return jsonify({'status' : 'success'})
 
 @dept_sysbp.route('/delete_dept_json',methods=['POST'])
 def deldeptjson():
-	dept = Department.from_json(request.json)
-	db.session.add(dept)
+	dept = Department.query.filter_by(name=request.get_data('name')).first_or_404()
+	db.session.delete(dept)
 	db.session.commit()
-	return jsonify(Department.to_json())
-
-@dept_sysbp.route('/add_dept',methods=['GET','POST'])
-@login_required
-def add_dept():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = DeptForm()
-			if form.validate_on_submit():
-				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
-				db.session.close()
-				if check_dept and check_Department.count() != 0:
-					flash('Department. has been added already in database')
-					return redirect(url_for('.add_dept'))
-				else:
-					dept = Department(Dept_name = form.depart.data)
-					db.session.add(dept)
-					db.session.commit()
-					db.session.close()
-					flash('Department. has been added')
-					return redirect(url_for('.add_dept'))
-		
-			return render_template('form_entry.html', title='Add Department.', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('log_sysbp.home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('log_sysbp.login'))
-
-@dept_sysbp.route('/dept_view',methods=['GET','POST'])
-@login_required
-def view_dept():
-	if current_user.is_authenticated:
-		table = []
-		form = ViewDeptForm()
-		if form.validate_on_submit():
-			if form.criteria.data == '1':
-				dept = Department.query.all()
-			else:
-				dept = Department.query.filter_by(Dept_name=form.match.data)
-			if dept:
-				table = DeptTable(dept)
-				table.border = True
-			else:
-				flash("No Department.s Found")
-				return redirect(url_for('.view_dept'))
-		return render_template('view.html',title="Department.",form=form,table=table)
-	else:
-		flash('Login please')
-		return redirect(url_for('log_sysbp.login'))
-
-@dept_sysbp.route('/upd_dept',methods=['GET','POST'])
-@login_required
-def upd_dept():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = DeptForm()
-			if form.validate_on_submit():
-				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
-				db.session.close()
-				if check_dept and check_Department.count() != 0:
-					flash('Department. has been added already in database')
-					return redirect(url_for('.upd_dept'))
-				else:
-					dept = Department(Dept_name = form.depart.data)
-					db.session.add(dept)
-					db.session.commit()
-					db.session.close()
-					flash('Department. has been added')
-					return redirect(url_for('.upd_dept'))
-		
-			return render_template('form_entry.html', title='Add Department.', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('log_sysbp.home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('log_sysbp.login'))
-
-@dept_sysbp.route('/del_dept',methods=['GET','POST'])
-@login_required
-def del_dept():
-	if current_user.is_authenticated:
-		if current_user.role_id == admin_role.role_id:
-			form = DeptForm()
-			if form.validate_on_submit():
-				check_dept = Department.query.filter_by(Dept_name = form.depart.data)
-				db.session.close()
-				if check_dept and check_Department.count() != 0:
-					flash('Department. has been added already in database')
-					return redirect(url_for('.del_dept'))
-				else:
-					dept = Department(Dept_name = form.depart.data)
-					db.session.add(dept)
-					db.session.commit()
-					db.session.close()
-					flash('Department. has been added')
-					return redirect(url_for('.del_dept'))
-		
-			return render_template('form_entry.html', title='Add Department.', form=form)
-		else:
-			flash('Only admins can access this page')
-			return redirect(url_for('log_sysbp.home'))
-	else:
-		flash('Login please!!')
-		return redirect(url_for('log_sysbp.login'))
+	return jsonify({'status' : 'success'})

@@ -1,11 +1,10 @@
 <template>
   <div class="home">
     <table>
-      <tr v-for='dept in depts' :key='dept.did'>
+      <tr v-for='dept in depts' :key='dept.id'>
         <deptrec :dept='dept' @updrec='updaterec' @delrec='deleterec'></deptrec>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add Depts</button>
   </div>
 
 </template>
@@ -24,21 +23,18 @@ export default {
     deptrec,
   },
   methods: {
-    updaterec(Deptdat) {
-      alert(Deptdat);
+    updaterec(deptdat) {
+      this.$router.push({ name: 'DeptModify', params: { dept: deptdat } });
     },
-    deleterec(Deptdat) {
+    deleterec(deptdat) {
       const path = 'http://localhost:5000/dept/delete_dept_json';
-      axios.post(path, Deptdat)
+      axios.post(path, deptdat.name)
         .then((res) => {
           this.depts = res.data.records;
         })
         .catch((error) => {
           console.error(error);
         });
-    },
-    addrec() {
-      alert('sdcf');
     },
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';

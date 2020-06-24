@@ -18,8 +18,15 @@ export default {
     ModifyDeptForm,
   },
   methods: {
-    updaterec(modDept) {
-      alert(modDept);
+    updaterec(deptdat) {
+      const path = 'http://localhost:5000/depts/modify_dept_json';
+      axios.post(path, { old: this.dept, new: deptdat })
+        .then((res) => {
+          this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };

@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     validate(newuser) {
-      if (newuser.userid === null || newuser.userid === '') {
+      if (newuser.username === null || newuser.username === '') {
         alert('Fill in user name');
       }
       if (newuser.fname === null || newuser.fname === '') {
@@ -44,7 +44,7 @@ export default {
       if (newuser.rolec === null || newuser.rolec === '') {
         alert('Choose a role');
       }
-      if (newuser.deptc === null || newuser.deptc === '') {
+      if (newuser.rolec !== 'r4' && (newuser.deptc === '' || newuser.deptc === null)) {
         alert('Choose a department');
       }
       if (newuser.pass !== newuser.confirmpass) {
@@ -64,14 +64,14 @@ export default {
     },
     add(data) {
       const path = 'http://localhost:5000/users/add_log_json';
-      axios.post(path,data)
+      axios.post(path, data)
         .then((res) => {
           alert(res.data);
         })
         .catch((error) => {
           console.error(error);
-        });      
-    }
+        });
+    },
   },
   created() {
     this.getRnD();

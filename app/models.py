@@ -9,66 +9,62 @@ def load_user(username):
 	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
-				db.Column('stud_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-				db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
+				db.Column('SID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+				db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
 				)
 
 ta_courses = db.Table('ta_courses',
-			db.Column('ta_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
+			db.Column('TAID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
 			)
 
 prof_courses = db.Table('prof_courses',
-			db.Column('prof_id',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-			db.Column('course_id',db.String(64),db.ForeignKey('course.Course_ID',onupdate="CASCADE",ondelete="CASCADE"))
+			db.Column('FID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
+			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
 			)
 
 class Role(db.Model):
-	role_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
-	role = db.Column(db.String(20))
-	users_role = db.relationship('User', backref='role')
-	def to_json(self):
-		return dict(id = self.role_id,
-					role = self.role,
-					users_role=[user.to_json() for user in self.users_role])
+	ID = db.Column(db.Integer,primary_key=True,autoincrement=True)
+	name = db.Column(db.String(20))
+	users_name= db.relationship('User', backref='role')
 
 class Department(db.Model):
-	Dept_ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
-	Dept_name = db.Column(db.String(64))
+	ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
+	name = db.Column(db.String(64))
 	users_dept = db.relationship('User', backref='udept')
 	courses_dept = db.relationship('Course', backref='cdept')
 	def to_json(self):
-		return dict(id = self.Dept_ID,
-					name = self.Dept_name,
-					users_dept=[user.to_json() for user in self.users_dept],
-					courses_dept=[course.to_json() for course in self.courses_dept],
-					)
+		return	{	'id' : self.ID,
+					'name' : self.name,
+					'users_dept' : [user.to_json() for user in self.users_dept],
+					'courses_dept' : [course.to_json() for course in self.courses_dept],
+				}
 	def from_json(json_data):
-		Dept_ID = json_data.get('Dept_ID')
-		Dept_name = json_data.get('Dept_name')
-		if Dept_ID and Dept_name:
-			return Department(Dept_ID=Dept_ID,Dept_name=Dept_name)
+		ID = json_data.get('id')
+		name = json_data.get('name')
+		if ID and name:
+			return Department(ID=ID,name=name)
 		else:
 			pass
 
 
 class Course(db.Model):
-	Course_ID = db.Column(db.String(64), primary_key=True)
-	Course_name = db.Column(db.String(64))
-	Classes_held = db.Column(db.Integer,default=0)
-	dept_id = db.Column(db.Integer, db.ForeignKey('department.Dept_ID',onupdate="CASCADE",ondelete="CASCADE"))
+	ID = db.Column(db.String(64), primary_key=True)
+	name = db.Column(db.String(64))
+	classes_held = db.Column(db.Integer,default=0)
+	dept_ID = db.Column(db.Integer, db.ForeignKey('department.ID',onupdate="CASCADE",ondelete="CASCADE"))
 	def to_json(self):
-		return dict(id = self.Course_ID,
-					name = self.Course_name,
-					count = self.Classes_held,
-					dept_id = self.dept_id,
-					)
+		return	{	'id' : self.ID,
+					'name' : self.name,
+					'classes_held' : self.classes_held,
+					'dept_ID' : self.dept_ID,
+				}
 	def from_json(json_data):
-		Course_ID = json_data.get('Course_ID')
-		Course_name = json_data.get('Course_name')
-		dept_id = json_data.get('dept_id')
-		if dept_id and Course_ID and Course_name:
-			return Course(dept_id=dept_id,Course_ID=Course_ID,Course_name=Course_name)
+		ID = json_data.get('id')
+		name = json_data.get('name')
+		dept_ID = json_data.get('dept_id')
+		if ID and ID and name:
+			return Course(dept_ID=dept_ID,ID=ID,name=name)
 		else:
 			pass
 
@@ -79,27 +75,27 @@ class User(UserMixin,db.Model):
 	fname = db.Column(db.String(64), index=True)
 	lname = db.Column(db.String(64), index=True)
 	password_hash = db.Column(db.String(128))
-	dept = db.Column(db.Integer,db.ForeignKey('department.Dept_ID'))
-	role_id = db.Column(db.Integer, db.ForeignKey('role.role_id',onupdate="CASCADE",ondelete="CASCADE"))
+	dept = db.Column(db.Integer,db.ForeignKey('department.ID'))
+	role_id = db.Column(db.Integer, db.ForeignKey('role.ID',onupdate="CASCADE",ondelete="CASCADE"))
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (prof_courses.c.prof_id == username & role_id ==  Role.query.filter_by(role ='Faculty').first().role_id),
-			secondaryjoin = (prof_courses.c.course_id == Course.Course_ID),
+			primaryjoin = (prof_courses.c.FID == username & role_id ==  Role.query.filter_by(name='Faculty').first().role_id),
+			secondaryjoin = (prof_courses.c.CID == Course.ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	tutoring = db.relationship('Course',
 			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.ta_id == username & role_id ==  Role.query.filter_by(role ='TA').first().role_id),
-			secondaryjoin = (ta_courses.c.course_id == Course.Course_ID),
+			primaryjoin = (ta_courses.c.TAID == username & role_id ==  Role.query.filter_by(name='TA').first().role_id),
+			secondaryjoin = (ta_courses.c.CID == Course.ID),
 			backref = db.backref('tutored_by',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	opted = db.relationship('Course',
 			secondary=stud_courses,
-			primaryjoin = (stud_courses.c.stud_id == username & role_id == Role.query.filter_by(role ='Student').first().role_id),
-			secondaryjoin = (stud_courses.c.course_id == Course.Course_ID),
+			primaryjoin = (stud_courses.c.SID == username & role_id == Role.query.filter_by(name='Student').first().role_id),
+			secondaryjoin = (stud_courses.c.CID == Course.ID),
 			backref = db.backref('studied_by',lazy='dynamic'),
 			lazy = 'dynamic')
 	
@@ -117,19 +113,16 @@ class User(UserMixin,db.Model):
 		return user_obj
 
 	def from_json(json_data):
-		username = json_data.get('userid')
+		username = json_data.get('username')
 		email = json_data.get('email')
 		fname = json_data.get('fname')
-		lname = json_data.get('lname')		
-		dept = json_data.get('deptc')
-		print(dept)
-		if username and email and fname and lname and dept:
-			return User(username=username,email=email,fname=fname,lname=lname,dept=dept)
-		else:
-			pass
+		lname = json_data.get('lname')
+		dept = json_data.get('deptc') or None
+		return User(username=username,email=email,fname=fname,lname=lname,dept=dept)
 
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    
+
 	def set_password(self, password):
 		self.password_hash = generate_password_hash(password)
 
@@ -159,25 +152,26 @@ class User(UserMixin,db.Model):
 		return User.query.get(id)
 
 class Attendance(db.Model):													#attendance records
-	course_id = db.Column(db.String(64),db.ForeignKey('stud_courses.course_id'),primary_key=True)
-	student_id = db.Column(db.String(64),db.ForeignKey('stud_courses.stud_id'),primary_key=True)
+	CID = db.Column(db.String(64),db.ForeignKey('stud_courses.CID'),primary_key=True)
+	SID = db.Column(db.String(64),db.ForeignKey('stud_courses.SID'),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)
-	faculty_id = db.Column(db.String(64),db.ForeignKey('prof_courses.prof_id'))
-	TA_id = db.Column(db.String(64),db.ForeignKey('ta_courses.ta_id'))
+	FID = db.Column(db.String(64),db.ForeignKey('prof_courses.FID'))
+	TAID = db.Column(db.String(64),db.ForeignKey('ta_courses.TAID'))
 
 	def to_json(self):
-		return dict(cid = self.course_id,
-					stud_id = self.student_id,
-					prof_id = self.faculty_id,
-					ta_id = self.TA_id,
-					time = self.timestamp)
+		return 	{	'cid' : self.CID,
+					'sid' : self.SID,
+					'fid' : self.FID,
+					'taid' : self.TAID,
+					'time' : self.timestamp
+				}
 	def from_json(json_data):
-		course_ID = json_data.get('course_ID')
-		student_id = json_data.get('student_id')
-		TA_id = json_data.get('TA_id')
+		CID = json_data.get('cid')
+		SID = json_data.get('sid')
+		TAID = json_data.get('taid')
 		timestamp = json_data.get('timestamp')
-		faculty_id = json_data.get('faculty_id')
-		if TA_ID and course_ID and timestamp and faculty_id and student_id:
-			return Attendance(faculty_id=faculty_id,TA_id=TA_id,dept_id=dept_id,course_ID=course_ID,student_id=student_id)
+		FID = json_data.get('fid')
+		if TAID and ID and timestamp and FID and SID:
+			return Attendance(FID=FID,TAID=TAID,CID=CID,SID=SID,timestamp=timestamp)
 		else:
 			pass
