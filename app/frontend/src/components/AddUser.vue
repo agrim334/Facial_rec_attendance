@@ -89,7 +89,7 @@ export default {
         alert('Choose a department');
         f = 1;
       }
-      if (this.newuser.pass !== this.newuser.confirmpass) {
+      if (this.newuser.pass !== this.newuser.confirmpass || (this.newuser.pass === this.newuser.confirmpass && (this.newuser.pass === null || this.newuser.pass === ''))) {
         alert('Password no match');
         f = 1;
       }

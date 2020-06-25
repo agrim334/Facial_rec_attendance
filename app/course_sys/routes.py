@@ -38,25 +38,70 @@ def checkcoursejson():
 
 @course_sysbp.route('/add_course_json',methods=['POST'])
 def addcoursejson():
-	course = Course.from_json(request.json)
+	jsdat = request.json
+	check_course = Course.query.filter_by(ID = jsdat.get_data('id')).all()
+
+	if check_course and check_course.count() != 0:
+		return jsonify({ 'error' : 'Course already in database'})
+
+	check_course = Course.query.filter_by(name = jsdat.get_data('name')).all()
+
+	if check_course and check_course.count() != 0:
+		return jsonify({ 'error' : 'Course already in database'})
+
+	if jsdat.get_data('id') == '' or jsdat.get_data('id') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	if jsdat.get_data('name') == '' or jsdat.get_data('name') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	course = Course.from_json(jsdat)
 	if course is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	db.session.add(course)
-	db.session.commit()
-	return jsonify({ 'status' : 'success'})
+	try:
+		db.session.add(course)
+		db.session.commit()
+		return jsonify({ 'status' : 'success'})
+	except:
+		return jsonify({ 'status' : 'fail'})
 
 @course_sysbp.route('/modify_course_json',methods=['POST'])
 def modifycoursejson():
-	course = Course.query.filter_by(ID=request.json['old'].get('id')).first_or_404()
+	oldjs = request.json['old']
+	newjs = request.json['new']
+	
+	course = Course.query.filter_by(ID=oldjs.get('id')).first_or_404()
 	if course is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	course.ID = request.json['new'].get('id') or course.ID
-	course.name = request.json['new'].get('name') or course.name
+	course = Course.query.filter_by(name=oldjs.get('name')).first_or_404()
+	if course is None:
+		return jsonify({ 'error' : 'bad info'})
 
-	db.session.commit()
-	return jsonify({ 'status' : 'success'})
+	if newjs.get_data('id') == '' or newjs.get_data('id') is None:
+		return jsonify({ 'error' : 'bad info'})
+	if newjs.get_data('name') == '' or newjs.get_data('name') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	check_course = Course.query.filter_by(ID = newjs.get_data('id')).all()
+
+	if check_course and check_course.count() != 0:
+		return jsonify({ 'error' : 'Course already in database'})
+
+	check_course = Course.query.filter_by(name = newjs.get_data('name')).all()
+
+	if check_course and check_course.count() != 0:
+		return jsonify({ 'error' : 'Course already in database'})
+
+	try:
+		course.ID = newjs.get('id') or course.ID
+		course.name = newjs.get('name') or course.name
+
+		db.session.commit()
+		return jsonify({ 'status' : 'success'})
+	except:
+		return jsonify({ 'status' : 'fail'})
 
 @course_sysbp.route('/delete_course_json',methods=['POST'])
 def delcoursejson():
