@@ -26,7 +26,18 @@ export default {
   },
   methods: {
     handle() {
-      this.$emit('deptadd', this.dept);
+      let f = 0;
+      if (this.dept.id === null || this.dept.id === '') {
+        alert('fill dept id');
+        f = 1;
+      }
+      if (this.dept.name === null || this.dept.name === '') {
+        alert('fill dept name');
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('deptadd', this.dept);
+      }
     },
   },
 };

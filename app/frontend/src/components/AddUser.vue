@@ -1,6 +1,6 @@
 <template>
   <div id="register-form">
-    <form @submit.prevent="handle">
+    <form @submit.prevent="validate">
     <label>User ID</label>
     <input type="text" placeholder = "Enter UID" v-model = 'newuser.username' />
     <br>
@@ -43,6 +43,8 @@
 </template>
 
 <script>
+const validator = require('email-validator');
+
 export default {
   name: 'RegisterForm',
   props: { depts: Array, roles: Array },
@@ -54,9 +56,46 @@ export default {
     };
   },
   methods: {
-    handle() {
-      console.log(this.newuser.rolec);
-      this.$emit('userreg', this.newuser);
+    validate() {
+      let f = 0;
+      let ad = -1;
+      for (let i = 0; i < this.roles.length; i += 1) {
+        if (this.roles[i].name === 'Admin') {
+          ad = this.roles[i].id;
+          break;
+        }
+      }
+      if (this.newuser.username === null || this.newuser.username === '') {
+        alert('Fill in user name');
+        f = 1;
+      }
+      if (this.newuser.fname === null || this.newuser.fname === '') {
+        alert('Fill in first name');
+        f = 1;
+      }
+      if (this.newuser.lname === null || this.newuser.lname === '') {
+        alert('Fill in last name');
+        f = 1;
+      }
+      if (this.newuser.email === null || this.newuser.email === '' || validator.validate(this.newuser.email) === false) {
+        alert('email format incorrect');
+        f = 1;
+      }
+      if (this.newuser.rolec === null || this.newuser.rolec === '') {
+        alert('Choose a role');
+        f = 1;
+      }
+      if (this.newuser.rolec !== ad && (this.newuser.deptc === '' || this.newuser.deptc === null)) {
+        alert('Choose a department');
+        f = 1;
+      }
+      if (this.newuser.pass !== this.newuser.confirmpass) {
+        alert('Password no match');
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('userreg', this.newuser);
+      }
     },
   },
 };

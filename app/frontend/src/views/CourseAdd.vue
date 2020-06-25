@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <AddCourseForm @courseadd="validate">
+    <AddCourseForm @courseadd="add">
     </AddCourseForm>
   </div>
 </template>
@@ -16,15 +16,6 @@ export default {
     AddCourseForm,
   },
   methods: {
-    validate(newcourse) {
-      if (newcourse.id === null || newcourse.id === '') {
-        alert('Fill in user name');
-      }
-      if (newcourse.name === null || newcourse.name === '') {
-        alert('Fill in first name');
-      }
-      this.add(newcourse);
-    },
     add(data) {
       const path = 'http://localhost:5000/courses/add_course_json';
       axios.post(path, data)

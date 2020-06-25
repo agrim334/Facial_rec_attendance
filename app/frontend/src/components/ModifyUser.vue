@@ -1,6 +1,6 @@
 <template>
   <div id="modify-form">
-    <form @submit.prevent="handle">
+    <form @submit.prevent="validate">
     <label>User ID</label>
     <input type="text" placeholder = "Enter UID" v-model = 'moduser.username'/>
     <br>
@@ -36,6 +36,8 @@
 </template>
 
 <script>
+const validator = require('email-validator');
+
 export default {
   name: 'ModifyUser',
   props: { userrec: Array, depts: Array, roles: Array },
@@ -52,8 +54,42 @@ export default {
     };
   },
   methods: {
-    handle() {
-      this.$emit('userupd', this.moduser);
+    validate() {
+      let f = 0;
+      let ad = -1;
+      for (let i = 0; i < this.roles.length; i += 1) {
+        if (this.roles[i].name === 'Admin') {
+          ad = this.roles[i].id;
+          break;
+        }
+      }
+      if (this.moduser.username === null || this.moduser.username === '') {
+        alert('Fill in user name');
+        f = 1;
+      }
+      if (this.moduser.fname === null || this.moduser.fname === '') {
+        alert('Fill in first name');
+        f = 1;
+      }
+      if (this.moduser.lname === null || this.moduser.lname === '') {
+        alert('Fill in last name');
+        f = 1;
+      }
+      if (this.moduser.email === null || this.moduser.email === '' || validator.validate(this.moduser.email) === false) {
+        alert('email format incorrect');
+        f = 1;
+      }
+      if (this.moduser.rolec === null || this.moduser.rolec === '') {
+        alert('Choose a role');
+        f = 1;
+      }
+      if (this.moduser.rolec !== ad && (this.moduser.deptc === '' || this.moduser.deptc === null)) {
+        alert('Choose a department');
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('userupd', this.moduser);
+      }
     },
   },
 };

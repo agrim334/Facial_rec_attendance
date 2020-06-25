@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <AddDeptForm @deptadd="validate">
+    <AddDeptForm @deptadd="add">
     </AddDeptForm>
   </div>
 </template>
@@ -16,16 +16,6 @@ export default {
     AddDeptForm,
   },
   methods: {
-    validate(newdept) {
-      console.log(newdept);
-      if (newdept.id === null || newdept.id === '') {
-        alert('Fill in id');
-      }
-      if (newdept.name === null || newdept.name === '') {
-        alert('Fill in name');
-      }
-      this.add(newdept);
-    },
     add(data) {
       const path = 'http://localhost:5000/dept/add_dept_json';
       axios.post(path, data)

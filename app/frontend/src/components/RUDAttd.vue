@@ -3,7 +3,6 @@
     {{ attd.markerid }}
     {{ attd.markeeid }}
     {{ attd.courseid }}
-    {{ attd.role }}
     {{ attd.date }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>

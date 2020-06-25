@@ -1,6 +1,6 @@
 from .. import db,errors
 from . import log_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
+from flask import Flask,jsonify,request,redirect,url_for,session,current_app
 from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,ViewUserForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -8,9 +8,8 @@ from flask_login import current_user, login_user,logout_user,login_required
 from ..models import User,Role,Department
 from .email import send_password_reset_email
 from datetime import datetime,timedelta
-import re
-from flask import current_app
-from app.tables import UserResults
+import jwt
+
 
 APP = current_app._get_current_object()
 
@@ -22,7 +21,7 @@ APP = current_app._get_current_object()
 @log_sysbp.before_request
 def make_session_permanent():
 	session.permanent = True
-	log_sysbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
+	log_sysbp.permanent_session_lifetime = timedelta(minutes=20)		#idle timeout for user session
 
 @log_sysbp.after_request
 def after_request(response):									#security

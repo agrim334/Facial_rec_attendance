@@ -26,7 +26,18 @@ export default {
   },
   methods: {
     handle() {
-      this.$emit('courseadd', this.course);
+      let f = 0;
+      if (this.course.id === null || this.course.id === '') {
+        alert('fill course id');
+        f = 1;
+      }
+      if (this.course.name === null || this.course.name === '') {
+        alert('fill course name');
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('courseadd', this.course);
+      }
     },
   },
 };

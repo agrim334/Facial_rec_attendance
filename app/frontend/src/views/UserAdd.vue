@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <RegisterForm @userreg="validate" :roles="roles" :depts="depts">
+    <RegisterForm @userreg="add" :roles="roles" :depts="depts">
     </RegisterForm>
   </div>
 </template>
@@ -9,8 +9,6 @@
 // @ is an alias to /src
 import axios from 'axios';
 import RegisterForm from '@/components/AddUser.vue';
-
-const validator = require('email-validator');
 
 export default {
   name: 'Reg',
@@ -24,33 +22,6 @@ export default {
     };
   },
   methods: {
-    validate(newuser) {
-      if (newuser.username === null || newuser.username === '') {
-        alert('Fill in user name');
-      }
-      if (newuser.fname === null || newuser.fname === '') {
-        alert('Fill in first name');
-      }
-      if (newuser.lname === null || newuser.lname === '') {
-        alert('Fill in last name');
-      }
-      if (newuser.email === null || newuser.email === '') {
-        alert('Fill in email');
-      }
-      if (validator.validate(newuser.email) === false) {
-        alert('Email format is incorrect');
-      }
-      if (newuser.rolec === null || newuser.rolec === '') {
-        alert('Choose a role');
-      }
-      if (newuser.rolec !== 'r4' && (newuser.deptc === '' || newuser.deptc === null)) {
-        alert('Choose a department');
-      }
-      if (newuser.pass !== newuser.confirmpass) {
-        alert('Password no match');
-      }
-      this.add(newuser);
-    },
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
       axios.get(path)

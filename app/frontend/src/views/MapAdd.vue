@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <AddMapForm @mapadd='validate' @getusertype='getuser' >
+    <AddMapForm @mapadd='add'>
     </AddMapForm>
   </div>
 </template>
@@ -16,15 +16,6 @@ export default {
     AddMapForm,
   },
   methods: {
-    validate(newmap) {
-      if (newmap.cid === null || newmap.cid === '') {
-        alert('Enter CID');
-      }
-      if (newmap.uid === null || newmap.uid === '') {
-        alert('Enter UID');
-      }
-      this.add(newmap);
-    },
     add(data) {
       const path = 'http://localhost:5000/map/add_map_json';
       axios.post(path, data)

@@ -34,7 +34,18 @@ export default {
   },
   methods: {
     handle() {
-      this.$emit('mapadd', this.map);
+      let f = 0;
+      if (this.map.id === null || this.map.id === '') {
+        alert('fill map id');
+        f = 1;
+      }
+      if (this.map.name === null || this.map.name === '') {
+        alert('fill map name');
+        f = 1;
+      }
+      if (f === 0 ) {
+        this.$emit('mapadd', this.map);
+      }
     },
   },
 };
