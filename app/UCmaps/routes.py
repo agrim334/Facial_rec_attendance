@@ -27,32 +27,85 @@ def after_request(response):									#security
 
 @mapbp.route('/check_map_json',methods=['GET','POST'])
 def checkmapjson():
-	PC = [tup.to_json() for tup in db.session.query(prof_courses).all()]
-	TC = [tup.to_json() for tup in db.session.query(ta_courses).all()]
-	SC = [tup.to_json() for tup in db.session.query(stud_courses).all()]
-	response = {'records_P': PC, 
-				'records_T': TC,
-				'records_S': SC
+	value = int(request.get_data('choice'))
+	pc = []
+	sc = []
+	tc = []
+	if value == 1:
+		pc = [{'cid': tup.CID, 'uid': tup.FID} for tup in db.session.query(prof_courses).all()]
+	if value == 2:
+		tc = [{'cid': tup.CID, 'uid': tup.TAID} for tup in db.session.query(ta_courses).all()]
+	if value == 3:
+		sc = [{'cid': tup.CID, 'uid': tup.SID} for tup in db.session.query(stud_courses).all()]
+	response =	{
+				'records_p' : pc,
+				'records_t' : tc,
+				'records_s' : sc,
 				}
+
 	return jsonify(response)
 
 @mapbp.route('/add_map_json',methods=['POST'])
 def addmapjson():
-	
-	return jsonify(response)
+	user = User.query.filter_by(username=request.json['uid']).first()
+	fa_role = Role.query.filter_by(name="Prof").first()
+	stud_role = Role.query.filter_by(name="Student").first()
+	ta_role = Role.query.filter_by(name="TA").first()
+	admin_role = Role.query.filter_by(name="Admin").first()
+
+	if user.role_id == fa_role.ID:
+		stmt = prof_courses.insert().values(FID=request.json['uid'],CID=request.json['cid'])
+	elif user.role_id == ta_role.ID:
+		stmt = ta_courses.insert().values(TAID=request.json['uid'],CID=request.json['cid'])
+	elif user.role_id == stud_role.ID:
+		stmt = stud_courses.insert().values(SID=request.json['uid'],CID=request.json['cid'])
+
+	db.session.execute(stmt)
+	db.session.commit()
+	return jsonify({'status':'success'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():
-	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
-	response = { 'records': maprec }
+	user = User.query.filter_by(username=request.json['uid']).first()
+	fa_role = Role.query.filter_by(name="Prof").first()
+	stud_role = Role.query.filter_by(name="Student").first()
+	ta_role = Role.query.filter_by(name="TA").first()
+	admin_role = Role.query.filter_by(name="Admin").first()
+
+	if user.role_id == fa_role.ID:
+		item = db.session.query(prof_courses).filter_by(FID=request.json['uid'],CID=request.json['cid']).first()
+	elif user.role_id == ta_role.ID:
+		item = db.session.query(ta_courses).filter_by(TAID=request.json['uid'],CID=request.json['cid']).first()
+	elif user.role_id == stud_role.ID:
+		item = db.session.query(stud_courses).filter_by(SID=request.json['uid'],CID=request.json['cid']).first()
+
+	print(item)
+	if(item):
+		db.session.delete(item)
+	
+	db.session.commit()
+
 	return jsonify(response)
 
 @mapbp.route('/delete_map_json',methods=['POST'])
 def delmapjson():
-	maprec = [tup.to_json() for tup in db.session.query(prof_courses).all()]
-	maprec.append([tup.to_json() for tup in db.session.query(ta_courses).all()])
-	maprec.append([tup.to_json() for tup in db.session.query(stud_courses).all()])	
-	response = { 'records': maprec }
-	return jsonify(response)
+	user = User.query.filter_by(username=request.json['uid']).first()
+	fa_role = Role.query.filter_by(name="Prof").first()
+	stud_role = Role.query.filter_by(name="Student").first()
+	ta_role = Role.query.filter_by(name="TA").first()
+	admin_role = Role.query.filter_by(name="Admin").first()
+
+	if user.role_id == fa_role.ID:
+		item = db.session.query(prof_courses).filter_by(FID=request.json['uid'],CID=request.json['cid']).first()
+	elif user.role_id == ta_role.ID:
+		item = db.session.query(ta_courses).filter_by(TAID=request.json['uid'],CID=request.json['cid']).first()
+	elif user.role_id == stud_role.ID:
+		item = db.session.query(stud_courses).filter_by(SID=request.json['uid'],CID=request.json['cid']).first()
+
+	print(item)
+	if(item):
+		db.session.delete(item)
+	
+	db.session.commit()
+
+	return jsonify({'status':'success'})

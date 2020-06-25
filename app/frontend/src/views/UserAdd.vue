@@ -19,9 +19,8 @@ export default {
   },
   data() {
     return {
-      roles: [{ id: 'r1', name: 'Student' }, { id: 'r2', name: 'Prof' }, { id: 'r3', name: 'TA' },
-        { id: 'r4', name: 'Admin' }],
-      depts: [],
+      roles: Array,
+      depts: Array,
     };
   },
   methods: {
@@ -52,11 +51,21 @@ export default {
       }
       this.add(newuser);
     },
-    getRnD() {
+    getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
       axios.get(path)
         .then((res) => {
           this.depts = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    getRole() {
+      const path = 'http://localhost:5000/roles/check_role_json';
+      axios.get(path)
+        .then((res) => {
+          this.roles = res.data.records;
         })
         .catch((error) => {
           console.error(error);
@@ -74,7 +83,8 @@ export default {
     },
   },
   created() {
-    this.getRnD();
+    this.getDept();
+    this.getRole();
   },
 };
 </script>

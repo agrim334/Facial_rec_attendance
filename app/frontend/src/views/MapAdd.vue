@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <AddMapForm @mapadd='validate' :roles='roles' >
+    <AddMapForm @mapadd='validate' @getusertype='getuser' >
     </AddMapForm>
   </div>
 </template>
@@ -12,27 +12,29 @@ import AddMapForm from '@/components/AddMap.vue';
 
 export default {
   name: 'AddMap',
-  props: { roles: Array },
   components: {
     AddMapForm,
   },
   methods: {
     validate(newmap) {
-      alert(newmap);
+      if (newmap.cid === null || newmap.cid === '') {
+        alert('Enter CID');
+      }
+      if (newmap.uid === null || newmap.uid === '') {
+        alert('Enter UID');
+      }
+      this.add(newmap);
     },
-    getroles() {
-      const path = 'http://localhost:5000/roles/check_role_json';
-      axios.get(path)
+    add(data) {
+      const path = 'http://localhost:5000/map/add_map_json';
+      axios.post(path, data)
         .then((res) => {
-          this.roles = res.data.records;
+          alert(res.data);
         })
         .catch((error) => {
           console.error(error);
         });
     },
-  },
-  created() {
-    this.getroles();
   },
 };
 </script>

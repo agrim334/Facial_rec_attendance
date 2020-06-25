@@ -84,3 +84,77 @@ def delattdjson():
 	db.session.delete(attd)
 	db.session.commit()
 	return jsonify({ 'status' : 'success'})
+
+
+def detect_faces_in_image(file_stream,CID,user):
+	result = []
+	try:
+		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
+		base = os.path.abspath(os.path.dirname(__file__))
+		known_face_encd = []
+		known_face_name = {}
+		result = []
+		num = 0
+		pat = re.compile('[0-9A-Za-z]+\.')
+
+		for image in os.listdir(known_dir):
+			temp = face_recognition.load_image_file(known_dir+image)
+			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
+			encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
+			known_face_encd.append(encd)
+			image = pat.match(image)[0]
+			image = image[:-1]
+			known_face_name[str(encd)] = image
+
+		for file in os.listdir(file_stream):
+
+			un_image = face_recognition.load_image_file(file_stream+file)
+
+			face_locations = face_recognition.face_locations(un_image,model = "cnn")
+
+			un_face_encodings = face_recognition.face_encodings(un_image,known_face_locations=face_locations)
+
+			if len(un_face_encodings) > 0:
+				for face_encoding in un_face_encodings:
+					num = num + 1
+					matches = face_recognition.compare_faces(known_face_encd, face_encoding)
+					name = "Unknown"
+
+					face_distances = face_recognition.face_distance(known_face_encd, face_encoding)
+					best_match_index = np.argmin(face_distances)
+
+					if matches[best_match_index]:
+						im = known_face_encd[best_match_index]
+						name = known_face_name[str(im)]
+					result.append(("Face number " + str(num),name))
+
+					if name != "Unknown":
+						name = pat.match(name)[0]
+						name = name[:-1]
+						stud = User.query.filter_by(username=name,role_id=stud_role.role_id).first() 
+						if stud:
+							c1 = db.session.query(stud_courses).filter_by(TAID=stud.username,CID = CID)
+							if c1:
+								check = Attendance.query.filter_by(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+								if not check or check.count() == 0:
+									if user.role_id == ta_role.role_id :
+										atdrecord = Attendance(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = user.username)
+									else:
+										atdrecord = Attendance(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = user.username)
+									db.session.add(atdrecord)
+									db.session.commit()
+
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
+
+	except MemoryError as m:
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)
+
+	except:
+
+		for image in os.listdir(base+"/uploads/"):
+			if os.path.isfile(base+"/uploads/"+image):
+				os.remove(base+"/uploads/"+image)

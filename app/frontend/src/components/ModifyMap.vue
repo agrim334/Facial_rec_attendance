@@ -15,7 +15,7 @@
       <label> {{ role.name }} </label>
     </div>
     <br>
-    <div v-if='map.role === "1"'>
+    <div v-if='map.role === 1'>
       <label> Student Image </label>
       <input type="file" accept="image/*" id="file-input">
     </div>

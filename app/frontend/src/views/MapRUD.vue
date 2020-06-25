@@ -1,5 +1,13 @@
 <template>
   <div class="home">
+    <label>Filters</label>
+    <br>
+    <input type='radio' id='PC' value='1' v-model = 'choice' @change='getMaps'>
+    <label for='PC'> ProfCourses </label>
+    <input type='radio' id='TC' value='2' v-model = 'choice' @change='getMaps'>
+    <label for='TC'> TACourses </label>
+    <input type='radio' id='SC' value='3' v-model = 'choice' @change='getMaps'>
+    <label for='SC'> StudCourses </label>
     <table>
       <tr v-for='map in maps' :key='map.id'>
         <MapRecord :map='map' @updrec='updaterec' @delrec='deleterec'></MapRecord>
@@ -19,6 +27,11 @@ export default {
   props: {
     maps: Array,
   },
+  data() {
+    return {
+      choice: '',
+    };
+  },
   components: {
     MapRecord,
   },
@@ -37,18 +50,18 @@ export default {
         });
     },
     getMaps() {
+      console.log(this.choice);
       const path = 'http://localhost:5000/map/check_map_json';
-      axios.get(path)
+      axios.post(path, this.choice)
         .then((res) => {
-          this.maps = res.data.records;
+          const temp = res.data.records_t.concat(res.data.records_p);
+          const t2 = res.data.records_s.concat(temp);
+          this.maps = t2;
         })
         .catch((error) => {
           console.error(error);
         });
     },
-  },
-  created() {
-    this.getMaps();
   },
 };
 </script>

@@ -6,15 +6,9 @@
     <br>
 
     <label>map name</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
+    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' @change = 'getusertype' />
     <br>
 
-    <label>Role</label>
-    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
-      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'map.role'>
-      <label> {{ role.name }} </label>
-    </div>
-    <br>
     <div v-if='map.role === 1'>
       <label> Student Image </label>
       <input type="file" accept="image/*" id="file-input">
@@ -27,13 +21,14 @@
 </template>
 
 <script>
+
 export default {
   name: 'AddMapForm',
   props: { roles: Array },
   data() {
     return {
       map: {
-        cid: '', uid: '', role: '',
+        cid: '', uid: '',
       },
     };
   },

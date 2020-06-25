@@ -121,8 +121,9 @@ class User(UserMixin,db.Model):
 		email = json_data.get('email')
 		fname = json_data.get('fname')
 		lname = json_data.get('lname')
-		dept = json_data.get('deptc') or None
-		return User(username=username,email=email,fname=fname,lname=lname,dept=dept)
+		dept = json_data.get('deptc')
+		role_id = json_data.get('rolec')
+		return User(username=username,email=email,fname=fname,lname=lname,dept=dept,role_id=role_id)
 
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    

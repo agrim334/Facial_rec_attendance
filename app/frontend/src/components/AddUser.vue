@@ -55,6 +55,7 @@ export default {
   },
   methods: {
     handle() {
+      console.log(this.newuser.rolec);
       this.$emit('userreg', this.newuser);
     },
   },
