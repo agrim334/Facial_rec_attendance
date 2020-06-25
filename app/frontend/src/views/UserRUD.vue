@@ -5,7 +5,6 @@
         <UserRecord :user='user' @updrec='updaterec' @delrec='deleterec'></UserRecord>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add Users</button>
   </div>
 </template>
 
@@ -37,9 +36,6 @@ export default {
         .catch((error) => {
           console.error(error);
         });
-    },
-    addrec() {
-      alert('sdcf');
     },
     getUsers() {
       const path = 'http://localhost:5000/users/check_user_json';

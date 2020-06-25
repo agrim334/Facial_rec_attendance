@@ -1,6 +1,8 @@
 <template>
  <div>
     {{ user.username }}
+    {{ user.fname }}
+    {{ user.lname }}
     {{ user.email }}
     {{ user.dept }}
     {{ user.role }}

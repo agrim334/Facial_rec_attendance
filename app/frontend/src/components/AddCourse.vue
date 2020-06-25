@@ -2,7 +2,7 @@
   <div id="register-form">
     <form @submit.prevent="handle">
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'course.cid' />
+    <input type="text" placeholder = "Enter CID" v-model = 'course.id' />
     <br>
 
     <label>Course name</label>
@@ -20,7 +20,7 @@ export default {
   data() {
     return {
       course: {
-        cid: '', name: '',
+        id: '', name: '',
       },
     };
   },

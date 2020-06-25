@@ -7,6 +7,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import ModifyCourseForm from '@/components/ModifyCourse.vue';
 
 export default {
@@ -19,7 +20,14 @@ export default {
   },
   methods: {
     updaterec(modcourse) {
-      alert(modcourse);
+      const path = 'http://localhost:5000/courses/modify_course_json';
+      axios.post(path, { old: this.course, new: modcourse })
+        .then(() => {
+          console.log(this);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };

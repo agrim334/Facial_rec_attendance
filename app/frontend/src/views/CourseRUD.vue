@@ -5,7 +5,6 @@
         <courserec :course='course' @updrec='updaterec' @delrec='deleterec'></courserec>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add courses</button>
   </div>
 
 </template>
@@ -25,13 +24,17 @@ export default {
   },
   methods: {
     updaterec(coursedat) {
-      alert(coursedat);
+      this.$router.push({ name: 'CourseModify', params: { course: coursedat } });
     },
     deleterec(coursedat) {
-      alert(coursedat);
-    },
-    addrec() {
-      alert('sdcf');
+      const path = 'http://localhost:5000/courses/delete_course_json';
+      axios.post(path, coursedat.id)
+        .then(() => {
+          this.getCourse();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     getCourse() {
       const path = 'http://localhost:5000/courses/check_course_json';

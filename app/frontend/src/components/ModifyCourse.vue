@@ -2,13 +2,13 @@
   <div id="modify-form">
     <form @submit.prevent="handle">
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'modcourse.cid'
-    value = 'courserec.cid' />
+    <input type="text" placeholder = "Enter CID" v-model = 'modcourse.id'
+    />
     <br>
 
     <label>Course name</label>
     <input type="text" placeholder = "Enter course name" v-model = 'modcourse.name'
-    value = 'courserec.name'/>
+    />
     <br>
 
     <input type="submit" value="Update Course" />
@@ -23,7 +23,8 @@ export default {
   data() {
     return {
       modcourse: {
-        cid: '', name: '',
+        id: this.courserec.id,
+        name: this.courserec.name,
       },
     };
   },

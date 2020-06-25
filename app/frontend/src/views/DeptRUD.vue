@@ -28,9 +28,9 @@ export default {
     },
     deleterec(deptdat) {
       const path = 'http://localhost:5000/dept/delete_dept_json';
-      axios.post(path, deptdat.name)
-        .then((res) => {
-          this.depts = res.data.records;
+      axios.post(path, deptdat.id)
+        .then(() => {
+          this.getDept();
         })
         .catch((error) => {
           console.error(error);

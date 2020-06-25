@@ -34,25 +34,36 @@ def after_request(response):									#security
 def checkcoursejson():
 	courserec = [course.to_json() for course in Course.query.all()]
 	response = { 'records': courserec }
-	return jsonify(repsonse)
+	return jsonify(response)
 
-@course_sysbp.route('/mark_course_json',methods=['POST'])
+@course_sysbp.route('/add_course_json',methods=['POST'])
 def markcoursejson():
 	course = Course.from_json(request.json)
+	if course is None:
+		return jsonify({ 'error' : 'bad info'})
+	
 	db.session.add(course)
 	db.session.commit()
-	return jsonify(course.to_json())
+	return jsonify({ 'status' : 'success'})
 
 @course_sysbp.route('/modify_course_json',methods=['POST'])
 def modifycoursejson():
-	course = Course.from_json(request.json)
-	db.session.add(course)
+	course = Course.query.filter_by(ID=request.json['old'].get('id')).first_or_404()
+	if course is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	course.ID = request.json['new'].get('id') or course.ID
+	course.name = request.json['new'].get('name') or course.name
+
 	db.session.commit()
-	return jsonify(course.to_json())
+	return jsonify({ 'status' : 'success'})
 
 @course_sysbp.route('/delete_course_json',methods=['POST'])
 def delcoursejson():
-	course = Course.from_json(request.json)
-	db.session.add(course)
+	course = Course.query.filter_by(ID=request.get_data('id')).first_or_404()
+	if course is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	db.session.delete(course)
 	db.session.commit()
-	return jsonify(course.to_json())
+	return jsonify({ 'status' : 'success'})

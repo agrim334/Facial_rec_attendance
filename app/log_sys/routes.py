@@ -41,7 +41,6 @@ def checklogjson():
 
 @log_sysbp.route('/add_log_json',methods=['POST'])
 def addlogjson():
-	print(request.json)
 	user = User.from_json(request.json)
 	user.set_password(request.json.get('pass'))
 	if user is None:
@@ -57,10 +56,10 @@ def modifylogjson():
 	if user is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	user.username = user.username or request.json['new'].get('username')
-	user.fname = user.lname or request.json['new'].get('fname')
-	user.lname = user.lname or request.json['new'].get('lname')
-	user.email = user.email or request.json['new'].get('email')
+	user.username = request.json['new'].get('username') or user.username
+	user.fname = request.json['new'].get('fname') or user.lname 
+	user.lname = request.json['new'].get('lname') or user.lname 
+	user.email = request.json['new'].get('email') or user.email
 
 	db.session.commit()
 	return jsonify({'status' : 'success'})
