@@ -49,23 +49,38 @@ def checkattdjson():
 	response = { 'records': attdrec }
 	return jsonify(response)
 
-@attd_sysbp.route('/mark_attendance_json',methods=['POST'])
-def markattdjson():
+@attd_sysbp.route('/add_attendance_json',methods=['POST'])
+def addattdjson():
 	attd = Attendance.from_json(request.json)
+	if attd is None:
+		return jsonify({ 'error' : 'bad info'})
+
 	db.session.add(attd)
 	db.session.commit()
 	return jsonify(attd.to_json())
 
 @attd_sysbp.route('/modify_attendance_json',methods=['POST'])
 def modifyattdjson():
-	attd = Attendance.from_json(request.json)
-	db.session.add(attd)
+	attd = Attendance.from_json(request.json['old'])
+	if attd is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	attd.CID = request.json['new'].get('cid') or attd.CID
+	attd.SID = request.json['new'].get('sid') or attd.SID
+	attd.FID = request.json['new'].get('fid') or attd.FID
+	attd.TAID = request.json['new'].get('taid') or attd.TAID
+	attd.timestamp = request.json['new'].get('timestamp') or attd.timestamp
+
 	db.session.commit()
-	return jsonify(attd.to_json())
+	return jsonify({ 'status' : 'success'})
+
 
 @attd_sysbp.route('/delete_attendance_json',methods=['POST'])
 def delattdjson():
 	attd = Attendance.from_json(request.json)
-	db.session.add(attd)
+	if attd is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	db.session.delete(attd)
 	db.session.commit()
-	return jsonify(attd.to_json())
+	return jsonify({ 'status' : 'success'})

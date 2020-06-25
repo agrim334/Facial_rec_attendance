@@ -2,7 +2,7 @@
   <div id="register-form">
     <form @submit.prevent="handle">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.userid' value = 'user' />
+    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.userid' />
     <br>
 
     <label>Course ID</label>

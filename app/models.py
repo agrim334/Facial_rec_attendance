@@ -27,6 +27,10 @@ class Role(db.Model):
 	ID = db.Column(db.Integer,primary_key=True,autoincrement=True)
 	name = db.Column(db.String(20))
 	users_name= db.relationship('User', backref='role')
+	def to_json(self):
+		return	{	'id' : self.ID,
+					'name' : self.name,
+				}
 
 class Department(db.Model):
 	ID = db.Column(db.Integer, primary_key=True,autoincrement=True)

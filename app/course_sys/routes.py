@@ -37,11 +37,11 @@ def checkcoursejson():
 	return jsonify(response)
 
 @course_sysbp.route('/add_course_json',methods=['POST'])
-def markcoursejson():
+def addcoursejson():
 	course = Course.from_json(request.json)
 	if course is None:
 		return jsonify({ 'error' : 'bad info'})
-	
+
 	db.session.add(course)
 	db.session.commit()
 	return jsonify({ 'status' : 'success'})

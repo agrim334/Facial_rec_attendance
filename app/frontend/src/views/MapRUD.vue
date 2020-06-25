@@ -1,11 +1,10 @@
 <template>
   <div class="home">
     <table>
-      <tr v-for='map in maps' :key='map.uid'>
+      <tr v-for='map in maps' :key='map.id'>
         <MapRecord :map='map' @updrec='updaterec' @delrec='deleterec'></MapRecord>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add maps</button>
   </div>
 
 </template>
@@ -25,13 +24,17 @@ export default {
   },
   methods: {
     updaterec(mapdat) {
-      alert(mapdat);
+      this.$router.push({ name: 'MapModify', params: { map: mapdat } });
     },
     deleterec(mapdat) {
-      alert(mapdat);
-    },
-    addrec() {
-      alert('sdcf');
+      const path = 'http://localhost:5000/map/delete_map_json';
+      axios.post(path, mapdat)
+        .then(() => {
+          this.getMaps();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     getMaps() {
       const path = 'http://localhost:5000/map/check_map_json';

@@ -59,12 +59,14 @@ def create_app():
 		from .dept_sys import dept_sysbp 
 		from .course_sys import course_sysbp 
 		from .UCmaps import mapbp
+		from .role import role_sysbp
 
 		APP.register_blueprint(log_sysbp,url_prefix='/users')
 		APP.register_blueprint(attd_sysbp,url_prefix='/attd')
 		APP.register_blueprint(course_sysbp,url_prefix='/courses')
 		APP.register_blueprint(dept_sysbp,url_prefix='/dept')
 		APP.register_blueprint(mapbp,url_prefix='/map')
+		APP.register_blueprint(role_sysbp,url_prefix='/roles')
 		
 	from app import models
 

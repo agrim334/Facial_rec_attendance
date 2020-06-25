@@ -9,8 +9,16 @@
     <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
     <br>
 
-    <label>map name</label>
-    <input type="text" placeholder = "Enter User Role" v-model = 'map.role' />
+    <label>Role</label>
+    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
+      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'map.role'>
+      <label> {{ role.name }} </label>
+    </div>
+    <br>
+    <div v-if='map.role === 1'>
+      <label> Student Image </label>
+      <input type="file" accept="image/*" id="file-input">
+    </div>
     <br>
 
     <input type="submit" value="Add map" />

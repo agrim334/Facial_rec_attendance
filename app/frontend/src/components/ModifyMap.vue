@@ -1,39 +1,51 @@
 <template>
   <div id="register-form">
     <form @submit.prevent="handle">
-    <label>Map ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'modmap.cid' value = 'maprec.cid' />
+    <label>map ID</label>
+    <input type="text" placeholder = "Enter CID" v-model = 'map.cid' />
     <br>
 
-    <label>Map name</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'modmap.uid' value = 'maprec.uid'/>
+    <label>map name</label>
+    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
     <br>
 
-    <label>Map name</label>
-    <input type="text" placeholder = "Enter User Role"
-    v-model = 'modmap.role' value = 'maprec.role' />
+    <label>Role</label>
+    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
+      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'map.role'>
+      <label> {{ role.name }} </label>
+    </div>
+    <br>
+    <div v-if='map.role === "1"'>
+      <label> Student Image </label>
+      <input type="file" accept="image/*" id="file-input">
+    </div>
     <br>
 
-    <input type="submit" value="Modify map" />
+    <input type="submit" value="Add map" />
     </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ModifyMapForm',
-  props: { maprec: Array },
+  name: 'AddMapForm',
+  props: { ogmap: Array, roles: Array },
   data() {
     return {
-      modmap: {
-        cid: '', uid: '', role: '',
+      map: {
+        cid: this.ogmap.cid,
+        id: this.ogmap.id,
+        role: this.ogmap.role,
       },
     };
   },
   methods: {
     handle() {
-      this.$emit('mapupd', this.modmap);
+      this.$emit('mapadd', this.map);
     },
+  },
+  created() {
+    console.log(this.roles);
   },
 };
 </script>
