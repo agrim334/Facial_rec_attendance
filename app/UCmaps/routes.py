@@ -66,26 +66,33 @@ def addmapjson():
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():
-	user = User.query.filter_by(username=request.json['uid']).first()
+	user = User.query.filter_by(username=request.json['old'].get('uid')).first()
 	fa_role = Role.query.filter_by(name="Prof").first()
 	stud_role = Role.query.filter_by(name="Student").first()
 	ta_role = Role.query.filter_by(name="TA").first()
 	admin_role = Role.query.filter_by(name="Admin").first()
 
 	if user.role_id == fa_role.ID:
-		item = db.session.query(prof_courses).filter_by(FID=request.json['uid'],CID=request.json['cid']).first()
-	elif user.role_id == ta_role.ID:
-		item = db.session.query(ta_courses).filter_by(TAID=request.json['uid'],CID=request.json['cid']).first()
-	elif user.role_id == stud_role.ID:
-		item = db.session.query(stud_courses).filter_by(SID=request.json['uid'],CID=request.json['cid']).first()
+		stmt = prof_courses.delete().where(prof_courses.c.FID == request.json['old'].get('uid') and prof_courses.c.CID == request.json['old'].get('cid'))
+		db.session.execute(stmt)
+		stmt2 = prof_courses.insert().values(FID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
+		db.session.execute(stmt2)
 
-	print(item)
-	if(item):
-		db.session.delete(item)
-	
+	elif user.role_id == ta_role.ID:
+		stmt = ta_courses.delete().where(ta_courses.c.TAID == request.json['old'].get('uid') and ta_courses.c.CID == request.json['old'].get('cid'))
+		db.session.execute(stmt)
+		stmt2 = ta_courses.insert().values(TAID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
+		db.session.execute(stmt2)
+
+	elif user.role_id == stud_role.ID:
+		stmt = stud_courses.delete().where(stud_courses.c.SID == request.json['old'].get('uid') and stud_courses.c.CID == request.json['old'].get('cid'))
+		db.session.execute(stmt)
+		stmt2 = stud_courses.insert().values(SID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
+		db.session.execute(stmt2)
+
 	db.session.commit()
 
-	return jsonify(response)
+	return jsonify({'status':'success'})
 
 @mapbp.route('/delete_map_json',methods=['POST'])
 def delmapjson():
@@ -96,16 +103,13 @@ def delmapjson():
 	admin_role = Role.query.filter_by(name="Admin").first()
 
 	if user.role_id == fa_role.ID:
-		item = db.session.query(prof_courses).filter_by(FID=request.json['uid'],CID=request.json['cid']).first()
+		stmt = prof_courses.delete().where(prof_courses.c.FID == request.json['uid'] and prof_courses.c.CID == request.json['cid'])
 	elif user.role_id == ta_role.ID:
-		item = db.session.query(ta_courses).filter_by(TAID=request.json['uid'],CID=request.json['cid']).first()
+		stmt = ta_courses.delete().where(ta_courses.c.TAID == request.json['uid'] and ta_courses.c.CID == request.json['cid'])
 	elif user.role_id == stud_role.ID:
-		item = db.session.query(stud_courses).filter_by(SID=request.json['uid'],CID=request.json['cid']).first()
+		stmt = stud_courses.delete().where(stud_courses.c.SID == request.json['uid'] and stud_courses.c.CID ==  request.json['cid'])
 
-	print(item)
-	if(item):
-		db.session.delete(item)
-	
+	db.session.execute(stmt)
 	db.session.commit()
 
 	return jsonify({'status':'success'})
