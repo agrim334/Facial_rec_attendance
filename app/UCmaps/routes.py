@@ -17,7 +17,7 @@ AP = current_app._get_current_object()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 AP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'known')
-upldir = os.path.join(basedir, 'known')
+known_dir = os.path.join(basedir, 'known')
 photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
@@ -85,20 +85,26 @@ def addmapjson():
 			elif user.role_id == stud_role.ID:
 				user.opted.append(course)
 				isstud = 1
+
 			db.session.commit()
 			return jsonify({'isstud': isstud, 'status':'success'})
 		except:
 			return jsonify({'status':'fail'})
 	elif request.files:
-		print(request.files)
-		if not os.path.exists(upldir):
-			os.makedirs(upldir)
+		if not os.path.exists(known_dir):
+			os.makedirs(known_dir)
+		uid = request.form.get('uid')
 		for f in request.files:
 			t = request.files[f]
 			filename = secure_filename(request.files[f].filename)
-			t.save(os.path.join(upldir, filename))
+			t.save(os.path.join(known_dir, filename))
+			filename_old, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+			new_file = uid + file_extension
+			os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, new_file))
 
 		return jsonify({'status':'success'})
+	else:
+		return jsonify({'status':'fail'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():

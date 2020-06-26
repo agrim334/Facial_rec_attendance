@@ -1,14 +1,7 @@
 <template>
   <div class="home">
-    <AddMapForm @mapadd='add'>
+    <AddMapForm @mapadd='add' @imgupl='imgupl' :isstud='isstud'>
     </AddMapForm>
-    <form id="addimg" v-if='isstud === 1' @submit='uplimg'>
-      <div >
-        <label> Student Image </label>
-        <input type="file" id="file" ref="file" accept="image/*" />
-      </div>
-      <input type="submit" value="Upload image" />
-    </form>
   </div>
 </template>
 
@@ -24,8 +17,7 @@ export default {
   },
   data() {
     return {
-      isstud: 0,
-      file: '',
+      isstud: { val: 0, uid: -1 },
     };
   },
   methods: {
@@ -33,19 +25,19 @@ export default {
       const path = 'http://localhost:5000/map/add_map_json';
       axios.post(path, data)
         .then((res) => {
-          this.isstud = res.data.isstud;
+          this.isstud.val = res.data.isstud;
+          this.isstud.uid = data.uid;
           if (this.isstud === 0) alert('Success in adding map');
         })
         .catch((error) => {
           console.error(error);
         });
     },
-    uplimg() {
+    imgupl(data) {
       const path = 'http://localhost:5000/map/add_map_json';
-      console.log(this.$refs.file.file);
-      this.file = this.$refs.file.file;
       const formData = new FormData();
-      formData.append('file', this.file);
+      formData.append('file', data.img);
+      formData.append('uid', this.isstud.uid);
       axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((res) => {
           alert(res.data);
