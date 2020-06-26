@@ -39,20 +39,20 @@ def checkcoursejson():
 @course_sysbp.route('/add_course_json',methods=['POST'])
 def addcoursejson():
 	jsdat = request.json
-	check_course = Course.query.filter_by(ID = jsdat.get_data('id')).all()
+	check_course = Course.query.filter_by(ID = jsdat.get('id')).all()
 
 	if check_course and check_course.count() != 0:
 		return jsonify({ 'error' : 'Course already in database'})
 
-	check_course = Course.query.filter_by(name = jsdat.get_data('name')).all()
+	check_course = Course.query.filter_by(name = jsdat.get('name')).all()
 
 	if check_course and check_course.count() != 0:
 		return jsonify({ 'error' : 'Course already in database'})
 
-	if jsdat.get_data('id') == '' or jsdat.get_data('id') is None:
+	if jsdat.get('id') == '' or jsdat.get('id') is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	if jsdat.get_data('name') == '' or jsdat.get_data('name') is None:
+	if jsdat.get('name') == '' or jsdat.get('name') is None:
 		return jsonify({ 'error' : 'bad info'})
 
 	course = Course.from_json(jsdat)

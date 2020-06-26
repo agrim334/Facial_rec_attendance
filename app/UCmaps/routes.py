@@ -156,31 +156,27 @@ def modifymapjson():
 		ta_role = Role.query.filter_by(name="TA").first()
 		admin_role = Role.query.filter_by(name="Admin").first()
 
-		try:
-			if user_old.role_id == fa_role.ID:
-				user_old.facult.remove(course_old)
+		if user_old.role_id == fa_role.ID:
+			user_old.facult.remove(course_old)
 
-			elif user_old.role_id == ta_role.ID:
-				user_old.tutoring.remove(course_old)
+		elif user_old.role_id == ta_role.ID:
+			user_old.tutoring.remove(course_old)
 
-			elif user_old.role_id == stud_role.ID:
-				user_old.opted.remove(course_old)
+		elif user_old.role_id == stud_role.ID:
+			user_old.opted.remove(course_old)
 
-			if user_new.role_id == fa_role.ID:
-				user_new.facult.append(course_new)
+		if user_new.role_id == fa_role.ID:
+			user_new.facult.append(course_new)
 
-			elif user_new.role_id == ta_role.ID:
-				user_new.tutoring.append(course_new)
+		elif user_new.role_id == ta_role.ID:
+			user_new.tutoring.append(course_new)
 
-			elif user_new.role_id == stud_role.ID:
-				user_new.opted.append(course_new)
-				isstud = 1
+		elif user_new.role_id == stud_role.ID:
+			user_new.opted.append(course_new)
+			isstud = 1
 
-			db.session.commit()
-
-			return jsonify({'isstud': isstud, 'status':'success'})
-		except:
-			return jsonify({'status':'fail'})
+		db.session.commit()
+		return jsonify({'isstud': isstud, 'status':'success'})
 
 	elif request.files:
 		if not os.path.exists(known_dir):

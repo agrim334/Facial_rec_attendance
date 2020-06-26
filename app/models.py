@@ -9,18 +9,18 @@ def load_user(username):
 	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
-				db.Column('SID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-				db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
+				db.Column('SID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True),
+				db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
 				)
 
 ta_courses = db.Table('ta_courses',
-			db.Column('TAID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
+			db.Column('TAID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True),
+			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
 			)
 
 prof_courses = db.Table('prof_courses',
-			db.Column('FID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE")),
-			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"))
+			db.Column('FID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True),
+			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
 			)
 
 class Role(db.Model):

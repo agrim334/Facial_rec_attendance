@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1d35d34185f0
+Revision ID: 5645712d2412
 Revises: 
-Create Date: 2020-06-24 22:58:37.704807
+Create Date: 2020-06-26 22:45:06.326917
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1d35d34185f0'
+revision = '5645712d2412'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -55,22 +55,25 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_user_username'), ['username'], unique=False)
 
     op.create_table('prof_courses',
-    sa.Column('FID', sa.String(length=64), nullable=True),
-    sa.Column('CID', sa.String(length=64), nullable=True),
+    sa.Column('FID', sa.String(length=64), nullable=False),
+    sa.Column('CID', sa.String(length=64), nullable=False),
     sa.ForeignKeyConstraint(['CID'], ['course.ID'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['FID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE')
+    sa.ForeignKeyConstraint(['FID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('FID', 'CID')
     )
     op.create_table('stud_courses',
-    sa.Column('SID', sa.String(length=64), nullable=True),
-    sa.Column('CID', sa.String(length=64), nullable=True),
+    sa.Column('SID', sa.String(length=64), nullable=False),
+    sa.Column('CID', sa.String(length=64), nullable=False),
     sa.ForeignKeyConstraint(['CID'], ['course.ID'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['SID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE')
+    sa.ForeignKeyConstraint(['SID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('SID', 'CID')
     )
     op.create_table('ta_courses',
-    sa.Column('TAID', sa.String(length=64), nullable=True),
-    sa.Column('CID', sa.String(length=64), nullable=True),
+    sa.Column('TAID', sa.String(length=64), nullable=False),
+    sa.Column('CID', sa.String(length=64), nullable=False),
     sa.ForeignKeyConstraint(['CID'], ['course.ID'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['TAID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE')
+    sa.ForeignKeyConstraint(['TAID'], ['user.username'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('TAID', 'CID')
     )
     op.create_table('attendance',
     sa.Column('CID', sa.String(length=64), nullable=False),
