@@ -46,7 +46,7 @@ export default {
       const path = 'http://localhost:5000/users/add_log_json';
       axios.post(path, data)
         .then((res) => {
-          alert(res.data);
+          alert(res.data.status);
         })
         .catch((error) => {
           console.error(error);

@@ -19,7 +19,7 @@ export default {
     ManAttdList,
   },
   methods: {
-    validate(attdrec) {
+    add(attdrec) {
       alert(attdrec);
     },
   },

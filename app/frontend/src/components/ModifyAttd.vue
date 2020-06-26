@@ -1,6 +1,6 @@
 <template>
   <div id="modify-form">
-    <form @submit.prevent="handle">
+    <form @submit.prevent="validate">
     <label>Prof/TA ID</label>
     <input type="text" placeholder = "Enter New MarkerID" v-model = 'modattd.markerid'
     value = 'attdrec.markerid' />
@@ -21,13 +21,6 @@
     value = 'attdrec.email'/>
     <br>
 
-    <label> Role </label>
-    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
-      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'modattd.rolec'>
-      <label> {{role.name}} </label>
-    </div>
-    <br>
-
     <input type="submit" value="Modify attd" />
     </form>
   </div>
@@ -36,17 +29,35 @@
 <script>
 export default {
   name: 'ModifyAttdForm',
-  props: { attdrec: Array, roles: Array },
+  props: { attdrec: Array },
   data() {
     return {
       modattd: {
-        markerid: '', markeeid: '', cid: '', ts: '', rolec: '',
+        markerid: this.attdrec.markerid,
+        markeeid: this.attdrec.markeeid,
+        cid: this.attdrec.cid,
+        ts: this.attdrec.ts,
       },
     };
   },
   methods: {
-    handle() {
-      this.$emit('attdupd', this.modattd);
+    validate() {
+      let f = 0;
+      if (this.modattd.markerid === null || this.modattd.markerid === '') {
+        f = 1;
+      }
+      if (this.modattd.markeeid === null || this.modattd.markeeid === '') {
+        f = 1;
+      }
+      if (this.modattd.cid === null || this.modattd.cid === '') {
+        f = 1;
+      }
+      if (this.modattd.ts === null || this.modattd.ts === '') {
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('attdupd', this.modattd);
+      }
     },
   },
 };

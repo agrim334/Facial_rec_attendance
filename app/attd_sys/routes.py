@@ -61,8 +61,42 @@ def addattdjson():
 
 @attd_sysbp.route('/modify_attendance_json',methods=['POST'])
 def modifyattdjson():
-	attd = Attendance.from_json(request.json['old'])
-	if attd is None:
+	oldjs = request.json['old']
+
+	if not oldjs:
+		return jsonify({ 'error' : 'bad info'})
+
+	newjs = request.json['new']	
+
+	if not newjs:
+		return jsonify({ 'error' : 'bad info'})
+
+	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('markeeid'),timestamp=oldjs.get('ts')).first()
+	if not attd:
+		return jsonify({ 'error' : 'bad info'})
+
+	if newjs.get('cid') == '' or newjs.get('cid') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	course = Course.query.filter_by(username=newjs.get('cid')).first()
+	if not course:
+		return jsonify({ 'error' : 'bad info'})
+
+	if newjs.get('ts') == '' or newjs.get('ts') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	if newjs.get('markeeid') == '' or newjs.get('markeeid') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	user = User.query.filter_by(username=newjs.get('markeeid')).first()
+	if not user:
+		return jsonify({ 'error' : 'bad info'})
+
+	if newjs.get('markerid') == '' or newjs.get('markerid') is None:
+		return jsonify({ 'error' : 'bad info'})
+
+	user = User.query.filter_by(username=newjs.get('markerid')).first()
+	if not user:
 		return jsonify({ 'error' : 'bad info'})
 
 	attd.CID = request.json['new'].get('cid') or attd.CID
@@ -77,14 +111,20 @@ def modifyattdjson():
 
 @attd_sysbp.route('/delete_attendance_json',methods=['POST'])
 def delattdjson():
-	attd = Attendance.from_json(request.json)
-	if attd is None:
+	jsdat = request.json
+	if not jsdat:
 		return jsonify({ 'error' : 'bad info'})
 
-	db.session.delete(attd)
-	db.session.commit()
-	return jsonify({ 'status' : 'success'})
+	attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('markeeid'),timestamp=jsdat.get('ts')).first()
+	if not attd:
+		return jsonify({ 'error' : 'bad info'})
 
+	try:
+		db.session.delete(attd)
+		db.session.commit()
+		return jsonify({ 'status' : 'User deletion success'})
+	except:
+		return jsonify({ 'status' : 'User deletion failed'})
 
 def detect_faces_in_image(file_stream,CID,user):
 	result = []

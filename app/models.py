@@ -123,11 +123,9 @@ class User(UserMixin,db.Model):
 		lname = json_data.get('lname')
 		dept = json_data.get('deptc')
 		role_id = json_data.get('rolec')
+		if dept == '':
+			dept = None
 		return User(username=username,email=email,fname=fname,lname=lname,dept=dept,role_id=role_id)
-
-	def generate_auth_token(self, expiration):
-		s = Serializer(current_app.config['SECRET_KEY'],expires_in=expiration)
-		return s.dumps({'id': self.username})
 
 	def __repr__(self):
 		return '<User {}>'.format(self.username)    
@@ -159,14 +157,22 @@ class User(UserMixin,db.Model):
 		except:
 			return
 		return User.query.get(id)
-	@staticmethod
-	def verify_auth_token(token):
-		s = Serializer(current_app.config['SECRET_KEY'])
-		try:
-			data = s.loads(token)
-		except:
+
+	@classmethod
+	def authenticate(email,username,password):
+		
+		if (not email and not username) or not password:
 			return None
-		return User.query.get(data['id'])
+
+		if email:
+			user = User.query.filter_by(email=email).first()
+		elif username:
+			user = User.query.filter_by(username=username).first()
+
+		if not user or not check_password_hash(user.password_hash, password):
+			return None
+
+		return user
 
 class Attendance(db.Model):													#attendance records
 	CID = db.Column(db.String(64),db.ForeignKey('stud_courses.CID'),primary_key=True)

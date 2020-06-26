@@ -7,6 +7,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from 'axios';
 import ModifyAttdForm from '@/components/ModifyAttd.vue';
 
 export default {
@@ -19,7 +20,14 @@ export default {
   },
   methods: {
     updaterec(modattd) {
-      alert(modattd);
+      const path = 'http://localhost:5000/attd/modify_attendance_json';
+      axios.post(path, { old: this.attd, new: modattd })
+        .then((res) => {
+          this.attds = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
 };

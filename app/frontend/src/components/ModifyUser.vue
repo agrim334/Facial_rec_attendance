@@ -48,8 +48,8 @@ export default {
         fname: this.userrec.fname,
         lname: this.userrec.lname,
         email: this.userrec.email,
-        rolec: this.userrec.role_id,
-        deptc: this.userrec.dept_id,
+        rolec: this.userrec.role,
+        deptc: this.userrec.dept,
       },
     };
   },

@@ -42,9 +42,20 @@ export default {
           console.error(error);
         });
     },
+    getRoles() {
+      const path = 'http://localhost:5000/roles/check_role_json';
+      axios.get(path)
+        .then((res) => {
+          this.roles = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   created() {
     this.getDept();
+    this.getRoles();
   },
 
 };

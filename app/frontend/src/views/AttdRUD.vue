@@ -25,10 +25,17 @@ export default {
   },
   methods: {
     updaterec(attddat) {
-      alert(attddat);
+      this.$router.push({ name: 'AttdModify', params: { attd: attddat } });
     },
     deleterec(attddat) {
-      alert(attddat);
+      const path = 'http://localhost:5000/attd/delete_attendance_json';
+      axios.post(path, attddat)
+        .then((res) => {
+          this.attds = res.data.records;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     getAttd() {
       const path = 'http://localhost:5000/attd/check_attendance_json';

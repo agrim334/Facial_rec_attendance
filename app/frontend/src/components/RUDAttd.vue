@@ -2,7 +2,7 @@
  <div>
     {{ attd.markerid }}
     {{ attd.markeeid }}
-    {{ attd.courseid }}
+    {{ attd.cid }}
     {{ attd.date }}
     <button @click="deleterec"> Delete </button>
     <button @click="updaterec"> Update </button>
