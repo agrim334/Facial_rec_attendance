@@ -20,11 +20,15 @@ export default {
       const path = 'http://localhost:5000/attd/add_attd_json';
       axios.post(path, data.rec)
         .then((res) => {
-          alert(res.data);
+          if (res.data.status === 'Success') this.uplimg(data);
+          else alert(res.data.status);
         })
         .catch((error) => {
           console.error(error);
         });
+    },
+    uplimg(data) {
+      const path = 'http://localhost:5000/attd/add_attd_json';
       const formData = new FormData();
       for (let i = 0; i < data.img.length; i += 1) {
         const tfile = data.img[i];
@@ -37,6 +41,9 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    },
+    addman() {
+      console.log('temp');
     },
   },
 };

@@ -105,39 +105,39 @@ def addlogjson():
 		return jsonify({ 'status' : 'User already in database'})
 
 	if jsdat.get('username') == '' or jsdat.get('username') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty userid'})
 	
 	if jsdat.get('fname') == '' or jsdat.get('fname') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty first name'})
 
 	if jsdat.get('lname') == '' or jsdat.get('lname') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty last name'})
 
 	if jsdat.get('email') == '' or jsdat.get('email') is None or check(jsdat.get('email')) is False:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'email empty or bad email format'})
 
 	if jsdat.get('rolec') == '' or jsdat.get('rolec') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'role info not given'})
 
 	check_role = Role.query.filter_by(ID=jsdat.get('rolec')).first()
 	if not check_role:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'not valid role'})
 
 	if jsdat.get('rolec') != admin_role.ID:
 		if jsdat.get('deptc') == '' or jsdat.get('deptc') is None:
-			return jsonify({ 'status' : 'bad info'})
+			return jsonify({ 'status' : 'need to assign department to a non-admin'})
 
 		check_dept = Department.query.filter_by(ID=jsdat.get('deptc')).first()
 		if not check_dept:
-			return jsonify({ 'status' : 'bad info'})
+			return jsonify({ 'status' : 'invalid department'})
 
 	if jsdat.get('pass') !=  jsdat.get('confirmpass') or ( jsdat.get('pass') ==  jsdat.get('confirmpass') and (jsdat.get('pass') == '' or jsdat.get('pass') is None )):
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'password not match'})
 
 	user = User.from_json(jsdat)
 	user.set_password(jsdat.get('pass'))
 	if user is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'can\'t create user'})
 
 	try:
 		db.session.add(user)

@@ -1,18 +1,12 @@
 <template>
   <div id="register-form">
-    <form @submit.prevent="handle">
+    <form @submit.prevent="validate">
     <label>map ID</label>
     <input type="text" placeholder = "Enter CID" v-model = 'map.cid' />
     <br>
 
     <label>map name</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' @change = 'getusertype' />
-    <br>
-
-    <div v-if='map.role === 1'>
-      <label> Student Image </label>
-      <input type="file" accept="image/*" id="file-input">
-    </div>
+    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
     <br>
 
     <input type="submit" value="Add map" />
@@ -24,7 +18,6 @@
 
 export default {
   name: 'AddMapForm',
-  props: { roles: Array },
   data() {
     return {
       map: {
@@ -33,7 +26,7 @@ export default {
     };
   },
   methods: {
-    handle() {
+    validate() {
       let f = 0;
       if (this.map.id === null || this.map.id === '') {
         alert('fill map id');
@@ -43,7 +36,7 @@ export default {
         alert('fill map name');
         f = 1;
       }
-      if (f === 0 ) {
+      if (f === 0) {
         this.$emit('mapadd', this.map);
       }
     },

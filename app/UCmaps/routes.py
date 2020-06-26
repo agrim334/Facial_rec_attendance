@@ -1,7 +1,7 @@
 from .. import db,errors
 from . import mapbp
 from app.log_sys import log_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
+from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session,current_app
 from app.forms import CourseUserForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -10,6 +10,17 @@ from ..models import User,Role,Department,Course,stud_courses,ta_courses,prof_co
 from datetime import datetime,timedelta
 from app.models import stud_courses,prof_courses,ta_courses,Role
 from app.tables import MapResults
+import os
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+
+AP = current_app._get_current_object()
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+AP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'known')
+upldir = os.path.join(basedir, 'known')
+photos = UploadSet('photos', IMAGES)
+configure_uploads(AP, photos)
+patch_request_class(AP)
 
 @mapbp.before_request
 def make_session_permanent():
@@ -47,34 +58,47 @@ def checkmapjson():
 
 @mapbp.route('/add_map_json',methods=['POST'])
 def addmapjson():
-	jsdat = request.json
-	if jsdat is None:
-		return jsonify({'status':'Bad data'})
+	if request.json:
+		jsdat = request.json
+		print(jsdat)
+		if jsdat is None:
+			return jsonify({'status':'Bad data'})
 
-	user = User.query.filter_by(username=request.json['uid']).first()
-	if user is None:
-		return jsonify({'status':'User by ID {} does not exist'.format(jsdat['uid'])})
+		user = User.query.filter_by(username=request.json['uid']).first()	
+		if user is None:
+			return jsonify({'status':'User by ID {} does not exist'.format(jsdat['uid'])})
 
-	course = Course.query.filter_by(ID=request.json['cid']).first()
-	if course is None:
-		return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
+		course = Course.query.filter_by(ID=request.json['cid']).first()
+		if course is None:
+			return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
 
-	fa_role = Role.query.filter_by(name="Prof").first()
-	stud_role = Role.query.filter_by(name="Student").first()
-	ta_role = Role.query.filter_by(name="TA").first()
-	admin_role = Role.query.filter_by(name="Admin").first()
-	try:
-		if user.role_id == fa_role.ID:
-			user.facult.append(course)
-		elif user.role_id == ta_role.ID:
-			user.tutoring.append(course)
-		elif user.role_id == stud_role.ID:
-			user.opted.append(course)
+		fa_role = Role.query.filter_by(name="Prof").first()
+		stud_role = Role.query.filter_by(name="Student").first()
+		ta_role = Role.query.filter_by(name="TA").first()
+		admin_role = Role.query.filter_by(name="Admin").first()
+		isstud = 0
+		try:
+			if user.role_id == fa_role.ID:
+				user.facult.append(course)
+			elif user.role_id == ta_role.ID:
+				user.tutoring.append(course)
+			elif user.role_id == stud_role.ID:
+				user.opted.append(course)
+				isstud = 1
+			db.session.commit()
+			return jsonify({'isstud': isstud, 'status':'success'})
+		except:
+			return jsonify({'status':'fail'})
+	elif request.files:
+		print(request.files)
+		if not os.path.exists(upldir):
+			os.makedirs(upldir)
+		for f in request.files:
+			t = request.files[f]
+			filename = secure_filename(request.files[f].filename)
+			t.save(os.path.join(upldir, filename))
 
-		db.session.commit()
 		return jsonify({'status':'success'})
-	except:
-		return jsonify({'status':'fail'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():
