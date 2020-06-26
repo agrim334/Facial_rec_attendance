@@ -48,47 +48,55 @@ def checkmapjson():
 @mapbp.route('/add_map_json',methods=['POST'])
 def addmapjson():
 	user = User.query.filter_by(username=request.json['uid']).first()
+	course = Course.query.filter_by(ID=request.json['cid']).first()
 	fa_role = Role.query.filter_by(name="Prof").first()
 	stud_role = Role.query.filter_by(name="Student").first()
 	ta_role = Role.query.filter_by(name="TA").first()
 	admin_role = Role.query.filter_by(name="Admin").first()
 
 	if user.role_id == fa_role.ID:
-		stmt = prof_courses.insert().values(FID=request.json['uid'],CID=request.json['cid'])
+		user.facult.append(course)
 	elif user.role_id == ta_role.ID:
-		stmt = ta_courses.insert().values(TAID=request.json['uid'],CID=request.json['cid'])
+		user.tutoring.append(course)
 	elif user.role_id == stud_role.ID:
-		stmt = stud_courses.insert().values(SID=request.json['uid'],CID=request.json['cid'])
+		user.opted.append(course)
 
-	db.session.execute(stmt)
 	db.session.commit()
 	return jsonify({'status':'success'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():
-	user = User.query.filter_by(username=request.json['old'].get('uid')).first()
+	oldjs = request.json['old']
+	newjs = request.json['new']
+
+	user_old = User.query.filter_by(username=oldjs.get('uid')).first()
+	user_new = User.query.filter_by(username=newjs.get('uid')).first()
+	course_old = Course.query.filter_by(ID = oldjs.get('cid')).first()
+	course_new = Course.query.filter_by(ID = newjs.get('cid')).first()
+
 	fa_role = Role.query.filter_by(name="Prof").first()
 	stud_role = Role.query.filter_by(name="Student").first()
 	ta_role = Role.query.filter_by(name="TA").first()
 	admin_role = Role.query.filter_by(name="Admin").first()
 
-	if user.role_id == fa_role.ID:
-		stmt = prof_courses.delete().where(prof_courses.c.FID == request.json['old'].get('uid') and prof_courses.c.CID == request.json['old'].get('cid'))
-		db.session.execute(stmt)
-		stmt2 = prof_courses.insert().values(FID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
-		db.session.execute(stmt2)
+	if user_old.role_id == fa_role.ID:
+		user_old.facult.remove(course_old)
 
-	elif user.role_id == ta_role.ID:
-		stmt = ta_courses.delete().where(ta_courses.c.TAID == request.json['old'].get('uid') and ta_courses.c.CID == request.json['old'].get('cid'))
-		db.session.execute(stmt)
-		stmt2 = ta_courses.insert().values(TAID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
-		db.session.execute(stmt2)
+	elif user_old.role_id == ta_role.ID:
+		user_old.tutoring.remove(course_old)
 
-	elif user.role_id == stud_role.ID:
-		stmt = stud_courses.delete().where(stud_courses.c.SID == request.json['old'].get('uid') and stud_courses.c.CID == request.json['old'].get('cid'))
-		db.session.execute(stmt)
-		stmt2 = stud_courses.insert().values(SID=request.json['new'].get('uid'),CID=request.json['new'].get('cid'))
-		db.session.execute(stmt2)
+	elif user_old.role_id == stud_role.ID:
+		user_old.opted.remove(course_old)
+
+	if user_new.role_id == fa_role.ID:
+		user_new.facult.append(course_new)
+
+	elif user_new.role_id == ta_role.ID:
+		user_new.tutoring.append(course_new)
+
+	elif user_new.role_id == stud_role.ID:
+		user_new.opted.append(course_new)
+
 
 	db.session.commit()
 
@@ -97,19 +105,18 @@ def modifymapjson():
 @mapbp.route('/delete_map_json',methods=['POST'])
 def delmapjson():
 	user = User.query.filter_by(username=request.json['uid']).first()
+	course = Course.query.filter_by(ID=request.json['cid']).first()
 	fa_role = Role.query.filter_by(name="Prof").first()
 	stud_role = Role.query.filter_by(name="Student").first()
 	ta_role = Role.query.filter_by(name="TA").first()
 	admin_role = Role.query.filter_by(name="Admin").first()
 
 	if user.role_id == fa_role.ID:
-		stmt = prof_courses.delete().where(prof_courses.c.FID == request.json['uid'] and prof_courses.c.CID == request.json['cid'])
+		user.facult.remove(course)
 	elif user.role_id == ta_role.ID:
-		stmt = ta_courses.delete().where(ta_courses.c.TAID == request.json['uid'] and ta_courses.c.CID == request.json['cid'])
+		user.tutoring.remove(course)
 	elif user.role_id == stud_role.ID:
-		stmt = stud_courses.delete().where(stud_courses.c.SID == request.json['uid'] and stud_courses.c.CID ==  request.json['cid'])
+		user.opted.remove(course)
 
-	db.session.execute(stmt)
 	db.session.commit()
-
 	return jsonify({'status':'success'})

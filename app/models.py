@@ -84,21 +84,21 @@ class User(UserMixin,db.Model):
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (prof_courses.c.FID == username & role_id ==  Role.query.filter_by(name='Faculty').first().role_id),
+			primaryjoin = (prof_courses.c.FID == username and role_id == Role.query.filter_by(name='Faculty').first().role_id),
 			secondaryjoin = (prof_courses.c.CID == Course.ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	tutoring = db.relationship('Course',
 			secondary=ta_courses,
-			primaryjoin = (ta_courses.c.TAID == username & role_id ==  Role.query.filter_by(name='TA').first().role_id),
+			primaryjoin = (ta_courses.c.TAID == username and role_id == Role.query.filter_by(name='TA').first().role_id),
 			secondaryjoin = (ta_courses.c.CID == Course.ID),
 			backref = db.backref('tutored_by',lazy='dynamic'),
 			lazy = 'dynamic') 
 
 	opted = db.relationship('Course',
 			secondary=stud_courses,
-			primaryjoin = (stud_courses.c.SID == username & role_id == Role.query.filter_by(name='Student').first().role_id),
+			primaryjoin = (stud_courses.c.SID == username and role_id == Role.query.filter_by(name='Student').first().role_id),
 			secondaryjoin = (stud_courses.c.CID == Course.ID),
 			backref = db.backref('studied_by',lazy='dynamic'),
 			lazy = 'dynamic')
