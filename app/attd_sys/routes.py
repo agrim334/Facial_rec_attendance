@@ -47,8 +47,6 @@ def checkattdjson():
 
 @attd_sysbp.route('/add_attd_json',methods=['POST'])
 def addattdjson():
-	cid = None
-	uid = None
 	if request.json:
 		fa_role = Role.query.filter_by(name="Prof").first()
 		ta_role = Role.query.filter_by(name="TA").first()
@@ -56,20 +54,19 @@ def addattdjson():
 		stud_role = Role.query.filter_by(name="Student").first()
 
 		jsdat = request.json
-		if jsdat.get('mancheck'):
-			manmark(jsdat.get('marked'),jsdat.get('cid'),jsdat.get('uid'))
-			return jsonify({ 'status' : 'fail'})
+		if jsdat.get('mancheck') == 1:
+			manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
+			return jsonify({ 'status' : 'success'})
 		else:
 			if jsdat.get('uid') == '' or jsdat.get('uid') is None:
 				return jsonify({ 'status' : 'bad info'})
 
 			check_user = User.query.filter_by(username = jsdat.get('uid')).first()
-			print(check_user)
 			if not check_user:
 				return jsonify({ 'status' : 'User not in database'})
 
 			if jsdat.get('cid') == '' or jsdat.get('cid') is None:
-				return jsonify({ 'status' : 'bad info'})
+				return jsonify({ 'status' : 'No such course'})
 
 			check_course = Course.query.filter_by(ID = jsdat.get('cid')).all()
 
@@ -77,31 +74,29 @@ def addattdjson():
 				return jsonify({ 'status' : 'Course not in database'})
 
 			check_map = None
-			if check_user.role == fa_role.ID:
-				check_map = db.session.query(prof_courses).filter_by(FID=uid,CID=cid).all()
-	
-			elif check_user.role == ta_role.ID:
-				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
-	
-			if check_map is None:
-				return jsonify({ 'status' : 'bad info'})
-	
 			cid = jsdat.get('cid')
 			uid = jsdat.get('uid')
+			if check_user.role_id == fa_role.ID:
+				check_map = db.session.query(prof_courses).filter_by(FID=uid,CID=cid).all()
+			elif check_user.role_id == ta_role.ID:
+				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
+				
+			if check_map is None:
+				return jsonify({ 'status' : 'No such mapping'})
 
-			return jsonify({ 'status' : 'bad info'})
+			return jsonify({ 'status' : 'Success'})
 
 	elif request.files:
 		if not os.path.exists(upldir):
 			os.makedirs(upldir)
+		uid = request.form.get('uid')
+		cid = request.form.get('cid')
 		for f in request.files:
 			t = request.files[f]
 			filename = secure_filename(request.files[f].filename)
 			t.save(os.path.join(upldir, filename))
 
-		if cid and uid:
-			reglist = detect_faces_in_image(upldir,cid,uid)
-
+		reglist = detect_faces_in_image(upldir,cid,uid)
 		return jsonify({'studlist' : reglist})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
@@ -178,9 +173,9 @@ def detect_faces_in_image(file_stream,CID,user):
 	admin_role = Role.query.filter_by(name="Admin").first()
 	stud_role = Role.query.filter_by(name="Student").first()
 
-	reglist = dict()
+	reglist = []
 	for r in db.session.query(stud_courses).filter_by(CID=CID):
-		reglist[r.SID] = "Absent"
+		reglist.append({ 'id' : r.SID, 'status': 0 })
 	try:
 		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
 		base = os.path.abspath(os.path.dirname(__file__))
@@ -224,22 +219,27 @@ def detect_faces_in_image(file_stream,CID,user):
 					if name != "Unknown":
 						name = pat.match(name)[0]
 						name = name[:-1]
-						stud = User.query.filter_by(username=name,role=stud_role.role_id).first() 
+						stud = User.query.filter_by(username=name,role=stud_role.ID).first() 
 						if stud:
-							c1 = db.session.query(stud_courses).filter_by(SID=stud.username,CID = CID)
+							c1 = db.session.query(stud_courses).filter_by(SID=name,CID = CID)
 							if c1:
-								check = Attendance.query.filter_by(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+								check = Attendance.query.filter_by(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d')) 
 								if not check or check.count() == 0:
-									if user.role_id == ta_role.role_id :
-										atdrecord = Attendance(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = user.username)
-									else:
-										atdrecord = Attendance(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = user.username)
-									db.session.add(atdrecord)
-									db.session.commit()
+									if user.role_id == ta_role.ID :
+										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = user.username)
+										db.session.add(atdrecord)
+										db.session.commit()
+
+									elif user.role_id == fa_role.ID:
+										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = user.username)
+										db.session.add(atdrecord)
+										db.session.commit()
 
 		for r in db.session.query(stud_courses).join(Attendance,Attendance.CID == stud_courses.c.CID).filter_by(CID=CID,timestamp=datetime.today().strftime('%Y-%m-%d')):
-			reglist[r.SID] = "Present" 
-
+			for d in reglist:
+				if d['id'] == r.SID:
+					d['status'] = 1
+		print(reglist)
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
@@ -254,8 +254,40 @@ def detect_faces_in_image(file_stream,CID,user):
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
-
+	print(reglist)
 	return reglist
 
-def manmark(studlist,cid,mid):
-	print(studlist)
+def manmark(studlist,cid,uid):
+	fa_role = Role.query.filter_by(name="Prof").first()
+	ta_role = Role.query.filter_by(name="TA").first()
+	admin_role = Role.query.filter_by(name="Admin").first()
+	stud_role = Role.query.filter_by(name="Student").first()
+
+	check_course = Course.query.filter_by(ID=cid).all()
+	if not check_course:
+		return False
+
+	check_user = User.query.filter_by(username=uid).first()
+	if not check_user:
+		return False
+
+	for stu in studlist:
+		stud_id = stu['id']
+		if int(stu['status']) == 1:
+			stud = User.query.filter_by(username=stud_id,role_id=stud_role.ID).first() 
+			if stud:
+				c1 = db.session.query(stud_courses).filter_by(SID=stud_id,CID = cid)
+				if c1:
+					check = Attendance.query.filter_by(CID=cid,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+					if not check or check.count() == 0:
+						if check_user.role_id == ta_role.ID :
+							atdrecord = Attendance(CID=cid,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = uid)
+							db.session.add(atdrecord)
+							db.session.commit()
+
+						elif check_user.role_id == fa_role.ID :
+							atdrecord = Attendance(CID=cid,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = uid)
+							db.session.add(atdrecord)
+							db.session.commit()
+	db.session.close()
+	return True

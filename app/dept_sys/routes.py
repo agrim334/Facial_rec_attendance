@@ -70,9 +70,9 @@ def modifydeptjson():
 	if dept is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	if newjs.get_data('id') == '' or newjs.get_data('id') is None:
+	if newjs.get('id') == '' or newjs.get('id') is None:
 		return jsonify({ 'error' : 'bad info'})
-	if newjs.get_data('name') == '' or newjs.get_data('name') is None:
+	if newjs.get('name') == '' or newjs.get('name') is None:
 		return jsonify({ 'error' : 'bad info'})
 
 	check_dept = Department.query.filter_by(ID = newjs.get('id')).all()
