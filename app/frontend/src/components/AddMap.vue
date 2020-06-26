@@ -9,6 +9,7 @@
     <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
     <br>
     <input type="submit" value="Add map" />
+
     <form id="addimg" v-if='isstud.val === 1' @submit.prevent='uplimg'>
       <div >
         <label> Student Image </label>
@@ -50,7 +51,6 @@ export default {
       }
     },
     uplimg() {
-      console.log(this.$refs.file.files);
       [this.file] = this.$refs.file.files;
       this.$emit('imgupl', { img: this.file, uid: this.map.uid });
     },

@@ -60,7 +60,6 @@ def checkmapjson():
 def addmapjson():
 	if request.json:
 		jsdat = request.json
-		print(jsdat)
 		if jsdat is None:
 			return jsonify({'status':'Bad data'})
 
@@ -108,79 +107,95 @@ def addmapjson():
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 def modifymapjson():
-	if request.json is None:
-		return jsonify({'status':'Bad data'})
 
-	oldjs = request.json['old']
-	newjs = request.json['new']
+	isstud = 0
+	if request.json:
+		oldjs = request.json['old']
+		newjs = request.json['new']
 
-	if oldjs is None:
-		return jsonify({'status':'Bad data'})
+		if oldjs is None:
+			return jsonify({'status':'Bad original data'})
 
-	if newjs is None:
-		return jsonify({'status':'Bad data'})
+		if newjs is None:
+			return jsonify({'status':'Bad submission data'})
 
-	if oldjs.get('uid') == '' or oldjs.get('uid') is None:
-		return jsonify({'status':'Bad data. Give original user ID'})
+		if oldjs.get('uid') == '' or oldjs.get('uid') is None:
+			return jsonify({'status':'Bad data. Give original user ID'})
 
-	if oldjs.get('cid') == '' or oldjs.get('cid') is None:
-		return jsonify({'status':'Bad data. Give original course ID'})
+		if oldjs.get('cid') == '' or oldjs.get('cid') is None:
+			return jsonify({'status':'Bad data. Give original course ID'})
 
-	if newjs.get('uid') == '' or newjs.get('uid') is None:
-		return jsonify({'status':'Bad data. Give new course ID'})
+		if newjs.get('uid') == '' or newjs.get('uid') is None:
+			return jsonify({'status':'Bad data. Give new course ID'})
 
-	if newjs.get('uid') == '' or newjs.get('uid') is None:
-		return jsonify({'status':'Bad data. Give new user ID'})
+		if newjs.get('uid') == '' or newjs.get('uid') is None:
+			return jsonify({'status':'Bad data. Give new user ID'})
 
+		user_old = User.query.filter_by(username=oldjs.get('uid')).first()
 
-	user_old = User.query.filter_by(username=oldjs.get('uid')).first()
+		if user_old is None:
+			return jsonify({'status':'User by ID {} does not exist'.format(oldjs.get('uid'))})
 
-	if user_old is None:
-		return jsonify({'status':'User by ID {} does not exist'.format(oldjs.get('uid'))})
+		user_new = User.query.filter_by(username=newjs.get('uid')).first()
 
-	user_new = User.query.filter_by(username=newjs.get('uid')).first()
+		if user_new is None:
+			return jsonify({'status':'User by ID {} does not exist'.format(newjs.get('uid'))})
 
-	if user_new is None:
-		return jsonify({'status':'User by ID {} does not exist'.format(newjs.get('uid'))})
+		course_old = Course.query.filter_by(ID = oldjs.get('cid')).first()
 
-	course_old = Course.query.filter_by(ID = oldjs.get('cid')).first()
+		if course_old is None:
+			return jsonify({'status':'Course by ID {} does not exist'.format(oldjs.get('cid'))})
 
-	if course_old is None:
-		return jsonify({'status':'Course by ID {} does not exist'.format(oldjs.get('cid'))})
+		course_new = Course.query.filter_by(ID = newjs.get('cid')).first()
 
-	course_new = Course.query.filter_by(ID = newjs.get('cid')).first()
+		if course_new is None:
+			return jsonify({'status':'Course by ID {} does not exist'.format(newjs.get('cid'))})
 
-	if course_new is None:
-		return jsonify({'status':'Course by ID {} does not exist'.format(newjs.get('cid'))})
+		fa_role = Role.query.filter_by(name="Prof").first()
+		stud_role = Role.query.filter_by(name="Student").first()
+		ta_role = Role.query.filter_by(name="TA").first()
+		admin_role = Role.query.filter_by(name="Admin").first()
 
-	fa_role = Role.query.filter_by(name="Prof").first()
-	stud_role = Role.query.filter_by(name="Student").first()
-	ta_role = Role.query.filter_by(name="TA").first()
-	admin_role = Role.query.filter_by(name="Admin").first()
+		try:
+			if user_old.role_id == fa_role.ID:
+				user_old.facult.remove(course_old)
 
-	try:
-		if user_old.role_id == fa_role.ID:
-			user_old.facult.remove(course_old)
+			elif user_old.role_id == ta_role.ID:
+				user_old.tutoring.remove(course_old)
 
-		elif user_old.role_id == ta_role.ID:
-			user_old.tutoring.remove(course_old)
+			elif user_old.role_id == stud_role.ID:
+				user_old.opted.remove(course_old)
 
-		elif user_old.role_id == stud_role.ID:
-			user_old.opted.remove(course_old)
+			if user_new.role_id == fa_role.ID:
+				user_new.facult.append(course_new)
 
-		if user_new.role_id == fa_role.ID:
-			user_new.facult.append(course_new)
+			elif user_new.role_id == ta_role.ID:
+				user_new.tutoring.append(course_new)
 
-		elif user_new.role_id == ta_role.ID:
-			user_new.tutoring.append(course_new)
+			elif user_new.role_id == stud_role.ID:
+				user_new.opted.append(course_new)
+				isstud = 1
 
-		elif user_new.role_id == stud_role.ID:
-			user_new.opted.append(course_new)
+			db.session.commit()
 
-		db.session.commit()
+			return jsonify({'isstud': isstud, 'status':'success'})
+		except:
+			return jsonify({'status':'fail'})
+
+	elif request.files:
+		if not os.path.exists(known_dir):
+			os.makedirs(known_dir)
+		uid = request.form.get('uid')
+		for f in request.files:
+			t = request.files[f]
+			filename = secure_filename(request.files[f].filename)
+			t.save(os.path.join(known_dir, filename))
+			filename_old, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+			new_file = uid + file_extension
+			os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, new_file))
 
 		return jsonify({'status':'success'})
-	except:
+	else:
 		return jsonify({'status':'fail'})
 
 @mapbp.route('/delete_map_json',methods=['POST'])
