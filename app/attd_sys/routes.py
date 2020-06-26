@@ -18,13 +18,9 @@ from app.tables import AttendanceResults
 
 AP = current_app._get_current_object()
 
-#fa_role = Role.query.filter_by(name="Faculty").first()
-#ta_role = Role.query.filter_by(name="TA").first()
-#admin_role = Role.query.filter_by(name="Admin").first()
-#stud_role = Role.query.filter_by(name="Student").first()
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 AP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
+upldir = os.path.join(basedir, 'uploads')
 photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
@@ -43,23 +39,66 @@ def after_request(response):									#security
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
 	return response
 
-@attd_sysbp.route('/check_attendance_json',methods=['GET','POST'])
+@attd_sysbp.route('/check_attd_json',methods=['GET','POST'])
 def checkattdjson():
 	attdrec = [attd.to_json() for attd in Attendance.query.all()]
 	response = { 'records': attdrec }
 	return jsonify(response)
 
-@attd_sysbp.route('/add_attendance_json',methods=['POST'])
+@attd_sysbp.route('/add_attd_json',methods=['POST'])
 def addattdjson():
-	attd = Attendance.from_json(request.json)
-	if attd is None:
+	cid = None
+	uid = None
+	if request.json:
+		fa_role = Role.query.filter_by(name="Faculty").first()
+		ta_role = Role.query.filter_by(name="TA").first()
+		admin_role = Role.query.filter_by(name="Admin").first()
+		stud_role = Role.query.filter_by(name="Student").first()
+
+		jsdat = request.json
+		if jsdat.get('uid') == '' or jsdat.get('uid') is None:
+			return jsonify({ 'status' : 'bad info'})
+
+		check_user = User.query.filter_by(username = jsdat.get('uid')).all()
+
+		if not check_user:
+			return jsonify({ 'status' : 'User not in database'})
+
+		if jsdat.get('cid') == '' or jsdat.get('cid') is None:
+			return jsonify({ 'status' : 'bad info'})
+
+		check_course = Course.query.filter_by(ID = jsdat.get('cid')).all()
+
+		if not check_course:
+			return jsonify({ 'status' : 'Course not in database'})
+
+		check_map = None
+		if check_user.role_id == fa_role.role_id:
+			check_map = db.session.query(prof_courses).filter_by(FID=uid,CID=cid).all()
+	
+		elif check_user.role_id == ta_role.role_id:
+			check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
+	
+		if check_map is None:
+			return jsonify({ 'error' : 'bad info'})
+	
+		cid = jsdat.get('cid')
+		uid = jsdat.get('uid')
+
 		return jsonify({ 'error' : 'bad info'})
 
-	db.session.add(attd)
-	db.session.commit()
-	return jsonify(attd.to_json())
+	elif request.files:
+		for f in request.files:
+			t = request.files[f]
+			filename = secure_filename(request.files[f].filename)
+			t.save(secure_filename(os.path.join(upldir, filename)))
 
-@attd_sysbp.route('/modify_attendance_json',methods=['POST'])
+		if cid and uid:
+			detect_faces_in_image(upldir,cid,uid)
+
+		return jsonify({ 'error' : 'bad info'})
+
+@attd_sysbp.route('/modify_attd_json',methods=['POST'])
 def modifyattdjson():
 	oldjs = request.json['old']
 
@@ -109,7 +148,7 @@ def modifyattdjson():
 	return jsonify({ 'status' : 'success'})
 
 
-@attd_sysbp.route('/delete_attendance_json',methods=['POST'])
+@attd_sysbp.route('/delete_attd_json',methods=['POST'])
 def delattdjson():
 	jsdat = request.json
 	if not jsdat:
@@ -128,6 +167,11 @@ def delattdjson():
 
 def detect_faces_in_image(file_stream,CID,user):
 	result = []
+	fa_role = Role.query.filter_by(name="Faculty").first()
+	ta_role = Role.query.filter_by(name="TA").first()
+	admin_role = Role.query.filter_by(name="Admin").first()
+	stud_role = Role.query.filter_by(name="Student").first()
+
 	try:
 		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
 		base = os.path.abspath(os.path.dirname(__file__))
@@ -173,7 +217,7 @@ def detect_faces_in_image(file_stream,CID,user):
 						name = name[:-1]
 						stud = User.query.filter_by(username=name,role_id=stud_role.role_id).first() 
 						if stud:
-							c1 = db.session.query(stud_courses).filter_by(TAID=stud.username,CID = CID)
+							c1 = db.session.query(stud_courses).filter_by(SID=stud.username,CID = CID)
 							if c1:
 								check = Attendance.query.filter_by(CID=CID,SID=stud.username,timestamp=datetime.today().strftime('%Y-%m-%d')) 
 								if not check or check.count() == 0:
@@ -184,17 +228,31 @@ def detect_faces_in_image(file_stream,CID,user):
 									db.session.add(atdrecord)
 									db.session.commit()
 
+		already = db.session.query(stud_courses).join(Attendance,Attendance.CID == stud_courses.c.CID).filter_by(CID=CID,timestamp=datetime.today().strftime('%Y-%m-%d'))
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
-
+		return jsonify()
 	except MemoryError as m:
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
-
+		return jsonify()
 	except:
-
 		for image in os.listdir(base+"/uploads/"):
 			if os.path.isfile(base+"/uploads/"+image):
 				os.remove(base+"/uploads/"+image)
+		return jsonify()
+
+def temp():
+	for stu in recr:
+		stud = User.query.filter_by(username=stu,role_id=stud_role.role_id) 
+		if stud and stud.count() != 0:
+			c1 = db.session.query(stud_courses).filter_by(stud_id=stu,course_id = request.args.get('CID'))
+			if c1 and c1.count() != 0:
+				check = Attendance.query.filter_by(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d')) 
+				if not check or check.count() == 0:
+					atdrecord = Attendance(course_id=request.args.get('CID'),student_id=stu,timestamp=datetime.today().strftime('%Y-%m-%d'),faculty_id = current_user.username)
+					db.session.add(atdrecord)
+					db.session.commit()
+					db.session.close()

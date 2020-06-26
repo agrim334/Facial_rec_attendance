@@ -95,6 +95,9 @@ def checklogjson():
 @log_sysbp.route('/add_log_json',methods=['POST'])
 #@token_required
 def addlogjson():
+	if not request.json:
+		return jsonify({ 'status' : 'bad info'})
+
 	jsdat = request.json
 	check_user = User.query.filter_by(username = jsdat.get('username')).all()
 

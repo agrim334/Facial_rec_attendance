@@ -1,16 +1,16 @@
 <template>
   <div id="register-form">
-    <form @submit.prevent="handle">
+    <form @submit.prevent="validate">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.userid' />
+    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.uid' />
     <br>
 
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'attdrec.courseid' />
+    <input type="text" placeholder = "Enter CID" v-model = 'attdrec.cid' />
     <br>
 
     <label> Class Image </label>
-    <input type="file" accept="image/*" id="file-input">
+    <input type="file" id="files" ref="files" accept="image/*" multiple />
     <br>
 
     <input type="submit" value="Mark Attendance" />
@@ -25,13 +25,28 @@ export default {
   data() {
     return {
       attdrec: {
-        userid: '', courseid: '',
+        uid: '',
+        cid: '',
       },
+      files: '',
     };
   },
   methods: {
-    handle() {
-      this.$emit('attdmark', this.attdrec);
+    validate() {
+      let f = 0;
+      if (this.attdrec.uid === null || this.attdrec.uid === '') {
+        alert('enter uid');
+        f = 1;
+      }
+      if (this.attdrec.cid === null || this.attdrec.cid === '') {
+        alert('enter cid');
+        f = 1;
+      }
+      this.files = this.$refs.files.files;
+
+      if (f === 0) {
+        this.$emit('attdmark', { rec: this.attdrec, img: this.files });
+      }
     },
   },
 };
