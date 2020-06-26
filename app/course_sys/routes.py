@@ -79,19 +79,19 @@ def modifycoursejson():
 	if course is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	if newjs.get_data('id') == '' or newjs.get_data('id') is None:
+	if newjs.get('id') == '' or newjs.get('id') is None:
 		return jsonify({ 'error' : 'bad info'})
-	if newjs.get_data('name') == '' or newjs.get_data('name') is None:
+	if newjs.get('name') == '' or newjs.get('name') is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	check_course = Course.query.filter_by(ID = newjs.get_data('id')).all()
+	check_course = Course.query.filter_by(ID = newjs.get('id')).all()
 
-	if check_course and check_course.count() != 0:
+	if check_course:
 		return jsonify({ 'error' : 'Course already in database'})
 
-	check_course = Course.query.filter_by(name = newjs.get_data('name')).all()
+	check_course = Course.query.filter_by(name = newjs.get('name')).all()
 
-	if check_course and check_course.count() != 0:
+	if check_course:
 		return jsonify({ 'error' : 'Course already in database'})
 
 	try:

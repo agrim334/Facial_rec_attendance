@@ -39,19 +39,19 @@ def checkdeptjson():
 @dept_sysbp.route('/add_dept_json',methods=['POST'])
 def adddeptjson():
 	jsdat = request.json
-	check_dept = Department.query.filter_by(ID = jsdat.get_data('id')).all()
+	check_dept = Department.query.filter_by(ID = jsdat.get('id')).all()
 
-	if check_dept and check_dept.count() != 0:
+	if not check_dept:
 		return jsonify({ 'error' : 'dept already in database'})
 
-	check_dept = Department.query.filter_by(name = jsdat.get_data('name')).all()
+	check_dept = Department.query.filter_by(name = jsdat.get('name')).all()
 
-	if check_dept and check_dept.count() != 0:
+	if not check_dept:
 		return jsonify({ 'error' : 'dept already in database'})
 
-	if jsdat.get_data('id') == '' or jsdat.get_data('id') is None:
+	if jsdat.get('id') == '' or jsdat.get('id') is None:
 		return jsonify({ 'error' : 'bad info'})
-	if jsdat.get_data('name') == '' or jsdat.get_data('name') is None:
+	if jsdat.get('name') == '' or jsdat.get('name') is None:
 		return jsonify({ 'error' : 'bad info'})
 
 	dept = dept.from_json(jsdat)
@@ -83,14 +83,14 @@ def modifydeptjson():
 	if newjs.get_data('name') == '' or newjs.get_data('name') is None:
 		return jsonify({ 'error' : 'bad info'})
 
-	check_dept = Department.query.filter_by(ID = newjs.get_data('id')).all()
+	check_dept = Department.query.filter_by(ID = newjs.get('id')).all()
 
-	if check_dept and check_dept.count() != 0:
+	if not check_dept:
 		return jsonify({ 'error' : 'dept already in database'})
 
-	check_dept = Department.query.filter_by(name = newjs.get_data('name')).all()
+	check_dept = Department.query.filter_by(name = newjs.get('name')).all()
 
-	if check_dept and check_dept.count() != 0:
+	if not check_dept:
 		return jsonify({ 'error' : 'dept already in database'})
 
 	try:
@@ -104,9 +104,9 @@ def modifydeptjson():
 
 @dept_sysbp.route('/delete_dept_json',methods=['POST'])
 def deldeptjson():
-	dept = Department.query.filter_by(ID=request.get_data('id')).first_or_404()
-	if dept is None:
-		return jsonify({ 'error' : 'bad info'})
+	dept = Department.query.filter_by(ID=request.get_data('id')).all()
+	if not check_dept:
+		return jsonify({ 'error' : 'dept does not exist'})
 
 	db.session.delete(dept)
 	db.session.commit()
