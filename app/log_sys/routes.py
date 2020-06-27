@@ -88,9 +88,12 @@ def after_request(response):									#security
 @log_sysbp.route('/check_user_json',methods=['GET'])
 #@token_required
 def checklogjson():
-	logrec = [user.to_json() for user in User.query.all()]
-	response = { 'records': logrec }
-	return jsonify(response)
+	try:
+		logrec = [user.to_json() for user in User.query.all()]
+		response = { 'records': logrec }
+		return jsonify(response)
+	except:
+		return {'status':'data fetch failed'}
 
 @log_sysbp.route('/add_log_json',methods=['POST'])
 #@token_required
@@ -154,44 +157,44 @@ def modifylogjson():
 	user = User.query.filter_by(username=oldjs.get('username')).first_or_404()
 
 	if not user:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'No such user exists'})
 
 	if newjs.get('username') == '' or newjs.get('username') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'Empty user id'})
 
 	check_user = User.query.filter_by(username=newjs.get('username')).first_or_404()
 
 	if check_user:
-		return jsonify({ 'status' : 'User already in database'})
+		return jsonify({ 'status' : 'User with id {} already in database'.format(newjs.get('username'))})
 	
 	if newjs.get('fname') == '' or newjs.get('fname') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty first name'})
 
 	if newjs.get('lname') == '' or newjs.get('lname') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty last name'})
 
 	if newjs.get('email') == '' or newjs.get('email') is None or check(newjs.get('email')) is False:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'email empty or bad email format'})
 
 	check_user = User.query.filter_by(email=newjs.get('email')).first_or_404()
 
 	if check_user:
-		return jsonify({ 'status' : 'User already in database'})
+		return jsonify({ 'status' : 'email id {} already used in database'.format(newjs.get('email'))})
 
 	if newjs.get('rolec') == '' or newjs.get('rolec') is None:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'empty role'})
 
 	check_role = Role.query.filter_by(ID=newjs.get('rolec')).first()
 	if not check_role:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'status' : 'No such role exists'})
 
 	if newjs.get('rolec') != admin_role.ID:
 		if newjs.get('deptc') == '' or newjs.get('deptc') is None:
-			return jsonify({ 'status' : 'bad info'})
+			return jsonify({ 'status' : 'Non admin must have a department'})
 
 		check_dept = Department.query.filter_by(ID=newjs.get('deptc')).first()
 		if not check_dept:
-			return jsonify({ 'status' : 'bad info'})
+			return jsonify({ 'status' : 'No such Department as {}'.format(newjs.get('deptc'))})
 
 	try:
 		user.username = newjs.get('username') or user.username
@@ -209,9 +212,12 @@ def modifylogjson():
 @log_sysbp.route('/delete_log_json',methods=['POST'])
 #@token_required
 def dellogjson():
+	if not request.get_data('username'):
+		return jsonify({ 'status' : 'No id given'})
+
 	user = User.query.filter_by(username=request.get_data('username')).first_or_404()
 	if not user:
-		return jsonify({ 'status' : 'No such user in first place'})
+		return jsonify({ 'status' : 'No such user in database'})
 	try:
 		db.session.delete(user)
 		db.session.commit()

@@ -68,7 +68,7 @@ def addattdjson():
 			if jsdat.get('cid') == '' or jsdat.get('cid') is None:
 				return jsonify({ 'status' : 'No such course'})
 
-			check_course = Course.query.filter_by(ID = jsdat.get('cid')).all()
+			check_course = Course.query.filter_by(ID = jsdat.get('cid')).first()
 
 			if not check_course:
 				return jsonify({ 'status' : 'Course not in database'})
@@ -104,67 +104,98 @@ def modifyattdjson():
 	oldjs = request.json['old']
 
 	if not oldjs:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'not received original record info'})
 
 	newjs = request.json['new']	
 
 	if not newjs:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'not received modified record info'})
 
-	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('markeeid'),timestamp=oldjs.get('ts')).first()
+	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('sid'),timestamp=oldjs.get('ts')).all()
+
 	if not attd:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'original record not in database'})
 
 	if newjs.get('cid') == '' or newjs.get('cid') is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no cid given'})
 
 	course = Course.query.filter_by(username=newjs.get('cid')).first()
 	if not course:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no course with given course id'})
 
-	if newjs.get('ts') == '' or newjs.get('ts') is None:
-		return jsonify({ 'error' : 'bad info'})
 
-	if newjs.get('markeeid') == '' or newjs.get('markeeid') is None:
-		return jsonify({ 'error' : 'bad info'})
+	if newjs.get('mid') == '' or newjs.get('mid') is None:
+		return jsonify({ 'status' : 'missing marker id'})
 
-	user = User.query.filter_by(username=newjs.get('markeeid')).first()
+	if newjs.get('sid') == '' or newjs.get('sid') is None:
+		return jsonify({ 'status' : 'missing student id'})
+
+	user = User.query.filter_by(username=newjs.get('sid')).all()
 	if not user:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no student with given student id'})
 
-	if newjs.get('markerid') == '' or newjs.get('markerid') is None:
-		return jsonify({ 'error' : 'bad info'})
-
-	user = User.query.filter_by(username=newjs.get('markerid')).first()
+	user = User.query.filter_by(username=newjs.get('mid')).all()
 	if not user:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'No faculty or ta with given marker id'})
 
-	attd.CID = request.json['new'].get('cid') or attd.CID
-	attd.SID = request.json['new'].get('sid') or attd.SID
-	attd.FID = request.json['new'].get('fid') or attd.FID
-	attd.TAID = request.json['new'].get('taid') or attd.TAID
-	attd.timestamp = request.json['new'].get('timestamp') or attd.timestamp
+	user = User.query.filter_by(username=newjs.get('mid')).first()
+	user_role = user.role_id
 
-	db.session.commit()
-	return jsonify({ 'status' : 'success'})
+	ta_role = Role.query.filter_by(name='TA').first()
+	ta_role = ta_role.ID
 
+	prof_role = Role.query.filter_by(name='Prof').first()
+	prof_role = prof_role.ID
+
+	attd.CID = newjs.get('cid') or attd.CID
+	attd.SID = newjs.get('sid') or attd.SID
+	
+	check_stud_map = db.session.query(stud_courses).filter_by(SID=newjs.get('sid'),CID=newjs.get('cid')).all()
+	if not check_stud_map:
+		return jsonify({ 'status' : 'Student with id {} not registered for course {}'.format(newjs.get('sid'),newjs.get('cid'))})
+
+	if user_role == ta_role:
+		check_ta_map = db.session.query(ta_courses).filter_by(TAID=newjs.get('mid'),CID=newjs.get('cid')).all()
+		if not check_ta_map:
+			return jsonify({ 'status' : 'TA with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
+
+		attd.TAID = newjs.get('mid') or attd.TAID
+	
+	elif user_role == ta_role:
+		check_prof_map = db.session.query(prof_courses).filter_by(FID=newjs.get('mid'),CID=newjs.get('cid')).all()
+		if not check_prof_map:
+			return jsonify({ 'status' : 'Faculty with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
+
+		attd.FID = newjs.get('mid') or attd.FID
+
+	if newjs.get('time') == '' or newjs.get('time') is None:
+		return jsonify({ 'status' : 'missing timestamp'})
+	
+
+	attd.timestamp = newjs.get('time') or attd.timestamp
+
+	try:
+		db.session.commit()
+		return jsonify({ 'status' : 'success'})
+	except:
+		return jsonify({ 'status' : 'fail'})
 
 @attd_sysbp.route('/delete_attd_json',methods=['POST'])
 def delattdjson():
 	jsdat = request.json
 	if not jsdat:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'bad info'})
 
 	attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('markeeid'),timestamp=jsdat.get('ts')).first()
 	if not attd:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no such record'})
 
 	try:
 		db.session.delete(attd)
 		db.session.commit()
-		return jsonify({ 'status' : 'User deletion success'})
+		return jsonify({ 'status' : 'Record deletion success'})
 	except:
-		return jsonify({ 'status' : 'User deletion failed'})
+		return jsonify({ 'status' : 'Record deletion failed'})
 
 def detect_faces_in_image(file_stream,CID,user):
 	result = []
@@ -239,7 +270,6 @@ def detect_faces_in_image(file_stream,CID,user):
 			for d in reglist:
 				if d['id'] == r.SID:
 					d['status'] = 1
-		print(reglist)
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
@@ -254,7 +284,6 @@ def detect_faces_in_image(file_stream,CID,user):
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
-	print(reglist)
 	return reglist
 
 def manmark(studlist,cid,uid):
@@ -289,5 +318,7 @@ def manmark(studlist,cid,uid):
 							atdrecord = Attendance(CID=cid,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = uid)
 							db.session.add(atdrecord)
 							db.session.commit()
+
+	check_course.classes_held = check_course.classes_held + 1
 	db.session.close()
 	return True

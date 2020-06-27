@@ -2,23 +2,19 @@
   <div id="modify-form">
     <form @submit.prevent="validate">
     <label>Prof/TA ID</label>
-    <input type="text" placeholder = "Enter New MarkerID" v-model = 'modattd.markerid'
-    value = 'attdrec.markerid' />
+    <input type="text" placeholder = "Enter New mid" v-model = 'modattd.mid'/>
     <br>
 
     <label>Student ID</label>
-    <input type="text" placeholder = "Enter New Student ID" v-model = 'modattd.markeeid'
-    value = 'attdrec.markeeid'/>
+    <input type="text" placeholder = "Enter New Student ID" v-model = 'modattd.sid'/>
     <br>
 
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter new Course ID" v-model = 'modattd.cid'
-    value = 'attdrec.cid'/>
+    <input type="text" placeholder = "Enter new Course ID" v-model = 'modattd.cid'/>
     <br>
 
     <label>TimeStamp(Date of class) </label>
-    <input type="text" placeholder = "Enter new Timestamp" v-model = 'modattd.ts'
-    value = 'attdrec.email'/>
+    <input type="text" placeholder = "Enter new Timestamp" v-model = 'modattd.time'/>
     <br>
 
     <input type="submit" value="Modify attd" />
@@ -33,26 +29,26 @@ export default {
   data() {
     return {
       modattd: {
-        markerid: this.attdrec.markerid,
-        markeeid: this.attdrec.markeeid,
+        mid: this.attdrec.taid || this.attdrec.fid,
+        sid: this.attdrec.sid,
         cid: this.attdrec.cid,
-        ts: this.attdrec.ts,
+        time: this.attdrec.time,
       },
     };
   },
   methods: {
     validate() {
       let f = 0;
-      if (this.modattd.markerid === null || this.modattd.markerid === '') {
+      if (this.modattd.mid === null || this.modattd.mid === '') {
         f = 1;
       }
-      if (this.modattd.markeeid === null || this.modattd.markeeid === '') {
+      if (this.modattd.sid === null || this.modattd.sid === '') {
         f = 1;
       }
       if (this.modattd.cid === null || this.modattd.cid === '') {
         f = 1;
       }
-      if (this.modattd.ts === null || this.modattd.ts === '') {
+      if (this.modattd.time === null || this.modattd.time === '') {
         f = 1;
       }
       if (f === 0) {

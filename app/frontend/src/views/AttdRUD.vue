@@ -5,7 +5,6 @@
         <AttdRecord :attd='attd' @updrec='updaterec' @delrec='deleterec'></AttdRecord>
       </tr>
     </table>
-    <button id='add' @click='addrec'>Add attds</button>
   </div>
 
 </template>
@@ -28,18 +27,17 @@ export default {
       this.$router.push({ name: 'AttdModify', params: { attd: attddat } });
     },
     deleterec(attddat) {
-      const path = 'http://localhost:5000/attd/delete_attendance_json';
+      const path = 'http://localhost:5000/attd/delete_attd_json';
       axios.post(path, attddat)
-        .then((res) => {
-          this.attds = res.data.records;
+        .then(() => {
+          this.getAttd();
         })
         .catch((error) => {
           console.error(error);
         });
     },
     getAttd() {
-      const path = 'http://localhost:5000/attd/check_attendance_json';
-      console.log(path);
+      const path = 'http://localhost:5000/attd/check_attd_json';
       axios.get(path)
         .then((res) => {
           this.attds = res.data.records;

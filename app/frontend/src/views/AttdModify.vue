@@ -20,10 +20,10 @@ export default {
   },
   methods: {
     updaterec(modattd) {
-      const path = 'http://localhost:5000/attd/modify_attendance_json';
+      const path = 'http://localhost:5000/attd/modify_attd_json';
       axios.post(path, { old: this.attd, new: modattd })
         .then((res) => {
-          this.attds = res.data.records;
+          console.log(res);
         })
         .catch((error) => {
           console.error(error);

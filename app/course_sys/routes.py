@@ -32,32 +32,30 @@ def after_request(response):									#security
 
 @course_sysbp.route('/check_course_json',methods=['GET','POST'])
 def checkcoursejson():
-	courserec = [course.to_json() for course in Course.query.all()]
-	response = { 'records': courserec }
-	return jsonify(response)
+	try:
+		courserec = [course.to_json() for course in Course.query.all()]
+		response = { 'records': courserec }
+		return jsonify(response)
+	except:
+		return {'status':'data fetch failed'}
 
 @course_sysbp.route('/add_course_json',methods=['POST'])
 def addcoursejson():
 	jsdat = request.json
-	check_course = Course.query.filter_by(ID = jsdat.get('id')).all()
+	check_course = Course.query.filter_by(ID = jsdat.get('id'),name = jsdat.get('name')).all()
 
 	if check_course and check_course.count() != 0:
-		return jsonify({ 'error' : 'Course already in database'})
-
-	check_course = Course.query.filter_by(name = jsdat.get('name')).all()
-
-	if check_course and check_course.count() != 0:
-		return jsonify({ 'error' : 'Course already in database'})
+		return jsonify({ 'status' : 'Course already in database'})
 
 	if jsdat.get('id') == '' or jsdat.get('id') is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no couse id given'})
 
 	if jsdat.get('name') == '' or jsdat.get('name') is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'no course name given'})
 
 	course = Course.from_json(jsdat)
 	if course is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'couldn\'t create course record'})
 
 	try:
 		db.session.add(course)
@@ -71,44 +69,42 @@ def modifycoursejson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
 	
-	course = Course.query.filter_by(ID=oldjs.get('id')).first_or_404()
-	if course is None:
-		return jsonify({ 'error' : 'bad info'})
+	course = Course.query.filter_by(ID=oldjs.get('id'),name=oldjs.get('name')).all()
 
-	course = Course.query.filter_by(name=oldjs.get('name')).first_or_404()
-	if course is None:
-		return jsonify({ 'error' : 'bad info'})
+	if not course:
+		return jsonify({ 'status' : 'No course {} in database'.format(oldjs.get('id'))})
 
 	if newjs.get('id') == '' or newjs.get('id') is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'empty course id'})
 	if newjs.get('name') == '' or newjs.get('name') is None:
-		return jsonify({ 'error' : 'bad info'})
+		return jsonify({ 'status' : 'empty course name'})
 
-	check_course = Course.query.filter_by(ID = newjs.get('id')).all()
-
-	if check_course:
-		return jsonify({ 'error' : 'Course already in database'})
-
-	check_course = Course.query.filter_by(name = newjs.get('name')).all()
+	check_course = Course.query.filter_by(ID = newjs.get('id'),name = newjs.get('name')).all()
 
 	if check_course:
-		return jsonify({ 'error' : 'Course already in database'})
+		return jsonify({ 'status' : 'Course already in database'})
+
+	course.ID = newjs.get('id') or course.ID
+	course.name = newjs.get('name') or course.name
 
 	try:
-		course.ID = newjs.get('id') or course.ID
-		course.name = newjs.get('name') or course.name
 
 		db.session.commit()
-		return jsonify({ 'status' : 'success'})
+		return jsonify({ 'status' : 'Course modify success'})
 	except:
-		return jsonify({ 'status' : 'fail'})
+		return jsonify({ 'status' : 'Course modify fail'})
 
 @course_sysbp.route('/delete_course_json',methods=['POST'])
 def delcoursejson():
-	course = Course.query.filter_by(ID=request.get_data('id')).first_or_404()
-	if course is None:
-		return jsonify({ 'error' : 'bad info'})
+	if not request.get_data('id'):
+		return jsonify({ 'status' : 'No id given'})
 
-	db.session.delete(course)
-	db.session.commit()
-	return jsonify({ 'status' : 'success'})
+	course = Course.query.filter_by(ID=request.get_data('id')).all()
+	if not course:
+		return jsonify({ 'status' : 'No such course in database'})
+	try:
+		db.session.delete(course)
+		db.session.commit()
+		return jsonify({ 'status' : 'Course deletion success'})
+	except:
+		return jsonify({ 'status' : 'Course deletion failed'})
