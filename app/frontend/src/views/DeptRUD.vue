@@ -22,6 +22,11 @@ export default {
   components: {
     deptrec,
   },
+  data() {
+    return {
+      deptrecarr: Array,
+    };
+  },
   methods: {
     updaterec(deptdat) {
       this.$router.push({ name: 'DeptModify', params: { dept: deptdat } });

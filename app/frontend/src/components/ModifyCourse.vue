@@ -1,18 +1,19 @@
 <template>
-  <div id="modify-form">
-    <form @submit.prevent="validate">
+  <div id="coursemod-form">
+    <b-form @submit.prevent="handle">
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'modcourse.id'
-    />
+    <b-input :state='cidstate' placeholder = "Enter Course ID"
+    v-model = 'modcourse.id' >
+    </b-input>
     <br>
 
     <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'modcourse.name'
-    />
+    <b-input :state='cnstate' placeholder = "Enter Course name"
+    v-model = 'modcourse.name' ></b-input>
     <br>
 
-    <input type="submit" value="Update Course" />
-    </form>
+    <b-button type="submit"> Modify Course </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -27,6 +28,14 @@ export default {
         name: this.courserec.name,
       },
     };
+  },
+  computed: {
+    cidstate() {
+      return this.modcourse.id.length > 0;
+    },
+    cnstate() {
+      return this.modcourse.name.length > 0;
+    },
   },
   methods: {
     validate() {

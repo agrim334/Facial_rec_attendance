@@ -1,20 +1,23 @@
 <template>
   <div id="register-form">
-    <form @submit.prevent="validate">
+    <b-form @submit.prevent="validate">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'attdrec.uid' />
+    <b-input :state='uidstate' placeholder = "Enter UID" v-model = 'attdrec.uid'>
+    </b-input>
     <br>
 
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'attdrec.cid' />
+    <b-input :state='cidstate' placeholder = "Enter CID" v-model = 'attdrec.cid'>
+    </b-input>
     <br>
 
     <label> Class Image </label>
-    <input type="file" id="files" ref="files" accept="image/*" multiple />
+    <b-form-file v-model="files" id="files" ref="files" accept="image/*" multiple>
+    </b-form-file>
     <br>
 
-    <input type="submit" value="Mark Attendance" />
-    </form>
+    <b-button type="submit"> Mark Attendance </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -28,8 +31,16 @@ export default {
         uid: '',
         cid: '',
       },
-      files: '',
+      files: Array,
     };
+  },
+  computed: {
+    uidstate() {
+      return this.attdrec.uid.length > 0;
+    },
+    cidstate() {
+      return this.attdrec.cid.length > 0;
+    },
   },
   methods: {
     validate() {

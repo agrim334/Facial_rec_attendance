@@ -1,28 +1,39 @@
 <template>
-  <div id="register-form">
-    <form @submit.prevent="handle">
+  <div id="courseadd-form">
+    <b-form @submit.prevent="handle">
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'course.id' />
+    <b-input :state='cidstate' placeholder = "Enter CID"
+    v-model = 'course.id' >
+    </b-input>
     <br>
 
     <label>Course name</label>
-    <input type="text" placeholder = "Enter course name" v-model = 'course.name' />
+    <b-input :state='cnstate' placeholder = "Enter course name"
+    v-model = 'course.name' ></b-input>
     <br>
 
-    <input type="submit" value="Add Course" />
-    </form>
+    <b-button type="submit"> Add Course </b-button>
+    </b-form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'AddCourseForm',
+  name: 'AddCourseform',
   data() {
     return {
       course: {
         id: '', name: '',
       },
     };
+  },
+  computed: {
+    cidstate() {
+      return this.course.id.length > 0;
+    },
+    cnstate() {
+      return this.course.name.length > 0;
+    },
   },
   methods: {
     handle() {

@@ -1,18 +1,19 @@
 <template>
-  <div id="modify-form">
-    <form @submit.prevent="validate">
-    <label>dept ID</label>
-    <input type="text" placeholder = "Enter Department ID" v-model = 'moddept.id'
-     />
+  <div id="modifydept-form">
+    <b-form @submit.prevent="handle">
+
+    <label>Department ID</label>
+    <b-input :state='depidstate' placeholder = "Enter Department ID"
+    v-model = 'moddept.id' ></b-input>
     <br>
 
-    <label>dept name</label>
-    <input type="text" placeholder = "Enter Deptartment name" v-model = 'moddept.name'
-    />
+    <label>Department name</label>
+    <b-input :state='depnstate' placeholder = "Enter Department name"
+    v-model = 'moddept.name' ></b-input>
     <br>
 
-    <input type="submit" value="Update dept" />
-    </form>
+    <b-button type="submit"> Modify Department </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -28,14 +29,22 @@ export default {
       },
     };
   },
+  computed: {
+    depidstate() {
+      return this.moddept.id.length > 0;
+    },
+    depnstate() {
+      return this.moddept.name.length > 0;
+    },
+  },
   methods: {
     validate() {
       let f = 0;
-      if (this.dept.id === null || this.dept.id === '') {
+      if (this.moddept.id === null || this.moddept.id === '') {
         alert('fill dept id');
         f = 1;
       }
-      if (this.dept.name === null || this.dept.name === '') {
+      if (this.moddept.name === null || this.moddept.name === '') {
         alert('fill dept name');
         f = 1;
       }

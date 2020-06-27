@@ -33,10 +33,10 @@ class Role(db.Model):
 				}
 
 class Department(db.Model):
-	ID = db.Column(db.Integer, primary_key=True,autoincrement=True)
+	ID = db.Column(db.String(64), primary_key=True,autoincrement=True)
 	name = db.Column(db.String(64))
-	users_dept = db.relationship('User', backref='udept')
-	courses_dept = db.relationship('Course', backref='cdept')
+	users_dept = db.relationship('User', backref='udept', cascade="all,delete",)
+	courses_dept = db.relationship('Course', backref='cdept', cascade="all,delete",)
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,

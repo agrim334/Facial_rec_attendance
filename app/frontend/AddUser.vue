@@ -2,55 +2,44 @@
   <div id="register-form">
     <b-form @submit.prevent="validate">
     <label>User ID</label>
-    <b-input :state='uidstate' placeholder = "Enter UID"
-    v-model = 'newuser.username' required>
-    </b-input>
+    <b-form-input type="text" placeholder = "Enter UID" v-model = 'newuser.username'
+    description="We'll never share your email with anyone else.">
+    </b-form-input>
+    <br>
 
     <label>First name</label>
-    <b-input :state='fnstate' placeholder = "Enter first name"
-    v-model = 'newuser.fname' required>
-    </b-input>
+    <input type="text" placeholder = "Enter first name" v-model = 'newuser.fname' />
     <br>
 
     <label>Last name</label>
-    <b-input :state='lnstate' placeholder = "Enter last name"
-    v-model = 'newuser.lname' required>
-    </b-input>
+    <input type="text" placeholder = "Enter last name" v-model = 'newuser.lname' />
     <br>
 
     <label> User Email </label>
-    <b-input :state='emstate' placeholder = "Enter email id"
-    v-model = 'newuser.email' required>
-    </b-input>
+    <input type="text" placeholder = "Enter email id" v-model = 'newuser.email' />
     <br>
 
-    <b-form-group label="Roles">
-      <b-form-radio-group :options='roles' name-field='name' html-field='name'
-      value-field = 'id' v-model="newuser.rolec">
-      </b-form-radio-group>
-    </b-form-group>
+    <label> Role </label>
+    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
+      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'newuser.rolec'>
+      <label> {{role.name}} </label>
+    </div>
     <br>
 
-    <b-form-group label="Department">
-      <b-form-radio-group :options='depts' name-field='name' html-field='name'
-      value-field = 'id' v-model="newuser.deptc">
-      </b-form-radio-group>
-    </b-form-group>
+    <label> Department </label>
+    <div id = 'deptrad' v-for='dept in depts' :key='dept.id'>
+      <input type="radio"  name= 'dept.name' :value = 'dept.id' v-model = 'newuser.deptc'>
+      <label> {{dept.name}} </label>
+    </div>
     <br>
-
     <label> Enter Password </label>
-    <b-input :state='pwstate' type="password" v-model = 'newuser.pass' required>
-    </b-input>
+    <input type="password" v-model = 'newuser.pass' />
     <br>
 
     <label> Confirm Password </label>
-    <b-input :state='cfpstate' type="password"
-    v-model = 'newuser.confirmpass' required>
-    </b-input>
+    <input type="password" v-model = 'newuser.confirmpass' />
     <br>
-
-    <b-button type="submit"> Add user </b-button>
-
+    <input type="submit" value="Add user" />
     </b-form>
   </div>
 </template>
@@ -67,27 +56,6 @@ export default {
         username: '', fname: '', lname: '', email: '', rolec: '', deptc: '', pass: '', confirmpass: '',
       },
     };
-  },
-  computed: {
-    uidstate() {
-      return this.newuser.username.length > 0;
-    },
-    fnstate() {
-      return this.newuser.fname.length > 0;
-    },
-    lnstate() {
-      return this.newuser.lname.length > 0;
-    },
-    emstate() {
-      return (this.newuser.email.length > 0) && validator.validate(this.newuser.email);
-    },
-    pwstate() {
-      return (this.newuser.pass.length > 0) && this.newuser.pass === this.newuser.confirmpass;
-    },
-    cfpstate() {
-      return ((this.newuser.confirmpass.length > 0)
-      && this.newuser.pass === this.newuser.confirmpass);
-    },
   },
   methods: {
     validate() {
@@ -120,7 +88,7 @@ export default {
         f = 1;
       }
       if (this.newuser.rolec !== ad && (this.newuser.deptc === '' || this.newuser.deptc === null)) {
-        alert('Non admin must have a department');
+        alert('Choose a department');
         f = 1;
       }
       if (this.newuser.pass !== this.newuser.confirmpass || (this.newuser.pass === this.newuser.confirmpass && (this.newuser.pass === null || this.newuser.pass === ''))) {

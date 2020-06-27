@@ -1,37 +1,46 @@
 <template>
   <div id="modify-form">
-    <form @submit.prevent="validate">
+    <b-form @submit.prevent="validate">
     <label>User ID</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'moduser.username'/>
-    <br>
+    <b-input :state='uidstate' placeholder = "Enter UID"
+    v-model = 'moduser.username' required>
+    </b-input>
 
     <label>First name</label>
-    <input type="text" placeholder = "Enter first name" v-model = 'moduser.fname'/>
+    <b-input :state='fnstate' placeholder = "Enter first name"
+    v-model = 'moduser.fname' required>
+    </b-input>
     <br>
 
     <label>Last name</label>
-    <input type="text" placeholder = "Enter last name" v-model = 'moduser.lname'/>
+    <b-input :state='lnstate' placeholder = "Enter last name"
+    v-model = 'moduser.lname' required>
+    </b-input>
     <br>
 
     <label> User Email </label>
-    <input type="text" placeholder = "Enter email id" v-model = 'moduser.email'/>
+    <b-input :state='emstate' placeholder = "Enter email id"
+    v-model = 'moduser.email' required>
+    </b-input>
     <br>
 
-    <label> Role </label>
-    <div id = 'rolerad' v-for='role in roles' :key='role.id'>
-      <input type="radio" name= 'role.name' :value = 'role.id' v-model = 'moduser.rolec'>
-      <label> {{role.name}} </label>
-    </div>
+    <b-form-group label="Roles">
+      <b-form-radio-group :options='roles' name-field='name' html-field='name'
+      value-field = 'id' v-model="moduser.rolec">
+      </b-form-radio-group>
+    </b-form-group>
     <br>
 
-    <label> Department </label>
-    <div id = 'deptrad' v-for='dept in depts' :key='dept.id'>
-      <input type="radio"  name= 'dept.name' :value = 'dept.id' v-model = 'moduser.deptc'>
-      <label> {{dept.name}} </label>
-    </div>
+    <b-form-group label="Department">
+      <b-form-radio-group :options='depts' name-field='name' html-field='name'
+      value-field = 'id' v-model="moduser.deptc">
+      </b-form-radio-group>
+    </b-form-group>
     <br>
-    <input type="submit" value="Modify user" />
-    </form>
+
+    <b-button type="submit"> Modify user </b-button>
+
+    </b-form>
   </div>
 </template>
 
@@ -52,6 +61,27 @@ export default {
         deptc: this.userrec.dept,
       },
     };
+  },
+  computed: {
+    uidstate() {
+      return this.moduser.username.length > 0;
+    },
+    fnstate() {
+      return this.moduser.fname.length > 0;
+    },
+    lnstate() {
+      return this.moduser.lname.length > 0;
+    },
+    emstate() {
+      return (this.moduser.email.length > 0) && validator.validate(this.moduser.email);
+    },
+    pwstate() {
+      return (this.moduser.pass.length > 0) && this.moduser.pass === this.moduser.confirmpass;
+    },
+    cfpstate() {
+      return ((this.moduser.confirmpass.length > 0)
+      && this.moduser.pass === this.moduser.confirmpass);
+    },
   },
   methods: {
     validate() {
@@ -84,7 +114,7 @@ export default {
         f = 1;
       }
       if (this.moduser.rolec !== ad && (this.moduser.deptc === '' || this.moduser.deptc === null)) {
-        alert('Choose a department');
+        alert('Non admin must have a department');
         f = 1;
       }
       if (f === 0) {

@@ -98,7 +98,7 @@ def deldeptjson():
 		return jsonify({ 'status' : 'No id given'})
 
 	dept = Department.query.filter_by(ID=request.get_data('id')).all()
-	if not check_dept:
+	if not dept:
 		return jsonify({ 'status' : 'No such department in database'})
 	try:
 		db.session.delete(dept)

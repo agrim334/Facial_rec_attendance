@@ -1,24 +1,24 @@
 <template>
   <div id="register-form">
-    <form @submit.prevent="validate">
-    <label>map ID</label>
-    <input type="text" placeholder = "Enter CID" v-model = 'map.cid' />
+    <b-form @submit.prevent="validate" v-if='isstud.val === 0'>
+    <label>User ID</label>
+    <b-input :state='uidstate' placeholder = "Enter UID" v-model = 'map.uid'>
+    </b-input>
     <br>
 
-    <label>map name</label>
-    <input type="text" placeholder = "Enter UID" v-model = 'map.uid' />
+    <label>Course ID</label>
+    <b-input :state='cidstate' placeholder = "Enter CID" v-model = 'map.cid'>
+    </b-input>
     <br>
-    <input type="submit" value="Add map" />
 
-    <form id="addimg" v-if='isstud.val === 1' @submit.prevent='uplimg'>
-      <div >
-        <label> Student Image </label>
-        <input type="file" id="file" ref="file" accept="image/*" />
-      </div>
-      <input type="submit" value="Upload image" />
-    </form>
-
-    </form>
+    <b-button type="submit"> Add map </b-button>
+    </b-form>
+    <b-form id="addimg" v-if='isstud.val === 1' @submit.prevent='uplimg'>
+      <label> Student Image </label>
+        <b-form-file v-model="file" id="files" ref="files" accept="image/*">
+        </b-form-file>
+      <b-button type="submit"> Add image </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -34,6 +34,14 @@ export default {
       },
       file: '',
     };
+  },
+  computed: {
+    uidstate() {
+      return this.map.uid.length > 0;
+    },
+    cidstate() {
+      return this.map.cid.length > 0;
+    },
   },
   methods: {
     validate() {

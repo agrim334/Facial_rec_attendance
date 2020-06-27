@@ -2,7 +2,6 @@
   <div class="home">
     <ModifyMapForm :ogmap = 'map' @mapupd='updaterec' @imgupl='imgupl' :isstud='isstud'>
     </ModifyMapForm>
-    <p> {{this.isstud.uid}} </p>
   </div>
 </template>
 

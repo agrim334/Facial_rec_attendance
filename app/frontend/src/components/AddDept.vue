@@ -1,16 +1,19 @@
 <template>
-  <div id="register-form">
-    <form @submit.prevent="handle">
+  <div id="adddept-form">
+    <b-form @submit.prevent="handle">
     <label>Department ID</label>
-    <input type="text" placeholder = "Enter Department ID" v-model = 'dept.id' />
+    <b-input :state='didstate' placeholder = "Enter Department ID"
+    v-model = 'dept.id' >
+    </b-input>
     <br>
 
     <label>Department name</label>
-    <input type="text" placeholder = "Enter Department Name" v-model = 'dept.name' />
+    <b-input :state='dnstate' placeholder = "Enter Department name"
+    v-model = 'dept.name' ></b-input>
     <br>
 
-    <input type="submit" value="Add deptartment" />
-    </form>
+    <b-button type="submit"> Add Department </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -23,6 +26,14 @@ export default {
         id: '', name: '',
       },
     };
+  },
+  computed: {
+    didstate() {
+      return this.dept.id.length > 0;
+    },
+    dnstate() {
+      return this.dept.name.length > 0;
+    },
   },
   methods: {
     handle() {
