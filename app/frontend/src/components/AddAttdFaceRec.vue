@@ -53,7 +53,6 @@ export default {
         alert('enter cid');
         f = 1;
       }
-      this.files = this.$refs.files.files;
       if (f === 0) {
         this.$emit('attdmark', { rec: this.attdrec, img: this.files });
       }

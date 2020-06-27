@@ -17,7 +17,8 @@ export default {
   },
   data() {
     return {
-      isstud: { val: 0, uid: -1 },
+      isstud: 0,
+      cid: -1,
     };
   },
   methods: {
@@ -25,8 +26,8 @@ export default {
       const path = 'http://localhost:5000/map/add_map_json';
       axios.post(path, data)
         .then((res) => {
-          this.isstud.val = res.data.isstud;
-          this.isstud.uid = data.uid;
+          this.isstud = res.data.isstud;
+          this.cid = data.cid;
           if (this.isstud === 0) alert('Success in adding map');
         })
         .catch((error) => {
@@ -37,7 +38,8 @@ export default {
       const path = 'http://localhost:5000/map/add_map_json';
       const formData = new FormData();
       formData.append('file', data.img);
-      formData.append('uid', this.isstud.uid);
+      formData.append('uid', data.dat.uid);
+      formData.append('cid', data.dat.cid);
       axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((res) => {
           alert(res.data);

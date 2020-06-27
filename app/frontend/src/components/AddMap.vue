@@ -1,6 +1,6 @@
 <template>
   <div id="register-form">
-    <b-form @submit.prevent="validate" v-if='isstud.val === 0'>
+    <b-form @submit.prevent="validate" v-if='isstud === 0'>
     <label>User ID</label>
     <b-input :state='uidstate' placeholder = "Enter UID" v-model = 'map.uid'>
     </b-input>
@@ -13,9 +13,9 @@
 
     <b-button type="submit"> Add map </b-button>
     </b-form>
-    <b-form id="addimg" v-if='isstud.val === 1' @submit.prevent='uplimg'>
+    <b-form id="addimg" v-if='isstud === 1' @submit.prevent='uplimg'>
       <label> Student Image </label>
-        <b-form-file v-model="file" id="files" ref="files" accept="image/*">
+        <b-form-file v-model="file" id="fileupl" ref="studimg" accept="image/*">
         </b-form-file>
       <b-button type="submit"> Add image </b-button>
     </b-form>
@@ -32,7 +32,7 @@ export default {
       map: {
         cid: '', uid: '',
       },
-      file: '',
+      file: null,
     };
   },
   computed: {
@@ -59,8 +59,7 @@ export default {
       }
     },
     uplimg() {
-      [this.file] = this.$refs.file.files;
-      this.$emit('imgupl', { img: this.file, uid: this.map.uid });
+      this.$emit('imgupl', { img: this.file, dat: this.map });
     },
   },
 };

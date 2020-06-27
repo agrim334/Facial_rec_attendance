@@ -90,16 +90,19 @@ def addmapjson():
 		except:
 			return jsonify({'status':'fail'})
 	elif request.files:
-		if not os.path.exists(known_dir):
-			os.makedirs(known_dir)
 		uid = request.form.get('uid')
+		cid = request.form.get('cid')
+		temp = os.path.join(known_dir,cid)
+		if not os.path.exists(temp):
+			os.makedirs(temp)
+
 		for f in request.files:
 			t = request.files[f]
 			filename = secure_filename(request.files[f].filename)
-			t.save(os.path.join(known_dir, filename))
-			filename_old, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+			t.save(os.path.join(temp, filename))
+			filename_old, file_extension = os.path.splitext(os.path.join(temp, filename))		#save images renaming them appropriately
 			new_file = uid + file_extension
-			os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, new_file))
+			os.rename(os.path.join(temp, filename),os.path.join(temp, new_file))
 
 		return jsonify({'status':'success'})
 	else:

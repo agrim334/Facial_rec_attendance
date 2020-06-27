@@ -1,16 +1,17 @@
 <template>
   <div class="home">
-    <MarkAttdFaceForm @attdmark='addface'> </MarkAttdFaceForm>
-    <div v-if='auto === 0'>
-    <b-table :items='studlist' v-if='auto == 1 '>
-      <template v-slot:cell(choices)='row'>
-        <b-form-radio-group v-model='row.item.status'>
-          <b-form-radio value='1' inline> Present </b-form-radio>
-          <b-form-radio value='0' inline> Absent </b-form-radio>
-        </b-form-radio-group>
-      </template>
-    </b-table>
-    </div>
+    <MarkAttdFaceForm v-if='auto === 1' @attdmark='addface'> </MarkAttdFaceForm>
+    <b-form @submit.prevent='addman' v-if='auto === 0'>
+      <b-table :items='studlist'>
+        <template v-slot:cell(choices)='row'>
+          <b-form-radio-group v-model='row.item.status'>
+            <b-form-radio value='1'> Present </b-form-radio>
+            <b-form-radio value='0'> Absent </b-form-radio>
+          </b-form-radio-group>
+        </template>
+      </b-table>
+      <b-button type="submit"> Mark Attendance </b-button>
+    </b-form>
   </div>
 </template>
 
@@ -40,7 +41,6 @@ export default {
       axios.post(path, attddat.rec)
         .then((res) => {
           this.auto = 0;
-          alert(res.data.status);
           if (res.data.status === 'Success') this.uplimg(attddat);
           else alert(res.data.status);
         })
@@ -59,9 +59,10 @@ export default {
       formData.append('cid', this.cid);
       axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((res) => {
+          alert(res.data.status);
           this.studlist = res.data.studlist;
           for (let i = 0; i < this.studlist.length; i += 1) {
-            this.studlist.choices = '';
+            this.studlist[i].choices = '';
           }
         })
         .catch((error) => {

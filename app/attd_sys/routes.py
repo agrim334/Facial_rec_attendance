@@ -97,7 +97,8 @@ def addattdjson():
 			t.save(os.path.join(upldir, filename))
 
 		reglist = detect_faces_in_image(upldir,cid,uid)
-		return jsonify({'studlist' : reglist})
+		print(reglist)
+		return jsonify({'studlist' : reglist, 'status': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
 def modifyattdjson():
@@ -295,6 +296,7 @@ def manmark(studlist,cid,uid):
 	check_course = Course.query.filter_by(ID=cid).all()
 	if not check_course:
 		return False
+	check_course = Course.query.filter_by(ID=cid).first()
 
 	check_user = User.query.filter_by(username=uid).first()
 	if not check_user:
