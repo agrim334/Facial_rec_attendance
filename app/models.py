@@ -40,8 +40,6 @@ class Department(db.Model):
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,
-					'users_dept' : [user.to_json() for user in self.users_dept],
-					'courses_dept' : [course.to_json() for course in self.courses_dept],
 				}
 	def from_json(json_data):
 		ID = json_data.get('id')
@@ -110,9 +108,6 @@ class User(UserMixin,db.Model):
 					'lname' : self.lname,
 					'dept' : self.dept,
 					'role' : self.role_id,
-					'prof_course' : [course.to_json() for course in self.facult],
-					'TA_course' : [course.to_json() for course in self.tutoring],
-					'stud_course' : [course.to_json() for course in self.opted]
 					}
 		return user_obj
 

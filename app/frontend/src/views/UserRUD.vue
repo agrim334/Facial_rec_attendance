@@ -1,17 +1,17 @@
 <template>
   <div class="home">
-    <table>
-      <tr v-for='user in users' :key='user.userid'>
-        <UserRecord :user='user' @updrec='updaterec' @delrec='deleterec'></UserRecord>
-      </tr>
-    </table>
+    <b-table :items='users'>
+      <template v-slot:cell(actions)='row'>
+        <b-button @click='deleterec'> Delete </b-button>
+        <b-button @click='updaterec(row)'> Update </b-button>
+      </template>
+    </b-table>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import axios from 'axios';
-import UserRecord from '@/components/RUDUser.vue';
 
 export default {
   name: 'UserTable',
@@ -20,16 +20,13 @@ export default {
       users: [],
     };
   },
-  components: {
-    UserRecord,
-  },
   methods: {
     updaterec(userdat) {
-      this.$router.push({ name: 'UserModify', params: { user: userdat } });
+      this.$router.push({ name: 'UserModify', params: { user: userdat.item } });
     },
     deleterec(userdat) {
       const path = 'http://localhost:5000/users/delete_log_json';
-      axios.post(path, userdat.username)
+      axios.post(path, userdat.item.username)
         .then(() => {
           this.getUsers();
         })
@@ -42,6 +39,9 @@ export default {
       axios.get(path)
         .then((res) => {
           this.users = res.data.records;
+          for (let i = 0; i < this.users.length; i += 1) {
+            this.users[i].actions = '';
+          }
         })
         .catch((error) => {
           console.error(error);
