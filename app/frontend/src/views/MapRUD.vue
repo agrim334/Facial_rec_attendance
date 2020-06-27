@@ -8,11 +8,12 @@
     <label for='TC'> TACourses </label>
     <input type='radio' id='SC' value='3' v-model = 'choice' @change='getMaps'>
     <label for='SC'> StudCourses </label>
-    <table>
-      <tr v-for='map in maps' :key='map.id'>
-        <MapRecord :map='map' @updrec='updaterec' @delrec='deleterec'></MapRecord>
-      </tr>
-    </table>
+    <b-table :items='maps'>
+      <template v-slot:cell(actions)='row'>
+        <b-button @click='deleterec(row)'> Delete </b-button>
+        <b-button @click='updaterec(row)'> Update </b-button>
+      </template>
+    </b-table>
   </div>
 
 </template>
@@ -20,7 +21,6 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
-import MapRecord from '@/components/RUDMap.vue';
 
 export default {
   name: 'MapTable',
@@ -32,17 +32,15 @@ export default {
       choice: '',
     };
   },
-  components: {
-    MapRecord,
-  },
   methods: {
     updaterec(mapdat) {
-      this.$router.push({ name: 'MapModify', params: { map: mapdat } });
+      this.$router.push({ name: 'MapModify', params: { map: mapdat.item } });
     },
     deleterec(mapdat) {
       const path = 'http://localhost:5000/map/delete_map_json';
-      axios.post(path, mapdat)
-        .then(() => {
+      axios.post(path, mapdat.item)
+        .then((res) => {
+          alert(res.data.status);
           this.getMaps();
         })
         .catch((error) => {
@@ -57,6 +55,9 @@ export default {
           const temp = res.data.records_t.concat(res.data.records_p);
           const t2 = res.data.records_s.concat(temp);
           this.maps = t2;
+          for (let i = 0; i < this.maps.length; i += 1) {
+            this.maps[i].actions = '';
+          }
         })
         .catch((error) => {
           console.error(error);

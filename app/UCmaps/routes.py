@@ -212,6 +212,7 @@ def delmapjson():
 	stud_role = Role.query.filter_by(name="Student").first()
 	ta_role = Role.query.filter_by(name="TA").first()
 	admin_role = Role.query.filter_by(name="Admin").first()
+
 	try:
 		if user.role_id == fa_role.ID:
 			user.facult.remove(course)

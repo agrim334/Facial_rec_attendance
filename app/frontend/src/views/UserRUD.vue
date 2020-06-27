@@ -2,7 +2,7 @@
   <div class="home">
     <b-table :items='users'>
       <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec'> Delete </b-button>
+        <b-button @click='deleterec(row)'> Delete </b-button>
         <b-button @click='updaterec(row)'> Update </b-button>
       </template>
     </b-table>

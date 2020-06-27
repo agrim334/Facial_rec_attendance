@@ -54,7 +54,6 @@ export default {
         f = 1;
       }
       this.files = this.$refs.files.files;
-      console.log('efew');
       if (f === 0) {
         this.$emit('attdmark', { rec: this.attdrec, img: this.files });
       }

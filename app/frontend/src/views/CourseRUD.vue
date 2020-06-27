@@ -1,10 +1,11 @@
 <template>
   <div class="home">
-    <table>
-      <tr v-for='course in courses' :key='course.cid'>
-        <courserec :course='course' @updrec='updaterec' @delrec='deleterec'></courserec>
-      </tr>
-    </table>
+    <b-table :items='courses'>
+      <template v-slot:cell(actions)='row'>
+        <b-button @click='deleterec(row)'> Delete </b-button>
+        <b-button @click='updaterec(row)'> Update </b-button>
+      </template>
+    </b-table>
   </div>
 
 </template>
@@ -12,23 +13,19 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
-import courserec from '@/components/RUDCourse.vue';
 
 export default {
   name: 'CourseTable',
   props: {
     courses: Array,
   },
-  components: {
-    courserec,
-  },
   methods: {
     updaterec(coursedat) {
-      this.$router.push({ name: 'CourseModify', params: { course: coursedat } });
+      this.$router.push({ name: 'CourseModify', params: { course: coursedat.item } });
     },
     deleterec(coursedat) {
       const path = 'http://localhost:5000/courses/delete_course_json';
-      axios.post(path, coursedat.id)
+      axios.post(path, coursedat.item.id)
         .then(() => {
           this.getCourse();
         })
@@ -41,6 +38,9 @@ export default {
       axios.get(path)
         .then((res) => {
           this.courses = res.data.records;
+          for (let i = 0; i < this.courses.length; i += 1) {
+            this.courses[i].actions = '';
+          }
         })
         .catch((error) => {
           console.error(error);

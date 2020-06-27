@@ -1,10 +1,11 @@
 <template>
   <div class="home">
-    <table>
-      <tr v-for='dept in depts' :key='dept.id'>
-        <deptrec :dept='dept' @updrec='updaterec' @delrec='deleterec'></deptrec>
-      </tr>
-    </table>
+    <b-table :items='depts'>
+      <template v-slot:cell(actions)='row'>
+        <b-button @click='deleterec(row)'> Delete </b-button>
+        <b-button @click='updaterec(row)'> Update </b-button>
+      </template>
+    </b-table>
   </div>
 
 </template>
@@ -12,28 +13,19 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
-import deptrec from '@/components/RUDDept.vue';
 
 export default {
   name: 'DeptTable',
   props: {
     depts: Array,
   },
-  components: {
-    deptrec,
-  },
-  data() {
-    return {
-      deptrecarr: Array,
-    };
-  },
   methods: {
     updaterec(deptdat) {
-      this.$router.push({ name: 'DeptModify', params: { dept: deptdat } });
+      this.$router.push({ name: 'DeptModify', params: { dept: deptdat.item } });
     },
     deleterec(deptdat) {
       const path = 'http://localhost:5000/dept/delete_dept_json';
-      axios.post(path, deptdat.id)
+      axios.post(path, deptdat.item.id)
         .then(() => {
           this.getDept();
         })
@@ -46,6 +38,9 @@ export default {
       axios.get(path)
         .then((res) => {
           this.depts = res.data.records;
+          for (let i = 0; i < this.depts.length; i += 1) {
+            this.depts[i].actions = '';
+          }
         })
         .catch((error) => {
           console.error(error);

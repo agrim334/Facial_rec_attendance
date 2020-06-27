@@ -186,11 +186,11 @@ def delattdjson():
 	if not jsdat:
 		return jsonify({ 'status' : 'bad info'})
 
-	attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('markeeid'),timestamp=jsdat.get('ts')).first()
-	if not attd:
-		return jsonify({ 'status' : 'no such record'})
-
 	try:
+		attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('sid'),timestamp=jsdat.get('time')).first()
+		if not attd:
+			return jsonify({ 'status' : 'no such record'})
+
 		db.session.delete(attd)
 		db.session.commit()
 		return jsonify({ 'status' : 'Record deletion success'})

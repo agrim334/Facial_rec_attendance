@@ -1,30 +1,36 @@
 <template>
-  <div id="modify-form">
-    <form @submit.prevent="validate">
+  <div id="modifyattd-form">
+    <b-form @submit.prevent="validate">
     <label>Prof/TA ID</label>
-    <input type="text" placeholder = "Enter New mid" v-model = 'modattd.mid'/>
+    <b-input :state='midstate' placeholder = "Enter New Marker ID.Must be a TA or Prof"
+    v-model = 'modattd.mid'>
+    </b-input>
     <br>
 
     <label>Student ID</label>
-    <input type="text" placeholder = "Enter New Student ID" v-model = 'modattd.sid'/>
+    <b-input :state='sidstate' placeholder = "Enter New Student ID" v-model = 'modattd.sid'>
+    </b-input>
     <br>
 
     <label>Course ID</label>
-    <input type="text" placeholder = "Enter new Course ID" v-model = 'modattd.cid'/>
+    <b-input :state='cidstate' placeholder = "Enter new Course ID" v-model = 'modattd.cid'>
+    </b-input>
     <br>
 
     <label>TimeStamp(Date of class) </label>
-    <input type="text" placeholder = "Enter new Timestamp" v-model = 'modattd.time'/>
+    <b-input type='date' :state='timdstate' placeholder = "Enter new Timestamp"
+    v-model = 'modattd.time'>
+    </b-input>
     <br>
 
-    <input type="submit" value="Modify attd" />
-    </form>
+    <b-button type="submit"> Modify attendance record </b-button>
+    </b-form>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ModifyAttdForm',
+  name: 'ModifyAttdform',
   props: { attdrec: Array },
   data() {
     return {
@@ -35,6 +41,20 @@ export default {
         time: this.attdrec.time,
       },
     };
+  },
+  computed: {
+    midstate() {
+      return this.modattd.mid.length > 0;
+    },
+    sidstate() {
+      return this.modattd.sid.length > 0;
+    },
+    cidstate() {
+      return this.modattd.cid.length > 0;
+    },
+    timdstate() {
+      return this.modattd.time.length > 0;
+    },
   },
   methods: {
     validate() {
