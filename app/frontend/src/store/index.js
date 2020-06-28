@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { authenticate, register } from '../logapi';
+import { authenticate, register } from '../api';
 import { isValidJwt, EventBus } from '../utils';
 
 Vue.use(Vuex);
@@ -48,3 +48,12 @@ const state = {
   user: {},
   jwt: '',
 };
+
+const store = new Vuex.Store({
+  state,
+  actions,
+  mutations,
+  getters,
+});
+
+export default store;

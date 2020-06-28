@@ -1,6 +1,6 @@
 <template>
  <div>
-  <b-form @submit.prevent="logsubmit">
+  <b-form @submit.prevent="authenticate">
     <label for='username'> Username </label>
     <b-input :state='ustate' type='text' placeholder ="enter name" v-model = 'cred.user'>
     </b-input>
@@ -10,7 +10,8 @@
     </b-input>
     <br>
     <label for='rembme'> Remember me? </label>
-    <input id = 'rembme' type='checkbox' v-model = 'cred.rem'>
+    <b-form-checkbox  v-model = 'cred.rem' value='true'>
+    </b-form-checkbox>
     <br>
     <b-button type = 'submit'> Login </b-button>
 
@@ -19,6 +20,8 @@
 </template>
 
 <script>
+import { EventBus } from '@/utils';
+
 export default {
   name: 'LogForm',
   data() {
@@ -33,12 +36,26 @@ export default {
     },
   },
   methods: {
+    logsubmit() {
+      let f = 0;
+      if (this.cred.user === null || this.cred.user === '') {
+        alert('Fill in user name');
+        f = 1;
+      }
+      if (this.cred.pass === null || this.cred.pass === '') {
+        alert('Fill in password');
+        f = 1;
+      }
+      if (f === 0) {
+        this.$emit('login', this.cred);
+      }
+    },
     authenticate() {
-      this.$store.dispatch('login', { email: this.email, password: this.password })
+      this.$store.dispatch('login', { user: this.cred.user, password: this.cred.pass })
         .then(() => this.$router.push('/'));
     },
     register() {
-      this.$store.dispatch('register', { email: this.email, password: this.password })
+      this.$store.dispatch('register', { user: this.cred.user, password: this.cred.pass })
         .then(() => this.$router.push('/'));
     },
   },

@@ -21,7 +21,6 @@ login.login_view = 'log_sysbp.login'
 
 def create_app():
 	APP = Flask(__name__)
-	CORS(APP, resources={r'/*': {'origins': '*'}})
 	APP.config.from_object(Config)
 	if not APP.debug:
 		if APP.config['MAIL_SERVER']:
@@ -52,7 +51,7 @@ def create_app():
 	db.init_app(APP)
 	migrate.init_app(APP,db)
 	login.init_app(APP)
-
+	CORS(APP, resources={r'/*': {'origins': '*'}})
 	with APP.app_context():
 		from .log_sys import log_sysbp 
 		from .attd_sys import attd_sysbp 

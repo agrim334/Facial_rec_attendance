@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import LogForm from '../views/Login.vue';
@@ -17,6 +18,7 @@ import AttdModify from '../views/AttdModify.vue';
 import MapTable from '../views/MapRUD.vue';
 import AddMap from '../views/MapAdd.vue';
 import MapModify from '../views/MapModify.vue';
+import store from '../store';
 
 Vue.use(VueRouter);
 
@@ -47,6 +49,10 @@ const routes = [
     name: 'UserTable',
     component: UserTable,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/addcourse',

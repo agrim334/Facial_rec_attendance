@@ -127,10 +127,7 @@ class User(UserMixin,db.Model):
 		return '<User {}>'.format(self.username)    
 
 	def set_password(self, password):
-		self.password_hash = generate_password_hash(password)
-
-	def check_password(self, password):
-		return check_password_hash(self.password_hash, password)
+		self.password_hash = generate_password_hash(password, method='sha256')
 
 	def get_reset_password_token(self, expires_in=600):
 		return jwt.encode({'reset_password': self.username, 'exp': time() + expires_in},APP.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
@@ -155,14 +152,13 @@ class User(UserMixin,db.Model):
 		return User.query.get(id)
 
 	@classmethod
-	def authenticate(email,username,password):
+	def authenticate(self,username,password):
 		
-		if (not email and not username) or not password:
+		print(password)
+		if not username or not password:
 			return None
 
-		if email:
-			user = User.query.filter_by(email=email).first()
-		elif username:
+		if username:
 			user = User.query.filter_by(username=username).first()
 
 		if not user or not check_password_hash(user.password_hash, password):

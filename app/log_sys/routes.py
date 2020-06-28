@@ -11,7 +11,7 @@ from datetime import datetime,timedelta
 import jwt
 import re
 from functools import wraps
-
+from flask_cors import CORS,cross_origin
 APP = current_app._get_current_object()
 
 #fa_role = Role.query.filter_by(name="Faculty").first()
@@ -57,10 +57,14 @@ def token_required(f):
 
 	return _verify
 
-@log_sysbp.route('/login/', methods=('POST',))
+@log_sysbp.route('/login/', methods=['POST'])
 def login():
 	data = request.json
-	user = User.authenticate(data.get('username'),data.get('email'),data.get('password'))
+	uname = data.get('user')
+	password = data.get('password')  
+
+	user = User.authenticate(uname,password)
+	print(user)
 
 	if not user:
 		return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
@@ -84,11 +88,13 @@ def after_request(response):									#security
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-	response.headers['Access-Control-Allow-Origin'] = '*'
+	response.headers.add('Access-Control-Allow-Origin', '*')
+	response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+	response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
 	return response
 
 @log_sysbp.route('/check_user_json',methods=['GET'])
-#@token_required
+@token_required
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -98,7 +104,6 @@ def checklogjson():
 		return {'status':'data fetch failed'}
 
 @log_sysbp.route('/add_log_json',methods=['POST'])
-#@token_required
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})
@@ -152,7 +157,7 @@ def addlogjson():
 		return jsonify({ 'status' : 'User add fail'})
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
-#@token_required
+@token_required
 def modifylogjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
@@ -216,7 +221,7 @@ def modifylogjson():
 		return jsonify({'status' : 'modify fail'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
-#@token_required
+@token_required
 def dellogjson():
 	if not request.get_data('username'):
 		return jsonify({ 'status' : 'No id given'})
