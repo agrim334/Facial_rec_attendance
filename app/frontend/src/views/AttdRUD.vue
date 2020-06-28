@@ -1,11 +1,7 @@
 <template>
   <div class="home">
-    <b-table :items='attds'>
-      <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec(row)'> Delete </b-button>
-        <b-button @click='updaterec(row)'> Update </b-button>
-      </template>
-    </b-table>
+    <AttdRecord :attds='attds' @updrec='updaterec' @delrec='deleterec'>
+    </AttdRecord>
   </div>
 
 </template>
@@ -13,19 +9,23 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import AttdRecord from '../components/RUDAttd.vue';
 
 export default {
   name: 'AttdTable',
   props: {
     attds: Array,
   },
+  components: {
+    AttdRecord,
+  },
   methods: {
     updaterec(attddat) {
-      this.$router.push({ name: 'AttdModify', params: { attd: attddat.item } });
+      this.$router.push({ name: 'AttdModify', params: { attd: attddat } });
     },
     deleterec(attddat) {
       const path = 'http://localhost:5000/attd/delete_attd_json';
-      axios.post(path, attddat.item)
+      axios.post(path, attddat)
         .then(() => {
           this.getAttd();
         })

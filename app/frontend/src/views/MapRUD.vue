@@ -8,12 +8,9 @@
     <label for='TC'> TACourses </label>
     <input type='radio' id='SC' value='3' v-model = 'choice' @change='getMaps'>
     <label for='SC'> StudCourses </label>
-    <b-table :items='maps'>
-      <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec(row)'> Delete </b-button>
-        <b-button @click='updaterec(row)'> Update </b-button>
-      </template>
-    </b-table>
+
+    <MapRecord :maps='maps' @updrec='updaterec' @delrec='deleterec'>
+    </MapRecord>
   </div>
 
 </template>
@@ -21,11 +18,15 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import MapRecord from '../components/RUDMap.vue';
 
 export default {
   name: 'MapTable',
   props: {
     maps: Array,
+  },
+  components: {
+    MapRecord,
   },
   data() {
     return {
@@ -34,11 +35,11 @@ export default {
   },
   methods: {
     updaterec(mapdat) {
-      this.$router.push({ name: 'MapModify', params: { map: mapdat.item } });
+      this.$router.push({ name: 'MapModify', params: { map: mapdat } });
     },
     deleterec(mapdat) {
       const path = 'http://localhost:5000/map/delete_map_json';
-      axios.post(path, mapdat.item)
+      axios.post(path, mapdat)
         .then((res) => {
           alert(res.data.status);
           this.getMaps();
@@ -48,7 +49,6 @@ export default {
         });
     },
     getMaps() {
-      console.log(this.choice);
       const path = 'http://localhost:5000/map/check_map_json';
       axios.post(path, this.choice)
         .then((res) => {

@@ -21,11 +21,11 @@ export default {
   },
   methods: {
     updaterec(coursedat) {
-      this.$router.push({ name: 'CourseModify', params: { course: coursedat.item } });
+      this.$router.push({ name: 'CourseModify', params: { course: coursedat } });
     },
     deleterec(coursedat) {
       const path = 'http://localhost:5000/courses/delete_course_json';
-      axios.post(path, coursedat.item.id)
+      axios.post(path, coursedat.id)
         .then(() => {
           this.getCourse();
         })

@@ -1,5 +1,5 @@
 <template>
-  <div class='home'>
+  <div class='home' v-if='this.depts.length !== 0'>
     <b-row>
       <b-col lg="6" class="my-1">
         <b-form-group label="Filter"
@@ -74,7 +74,7 @@ export default {
   props: { depts: Array },
   computed: {
     fields() {
-      if (this.depts) {
+      if (this.depts.length !== 0) {
         const ar = Object.keys(this.depts[0]);
         const last = Object.keys(this.depts[0]).length - 1;
         ar.splice(last.toString());
@@ -83,7 +83,7 @@ export default {
       return null;
     },
     totalRows() {
-      if (this.depts) {
+      if (this.depts.length !== 0) {
         return this.depts.length;
       }
       return 1;

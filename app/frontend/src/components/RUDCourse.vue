@@ -1,5 +1,5 @@
 <template>
-  <div class='home'>
+  <div class='home' v-if = 'this.courses.length !== 0'>
     <b-row>
       <b-col lg="6" class="my-1">
         <b-form-group label="Filter"
@@ -54,7 +54,7 @@
       </b-col>
     </b-row>
 
-    <b-table :primary-key='courses.username'
+    <b-table :primary-key='courses.id'
       :items='courses' :current-page='currentPage' :per-page='perPage'
       :filter='filter' :filterIncludedFields='filterOn' :sort-by.sync='sortBy'
       :sort-desc.sync='sortDesc' :sort-direction='sortDirection' @filtered='onFiltered' >
@@ -74,7 +74,7 @@ export default {
   props: { courses: Array },
   computed: {
     fields() {
-      if (this.courses) {
+      if (this.courses.length !== 0) {
         const ar = Object.keys(this.courses[0]);
         const last = Object.keys(this.courses[0]).length - 1;
         ar.splice(last.toString());
@@ -83,7 +83,7 @@ export default {
       return null;
     },
     totalRows() {
-      if (this.courses) {
+      if (this.courses.length !== 0) {
         return this.courses.length;
       }
       return 1;
