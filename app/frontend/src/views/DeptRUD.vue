@@ -1,11 +1,7 @@
 <template>
   <div class="home">
-    <b-table :items='depts'>
-      <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec(row)'> Delete </b-button>
-        <b-button @click='updaterec(row)'> Update </b-button>
-      </template>
-    </b-table>
+  <DeptRec :depts='depts' @updrec='updaterec' @delrec='deleterec'>
+  </DeptRec>
   </div>
 
 </template>
@@ -13,19 +9,23 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import DeptRec from '../components/RUDDept.vue';
 
 export default {
   name: 'DeptTable',
   props: {
     depts: Array,
   },
+  components: {
+    DeptRec,
+  },
   methods: {
     updaterec(deptdat) {
-      this.$router.push({ name: 'DeptModify', params: { dept: deptdat.item } });
+      this.$router.push({ name: 'DeptModify', params: { dept: deptdat } });
     },
     deleterec(deptdat) {
       const path = 'http://localhost:5000/dept/delete_dept_json';
-      axios.post(path, deptdat.item.id)
+      axios.post(path, deptdat.id)
         .then(() => {
           this.getDept();
         })

@@ -74,14 +74,23 @@ export default {
   props: { users: Array },
   computed: {
     fields() {
-      const ar = Object.keys(this.users[0]);
-      ar.splice('6');
-      return ar;
+      if (this.users) {
+        const ar = Object.keys(this.users[0]);
+        const last = Object.keys(this.users[0]).length - 1;
+        ar.splice(last.toString());
+        return ar;
+      }
+      return null;
+    },
+    totalRows() {
+      if (this.users) {
+        return this.users.length;
+      }
+      return 1;
     },
   },
   data() {
     return {
-      totalRows: 1,
       currentPage: 1,
       perPage: 5,
       pageOptions: [5, 10, 15],
@@ -94,10 +103,10 @@ export default {
   },
   methods: {
     updaterec(row) {
-      this.$emit('updrec', this.row.item);
+      this.$emit('updrec', row.item);
     },
     deleterec(row) {
-      this.$emit('delrec', this.row.item);
+      this.$emit('delrec', row.item);
     },
     onFiltered(filteredItems) {
       this.totalRows = filteredItems.length;

@@ -1,11 +1,7 @@
 <template>
   <div class="home">
-    <b-table :items='courses'>
-      <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec(row)'> Delete </b-button>
-        <b-button @click='updaterec(row)'> Update </b-button>
-      </template>
-    </b-table>
+  <CourseRec :courses='courses' @updrec='updaterec' @delrec='deleterec'>
+  </CourseRec>
   </div>
 
 </template>
@@ -13,11 +9,15 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import CourseRec from '../components/RUDCourse.vue';
 
 export default {
   name: 'CourseTable',
   props: {
     courses: Array,
+  },
+  components: {
+    CourseRec,
   },
   methods: {
     updaterec(coursedat) {

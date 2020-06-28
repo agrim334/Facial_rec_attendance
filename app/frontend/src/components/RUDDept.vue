@@ -1,22 +1,116 @@
 <template>
- <div>
-    {{ dept.id }}
-    {{ dept.name }}
-    <button @click="deleterec"> Delete </button>
-    <button @click="updaterec"> Update </button>
- </div>
+  <div class='home'>
+    <b-row>
+      <b-col lg="6" class="my-1">
+        <b-form-group label="Filter"
+          label-cols-sm="3" label-align-sm="right"
+          label-size="sm" label-for="filterInput" class="mb-0">
+
+          <b-input-group size="sm">
+
+            <b-form-input v-model="filter"
+              type="search" id="filterInput"
+              placeholder="Type to Search" >
+            </b-form-input>
+
+            <b-input-group-append>
+              <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+            </b-input-group-append>
+
+          </b-input-group>
+        </b-form-group>
+      </b-col>
+
+      <b-col lg="6" class="my-1">
+        <b-form-group
+          label="Filter On" label-cols-sm="3" label-align-sm="right"
+          label-size="sm" description="Leave all unchecked to filter on all data"
+          class="mb-0">
+
+          <b-form-checkbox-group v-model="filterOn" :options='fields' class="mt-1">
+          </b-form-checkbox-group>
+
+        </b-form-group>
+      </b-col>
+
+      <b-col sm="5" md="6" class="my-1">
+        <b-form-group label="Per page" label-cols-sm="6"
+          label-cols-md="4" label-cols-lg="3"
+          label-align-sm="right" label-size="sm"
+          label-for="perPageSelect" class="mb-0">
+
+          <b-form-select v-model="perPage" id="perPageSelect"
+            size="sm" :options="pageOptions">
+          </b-form-select>
+
+        </b-form-group>
+      </b-col>
+
+      <b-col sm="7" md="6" class="my-1">
+        <b-pagination v-model="currentPage"
+          :total-rows="totalRows" :per-page="perPage"
+          align="fill" size="sm" class="my-0">
+        </b-pagination>
+      </b-col>
+    </b-row>
+
+    <b-table :primary-key='depts.username'
+      :items='depts' :current-page='currentPage' :per-page='perPage'
+      :filter='filter' :filterIncludedFields='filterOn' :sort-by.sync='sortBy'
+      :sort-desc.sync='sortDesc' :sort-direction='sortDirection' @filtered='onFiltered' >
+
+      <template v-slot:cell(actions)='row'>
+        <b-button @click='deleterec(row)'> Delete </b-button>
+        <b-button @click='updaterec(row)'> Update </b-button>
+      </template>
+
+    </b-table>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'deptrec',
-  props: { dept: Array },
-  methods: {
-    updaterec() {
-      this.$emit('updrec', this.dept);
+  name: 'DeptRec',
+  props: { depts: Array },
+  computed: {
+    fields() {
+      if (this.depts) {
+        const ar = Object.keys(this.depts[0]);
+        const last = Object.keys(this.depts[0]).length - 1;
+        ar.splice(last.toString());
+        return ar;
+      }
+      return null;
     },
-    deleterec() {
-      this.$emit('delrec', this.dept);
+    totalRows() {
+      if (this.depts) {
+        return this.depts.length;
+      }
+      return 1;
+    },
+  },
+  data() {
+    return {
+      currentPage: 1,
+      perPage: 5,
+      pageOptions: [5, 10, 15],
+      sortBy: '',
+      sortDesc: false,
+      sortDirection: 'asc',
+      filter: null,
+      filterOn: [],
+    };
+  },
+  methods: {
+    updaterec(row) {
+      this.$emit('updrec', row.item);
+    },
+    deleterec(row) {
+      this.$emit('delrec', row.item);
+    },
+    onFiltered(filteredItems) {
+      this.totalRows = filteredItems.length;
+      this.currentPage = 1;
     },
   },
 };

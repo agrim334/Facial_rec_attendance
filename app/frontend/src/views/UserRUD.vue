@@ -8,10 +8,8 @@ import UserRecord from '../components/RUDUser.vue';
 
 export default {
   name: 'UserTable',
-  data() {
-    return {
-      users: [],
-    };
+  props: {
+    users: Array,
   },
   components: {
     UserRecord,
