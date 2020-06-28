@@ -1,17 +1,10 @@
 <template>
-  <div class="home">
-    <b-table :items='users'>
-      <template v-slot:cell(actions)='row'>
-        <b-button @click='deleterec(row)'> Delete </b-button>
-        <b-button @click='updaterec(row)'> Update </b-button>
-      </template>
-    </b-table>
-  </div>
+    <UserRecord :users='users' @updrec='updaterec' @delrec='deleterec'> </UserRecord>
 </template>
-
 <script>
 // @ is an alias to /src
 import axios from 'axios';
+import UserRecord from '../components/RUDUser.vue';
 
 export default {
   name: 'UserTable',
@@ -20,13 +13,21 @@ export default {
       users: [],
     };
   },
+  components: {
+    UserRecord,
+  },
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated;
+    },
+  },
   methods: {
     updaterec(userdat) {
-      this.$router.push({ name: 'UserModify', params: { user: userdat.item } });
+      this.$router.push({ name: 'UserModify', params: { user: userdat } });
     },
     deleterec(userdat) {
       const path = 'http://localhost:5000/users/delete_log_json';
-      axios.post(path, userdat.item.username)
+      axios.post(path, userdat.username)
         .then(() => {
           this.getUsers();
         })

@@ -21,6 +21,7 @@ login.login_view = 'log_sysbp.login'
 
 def create_app():
 	APP = Flask(__name__)
+	CORS(APP, resources={r'/*': {'origins': '*'}})
 	APP.config.from_object(Config)
 	if not APP.debug:
 		if APP.config['MAIL_SERVER']:
@@ -46,7 +47,6 @@ def create_app():
 
 		APP.logger.setLevel(logging.INFO)
 		APP.logger.info('Microblog startup')
-	CORS(APP, resources={r'/*': {'origins': '*'}})
 	bootstrap.init_app(APP)
 	mail.init_app(APP)
 	db.init_app(APP)

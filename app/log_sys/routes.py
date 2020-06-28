@@ -84,10 +84,11 @@ def after_request(response):									#security
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	response.headers['Access-Control-Allow-Origin'] = '*'
 	return response
 
 @log_sysbp.route('/check_user_json',methods=['GET'])
-@token_required
+#@token_required
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -97,7 +98,7 @@ def checklogjson():
 		return {'status':'data fetch failed'}
 
 @log_sysbp.route('/add_log_json',methods=['POST'])
-@token_required
+#@token_required
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})
@@ -151,7 +152,7 @@ def addlogjson():
 		return jsonify({ 'status' : 'User add fail'})
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
-@token_required
+#@token_required
 def modifylogjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
@@ -215,7 +216,7 @@ def modifylogjson():
 		return jsonify({'status' : 'modify fail'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
-@token_required
+#@token_required
 def dellogjson():
 	if not request.get_data('username'):
 		return jsonify({ 'status' : 'No id given'})

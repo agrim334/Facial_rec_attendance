@@ -5,7 +5,6 @@ import { isValidJwt, EventBus } from '../utils';
 
 Vue.use(Vuex);
 
-/* exported getters */
 const getters = {
   isAuthenticated(state) {
     return isValidJwt(state.jwt.token);
