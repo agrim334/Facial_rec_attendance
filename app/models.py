@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin
 from time import time
 import jwt
+from datetime import datetime
 
 @login.user_loader
 def load_user(username):
@@ -54,7 +55,7 @@ class Course(db.Model):
 	ID = db.Column(db.String(64), primary_key=True)
 	name = db.Column(db.String(64))
 	classes_held = db.Column(db.Integer,default=0)
-	dept_ID = db.Column(db.Integer, db.ForeignKey('department.ID',onupdate="CASCADE",ondelete="CASCADE"))
+	dept_ID = db.Column(db.String(64), db.ForeignKey('department.ID',onupdate="CASCADE",ondelete="CASCADE"))
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,
@@ -77,7 +78,7 @@ class User(UserMixin,db.Model):
 	fname = db.Column(db.String(64), index=True)
 	lname = db.Column(db.String(64), index=True)
 	password_hash = db.Column(db.String(128))
-	dept = db.Column(db.Integer,db.ForeignKey('department.ID'))
+	dept = db.Column(db.String(64),db.ForeignKey('department.ID'))
 	role_id = db.Column(db.Integer, db.ForeignKey('role.ID',onupdate="CASCADE",ondelete="CASCADE"))
 
 	facult = db.relationship('Course',

@@ -1,18 +1,20 @@
 <template>
  <div>
-  <form @submit.prevent="logsubmit">
+  <b-form @submit.prevent="logsubmit">
     <label for='username'> Username </label>
-    <input id = 'username' type='text' placeholder ="enter name" v-model = 'cred.user'>
+    <b-input :state='ustate' type='text' placeholder ="enter name" v-model = 'cred.user'>
+    </b-input>
     <br>
     <label for='pwd'> Password </label>
-    <input id = 'pwd' type='password' placeholder ="enter password" v-model = 'cred.pass'>
+    <b-input :state='pwstate' type='password' placeholder ="enter password" v-model = 'cred.pass'>
+    </b-input>
     <br>
     <label for='rembme'> Remember me? </label>
     <input id = 'rembme' type='checkbox' v-model = 'cred.rem'>
     <br>
-    <input id = 'submit' type = 'submit' value ='Login'>
+    <b-button type = 'submit'> Login </b-button>
 
-   </form>
+   </b-form>
  </div>
 </template>
 
@@ -22,10 +24,35 @@ export default {
   data() {
     return { cred: { user: '', pass: '', rem: false } };
   },
-  methods: {
-    logsubmit() {
-      this.$emit('userlogin', this.cred);
+  computed: {
+    ustate() {
+      return this.cred.user.length > 0;
     },
+    pwstate() {
+      return this.cred.pass.length > 0;
+    },
+  },
+  methods: {
+    authenticate() {
+      this.$store.dispatch('login', { email: this.email, password: this.password })
+        .then(() => this.$router.push('/'));
+    },
+    register() {
+      this.$store.dispatch('register', { email: this.email, password: this.password })
+        .then(() => this.$router.push('/'));
+    },
+  },
+  mounted() {
+    EventBus.$on('failedRegistering', (msg) => {
+      this.errorMsg = msg;
+    });
+    EventBus.$on('failedAuthentication', (msg) => {
+      this.errorMsg = msg;
+    });
+  },
+  beforeDestroy() {
+    EventBus.$off('failedRegistering');
+    EventBus.$off('failedAuthentication');
   },
 };
 </script>

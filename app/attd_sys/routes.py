@@ -296,6 +296,7 @@ def manmark(studlist,cid,uid):
 	check_course = Course.query.filter_by(ID=cid).all()
 	if not check_course:
 		return False
+
 	check_course = Course.query.filter_by(ID=cid).first()
 
 	check_user = User.query.filter_by(username=uid).first()

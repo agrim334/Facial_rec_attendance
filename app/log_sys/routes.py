@@ -10,6 +10,7 @@ from .email import send_password_reset_email
 from datetime import datetime,timedelta
 import jwt
 import re
+from functools import wraps
 
 APP = current_app._get_current_object()
 
@@ -23,7 +24,7 @@ def check(email):
 	if(re.search(regex,email)):  
 		return True		  
 	return False
-'''
+
 def token_required(f):
 	@wraps(f)
 	def _verify(*args, **kwargs):
@@ -70,7 +71,7 @@ def login():
 		'exp': datetime.utcnow() + timedelta(minutes=30)},
 		current_app.config['SECRET_KEY'])
 	return jsonify({ 'token': token.decode('UTF-8') })
-'''
+
 @log_sysbp.before_request
 def make_session_permanent():
 	session.permanent = True
@@ -86,7 +87,7 @@ def after_request(response):									#security
 	return response
 
 @log_sysbp.route('/check_user_json',methods=['GET'])
-#@token_required
+@token_required
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -96,7 +97,7 @@ def checklogjson():
 		return {'status':'data fetch failed'}
 
 @log_sysbp.route('/add_log_json',methods=['POST'])
-#@token_required
+@token_required
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})
@@ -150,21 +151,25 @@ def addlogjson():
 		return jsonify({ 'status' : 'User add fail'})
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
-#@token_required
+@token_required
 def modifylogjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
+
+	if oldjs.get('username') == '' or oldjs.get('username') is None:
+		return jsonify({ 'status' : 'Empty old user id'})
+
 	user = User.query.filter_by(username=oldjs.get('username')).first_or_404()
 
 	if not user:
 		return jsonify({ 'status' : 'No such user exists'})
 
 	if newjs.get('username') == '' or newjs.get('username') is None:
-		return jsonify({ 'status' : 'Empty user id'})
+		return jsonify({ 'status' : 'Empty new user id'})
 
 	check_user = User.query.filter_by(username=newjs.get('username')).first_or_404()
 
-	if check_user:
+	if check_user and check_user != user:
 		return jsonify({ 'status' : 'User with id {} already in database'.format(newjs.get('username'))})
 	
 	if newjs.get('fname') == '' or newjs.get('fname') is None:
@@ -178,7 +183,7 @@ def modifylogjson():
 
 	check_user = User.query.filter_by(email=newjs.get('email')).first_or_404()
 
-	if check_user:
+	if check_user and check_user != user:
 		return jsonify({ 'status' : 'email id {} already used in database'.format(newjs.get('email'))})
 
 	if newjs.get('rolec') == '' or newjs.get('rolec') is None:
@@ -198,7 +203,7 @@ def modifylogjson():
 
 	try:
 		user.username = newjs.get('username') or user.username
-		user.fname = newjs.get('fname') or user.lname 
+		user.fname = newjs.get('fname') or user.fname 
 		user.lname = newjs.get('lname') or user.lname 
 		user.email = newjs.get('email') or user.email
 		user.role_id = newjs.get('rolec') or user.email
@@ -210,7 +215,7 @@ def modifylogjson():
 		return jsonify({'status' : 'modify fail'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
-#@token_required
+@token_required
 def dellogjson():
 	if not request.get_data('username'):
 		return jsonify({ 'status' : 'No id given'})
