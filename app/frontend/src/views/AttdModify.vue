@@ -21,7 +21,8 @@ export default {
   methods: {
     updaterec(modattd) {
       const path = 'http://localhost:5000/attd/modify_attd_json';
-      axios.post(path, { old: this.attd, new: modattd })
+      const updat = { old: this.attd, new: modattd };
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
           console.log(res);
         })

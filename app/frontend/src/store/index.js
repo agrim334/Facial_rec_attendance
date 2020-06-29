@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {
-  isValidJwt, login, authenticate, EventBus,
+  isValidJwt, login, authenticate, authenticateimg, EventBus,
 } from '../services';
 
 Vue.use(Vuex);
@@ -24,6 +24,15 @@ const actions = {
     const userdat = userData.data;
     return authenticate(path, userdat, context.state.jwt.token);
   },
+  authrequestimg(context, userData) {
+    const path = userData.url;
+    const userdat = userData.data;
+    return authenticateimg(path, userdat, context.state.jwt.token);
+  },
+  logout(context) {
+    context.commit('resetJwtToken');
+    return 0;
+  },
 };
 
 const mutations = {
@@ -35,6 +44,11 @@ const mutations = {
     console.log('setJwtToken payload = ', payload);
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
+    console.log(state);
+  },
+  resetJwtToken(state) {
+    localStorage.removeItem('token');
+    state.jwt = '';
     console.log(state);
   },
 };

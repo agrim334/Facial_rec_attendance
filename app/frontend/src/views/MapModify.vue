@@ -26,7 +26,8 @@ export default {
   methods: {
     updaterec(mapdat) {
       const path = 'http://localhost:5000/map/modify_map_json';
-      axios.post(path, { old: this.map, new: mapdat })
+      const updat = { old: this.map, new: mapdat };
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
           console.log(res.data.status);
           this.isstud.val = res.data.isstud;
@@ -41,7 +42,7 @@ export default {
       const formData = new FormData();
       formData.append('file', data.img);
       formData.append('uid', this.isstud.uid);
-      axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      this.$store.dispatch('authrequestimg', { url: path, data: formData })
         .then((res) => {
           alert(res.data);
         })

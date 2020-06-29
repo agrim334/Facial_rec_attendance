@@ -17,6 +17,10 @@ export function authenticate(API_URL, userData, jwt) {
   return axios.post(`${API_URL}`, userData, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
+export function authenticateimg(API_URL, userData, jwt) {
+  return axios.post(`${API_URL}`, userData, { headers: { Authorization: `Bearer: ${jwt}`, 'Content-Type': 'multipart/form-data' } });
+}
+
 export function login(API_URL, userData) {
   return axios.post(`${API_URL}`, userData);
 }

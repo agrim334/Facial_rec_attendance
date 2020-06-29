@@ -22,7 +22,8 @@ export default {
     updaterec(deptdat) {
       alert(deptdat);
       const path = 'http://localhost:5000/depts/modify_dept_json';
-      axios.post(path, { old: this.dept, new: deptdat })
+      const updat = { old: this.dept, new: deptdat };
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then(() => {
           console.log('done');
         })

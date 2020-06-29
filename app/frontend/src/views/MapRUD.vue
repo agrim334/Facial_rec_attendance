@@ -39,7 +39,7 @@ export default {
     },
     deleterec(mapdat) {
       const path = 'http://localhost:5000/map/delete_map_json';
-      axios.post(path, mapdat)
+      this.$store.dispatch('authrequest', { url: path, data: mapdat })
         .then((res) => {
           alert(res.data.status);
           this.getMaps();
@@ -50,7 +50,7 @@ export default {
     },
     getMaps() {
       const path = 'http://localhost:5000/map/check_map_json';
-      axios.post(path, this.choice)
+      this.$store.dispatch('authrequest', { url: path, data: this.choice })
         .then((res) => {
           const temp = res.data.records_t.concat(res.data.records_p);
           const t2 = res.data.records_s.concat(temp);

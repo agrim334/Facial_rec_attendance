@@ -21,7 +21,8 @@ export default {
   methods: {
     updaterec(modcourse) {
       const path = 'http://localhost:5000/courses/modify_course_json';
-      axios.post(path, { old: this.course, new: modcourse })
+      const updat = { old: this.course, new: modcourse };
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then(() => {
           console.log(this);
         })

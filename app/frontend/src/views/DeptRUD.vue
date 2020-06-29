@@ -25,7 +25,7 @@ export default {
     },
     deleterec(deptdat) {
       const path = 'http://localhost:5000/dept/delete_dept_json';
-      axios.post(path, deptdat.id)
+      this.$store.dispatch('authrequest', { url: path, data: deptdat.id })
         .then(() => {
           this.getDept();
         })
@@ -35,7 +35,7 @@ export default {
     },
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;
           for (let i = 0; i < this.depts.length; i += 1) {

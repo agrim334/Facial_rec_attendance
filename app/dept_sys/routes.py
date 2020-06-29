@@ -24,6 +24,9 @@ def after_request(response):									#security
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	response.headers['Access-Control-Allow-Origin'] = '*'
+	response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+	response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
 	return response
 
 @dept_sysbp.route('/check_dept_json',methods=['GET','POST'])
@@ -36,7 +39,7 @@ def checkdeptjson():
 	except:
 		return {'status':'data fetch failed'}
 
-@dept_sysbp.route('/add_dept_json',methods=['POST'])
+@dept_sysbp.route('/add_dept_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)
 def adddeptjson():
 	jsdat = request.json
@@ -61,7 +64,7 @@ def adddeptjson():
 	except:
 		return jsonify({ 'status' : 'Dept add fail'})
 
-@dept_sysbp.route('/modify_dept_json',methods=['POST'])
+@dept_sysbp.route('/modify_dept_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)
 def modifydeptjson():
 	oldjs = request.json['old']
@@ -91,7 +94,7 @@ def modifydeptjson():
 	except:
 		return jsonify({ 'status' : 'Dept modify fail'})
 
-@dept_sysbp.route('/delete_dept_json',methods=['POST'])
+@dept_sysbp.route('/delete_dept_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)
 def deldeptjson():
 	if not request.get_data('id'):

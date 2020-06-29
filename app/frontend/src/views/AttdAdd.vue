@@ -43,7 +43,8 @@ export default {
       const path = 'http://localhost:5000/attd/add_attd_json';
       this.uid = attddat.rec.uid;
       this.cid = attddat.rec.cid;
-      axios.post(path, attddat.rec)
+
+      this.$store.dispatch('authrequest', { url: path, data: attddat.rec })
         .then((res) => {
           this.auto = 0;
           if (res.data.status === 'Success') this.uplimg(attddat);
@@ -62,7 +63,7 @@ export default {
       }
       formData.append('uid', this.uid);
       formData.append('cid', this.cid);
-      axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      this.$store.dispatch('authrequestimg', { url: path, data: formData })
         .then((res) => {
           alert(res.data.status);
           this.studlist = res.data.studlist;
@@ -76,12 +77,13 @@ export default {
     },
     addman() {
       const path = 'http://localhost:5000/attd/add_attd_json';
-      axios.post(path, {
+      const updat = {
         studlist: this.studlist,
         uid: this.uid,
         cid: this.cid,
         mancheck: 1,
-      })
+      };
+      this.$store.dispatch('authrequestimg', { url: path, data: updat })
         .then((res) => {
           console.log(res.data);
         })

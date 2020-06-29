@@ -24,7 +24,8 @@ export default {
   methods: {
     updaterec(userdat) {
       const path = 'http://localhost:5000/users/modify_log_json';
-      axios.post(path, { old: this.user, new: userdat })
+      const updat = { old: this.user, new: userdat };
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then(() => {
           console.log(this);
         })
@@ -34,7 +35,7 @@ export default {
     },
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;
         })

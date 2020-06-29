@@ -25,7 +25,7 @@ export default {
     },
     deleterec(attddat) {
       const path = 'http://localhost:5000/attd/delete_attd_json';
-      axios.post(path, attddat)
+      this.$store.dispatch('authrequest', { url: path, data: attddat })
         .then(() => {
           this.getAttd();
         })
@@ -35,7 +35,7 @@ export default {
     },
     getAttd() {
       const path = 'http://localhost:5000/attd/check_attd_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.attds = res.data.records;
           for (let i = 0; i < this.attds.length; i += 1) {

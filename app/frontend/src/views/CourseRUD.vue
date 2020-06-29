@@ -25,7 +25,7 @@ export default {
     },
     deleterec(coursedat) {
       const path = 'http://localhost:5000/courses/delete_course_json';
-      axios.post(path, coursedat.id)
+      this.$store.dispatch('authrequest', { url: path, data: coursedat.id })
         .then(() => {
           this.getCourse();
         })
@@ -35,7 +35,7 @@ export default {
     },
     getCourse() {
       const path = 'http://localhost:5000/courses/check_course_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.courses = res.data.records;
           for (let i = 0; i < this.courses.length; i += 1) {

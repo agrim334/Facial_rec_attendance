@@ -43,7 +43,7 @@ def token_required(permission):
 				token = auth_headers[1]
 				data = jwt.decode(token, current_app.config['SECRET_KEY'])
 				user = User.query.filter_by(username=data['sub']).first()
-
+				print(user,data)
 				if not user:
 					raise RuntimeError('User not found')
 				if not user.can(permission):
@@ -59,6 +59,7 @@ def token_required(permission):
 	return decorator_act
 
 @log_sysbp.route('/login/', methods=['POST'])
+@cross_origin
 def login():
 	data = request.json
 	uname = data.get('user')
@@ -89,13 +90,14 @@ def after_request(response):									#security
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-	response.headers.add('Access-Control-Allow-Origin', '*')
-	response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-	response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+	response.headers['Access-Control-Allow-Origin'] = '*'
+	response.headers['Access-Control-Allow-Headers'] = 'Origin,Content-Type,Authorization'
+	response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
 	return response
 
-@log_sysbp.route('/check_user_json',methods=['GET','POST'])
-@token_required(permission = Permission.READ | Permission.ADMIN)
+@log_sysbp.route('/check_user_json',methods=['POST'])
+@token_required(Permission.ADMIN)
+@cross_origin
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -106,6 +108,7 @@ def checklogjson():
 
 @log_sysbp.route('/add_log_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)
+@cross_origin
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})

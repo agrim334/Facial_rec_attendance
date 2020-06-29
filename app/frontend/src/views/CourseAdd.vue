@@ -18,7 +18,8 @@ export default {
   methods: {
     add(data) {
       const path = 'http://localhost:5000/courses/add_course_json';
-      axios.post(path, data)
+      const updat = data;
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
           alert(res.data);
         })

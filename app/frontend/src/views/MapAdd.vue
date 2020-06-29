@@ -24,7 +24,8 @@ export default {
   methods: {
     add(data) {
       const path = 'http://localhost:5000/map/add_map_json';
-      axios.post(path, data)
+      const updat = data;
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
           this.isstud = res.data.isstud;
           this.cid = data.cid;
@@ -40,7 +41,7 @@ export default {
       formData.append('file', data.img);
       formData.append('uid', data.dat.uid);
       formData.append('cid', data.dat.cid);
-      axios.post(path, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      this.$store.dispatch('authrequestimg', { url: path, data: formData })
         .then((res) => {
           alert(res.data);
         })

@@ -24,7 +24,7 @@ export default {
   methods: {
     getDept() {
       const path = 'http://localhost:5000/dept/check_dept_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;
         })
@@ -44,7 +44,8 @@ export default {
     },
     add(data) {
       const path = 'http://localhost:5000/users/add_log_json';
-      axios.post(path, data)
+      const updat = data;
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
           alert(res.data.status);
         })

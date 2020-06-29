@@ -25,7 +25,7 @@ export default {
     },
     deleterec(userdat) {
       const path = 'http://localhost:5000/users/delete_log_json';
-      axios.post(path, userdat.username)
+      this.$store.dispatch('authrequest', { url: path, data: userdat.username })
         .then(() => {
           this.getUsers();
         })
@@ -41,6 +41,9 @@ export default {
           for (let i = 0; i < this.users.length; i += 1) {
             this.users[i].actions = '';
           }
+        })
+        .catch((error) => {
+          console.error(error);
         });
     },
   },

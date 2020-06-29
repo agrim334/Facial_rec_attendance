@@ -27,6 +27,10 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/login',
@@ -37,12 +41,20 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Reg,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/userupd',
     name: 'UserModify',
     component: UserModify,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/usertable',
@@ -58,68 +70,116 @@ const routes = [
     path: '/addcourse',
     name: 'AddCourse',
     component: AddCourse,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/courseupd',
     name: 'CourseModify',
     component: CourseModify,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/coursetable',
     name: 'CourseTable',
     component: CourseTable,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/adddept',
     name: 'AddDept',
     component: AddDept,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/deptupd',
     name: 'DeptModify',
     component: DeptModify,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/depttable',
     name: 'DeptTable',
     component: DeptTable,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/addattd',
     name: 'AddAttd',
     component: AddAttd,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/attdupd',
     name: 'AttdModify',
     component: AttdModify,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/attdtable',
     name: 'AttdTable',
     component: AttdTable,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/addmap',
     name: 'AddMap',
     component: AddMap,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/mapupd',
     name: 'MapModify',
     component: MapModify,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/maptable',
     name: 'MapTable',
     component: MapTable,
     props: true,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
   },
   {
     path: '/about',

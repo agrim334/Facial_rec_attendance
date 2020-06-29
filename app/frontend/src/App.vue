@@ -14,10 +14,22 @@
       <router-link to="/attdtable"> Attendance List </router-link>
       <router-link to="/addmap"> Add Mapping </router-link> |
       <router-link to="/maptable"> Mapping List </router-link>
+      <b-button @click='logout'> Logout </b-button>
     </div>
     <router-view/>
   </div>
 </template>
+
+<script>
+export default {
+  methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
+  },
+};
+</script>
 
 <style>
 #app {
