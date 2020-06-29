@@ -5,19 +5,15 @@ from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetP
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Department
+from ..models import User,Role,Department,Permission
 from .email import send_password_reset_email
 from datetime import datetime,timedelta
 import jwt
 import re
 from functools import wraps
 from flask_cors import CORS,cross_origin
-APP = current_app._get_current_object()
 
-#fa_role = Role.query.filter_by(name="Faculty").first()
-#ta_role = Role.query.filter_by(name="TA").first()
-admin_role = Role.query.filter_by(name="Admin").first()
-#stud_role = Role.query.filter_by(name="Student").first()
+APP = current_app._get_current_object()
 
 def check(email):
 	regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
@@ -25,37 +21,42 @@ def check(email):
 		return True		  
 	return False
 
-def token_required(f):
-	@wraps(f)
-	def _verify(*args, **kwargs):
-		auth_headers = request.headers.get('Authorization', '').split()
+def token_required(permission):
+	def decorator_act(f):
+		@wraps(f)
+		def decorated_verify(*args, **kwargs):
+			auth_headers = request.headers.get('Authorization', '').split()
 
-		invalid_msg = {
-			'message': 'Invalid token. Registeration and / or authentication required',
-			'authenticated': False
-		}
-		expired_msg = {
-			'message': 'Expired token. Reauthentication required.',
-			'authenticated': False
-		}
+			invalid_msg = {
+				'message': 'Invalid token. Registeration and / or authentication required',
+				'authenticated': False
+			}
+			expired_msg = {
+				'message': 'Expired token. Reauthentication required.',
+				'authenticated': False
+			}
 
-		if len(auth_headers) != 2:
-			return jsonify(invalid_msg), 401
+			if len(auth_headers) != 2:
+				return jsonify(invalid_msg), 401
 
-		try:
-			token = auth_headers[1]
-			data = jwt.decode(token, current_app.config['SECRET_KEY'])
-			user = User.query.filter_by(username=data['sub']).first()
-			if not user:
-				raise RuntimeError('User not found')
-			return f(user, *args, **kwargs)
-		except jwt.ExpiredSignatureError:
-			return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-		except (jwt.InvalidTokenError, Exception) as e:
-			print(e)
-			return jsonify(invalid_msg), 401
+			try:
+				token = auth_headers[1]
+				data = jwt.decode(token, current_app.config['SECRET_KEY'])
+				user = User.query.filter_by(username=data['sub']).first()
 
-	return _verify
+				if not user:
+					raise RuntimeError('User not found')
+				if not user.can(permission):
+					abort(403)
+				print(user)
+				return f( *args, **kwargs)
+			except jwt.ExpiredSignatureError:
+				return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+			except (jwt.InvalidTokenError, Exception) as e:
+				print(e)
+				return jsonify(invalid_msg), 401
+		return decorated_verify
+	return decorator_act
 
 @log_sysbp.route('/login/', methods=['POST'])
 def login():
@@ -93,8 +94,8 @@ def after_request(response):									#security
 	response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
 	return response
 
-@log_sysbp.route('/check_user_json',methods=['GET'])
-@token_required
+@log_sysbp.route('/check_user_json',methods=['GET','POST'])
+@token_required(permission = Permission.READ | Permission.ADMIN)
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -103,7 +104,8 @@ def checklogjson():
 	except:
 		return {'status':'data fetch failed'}
 
-@log_sysbp.route('/add_log_json',methods=['POST'])
+@log_sysbp.route('/add_log_json',methods=['GET','POST'])
+@token_required(Permission.ADMIN)
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})
@@ -133,6 +135,8 @@ def addlogjson():
 	if not check_role:
 		return jsonify({ 'status' : 'not valid role'})
 
+	admin_role = Role.query.filter_by(name="Admin").first()
+	
 	if jsdat.get('rolec') != admin_role.ID:
 		if jsdat.get('deptc') == '' or jsdat.get('deptc') is None:
 			return jsonify({ 'status' : 'need to assign department to a non-admin'})
@@ -157,7 +161,7 @@ def addlogjson():
 		return jsonify({ 'status' : 'User add fail'})
 
 @log_sysbp.route('/modify_log_json',methods=['POST'])
-@token_required
+@token_required(Permission.ADMIN)
 def modifylogjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
@@ -194,7 +198,8 @@ def modifylogjson():
 
 	if newjs.get('rolec') == '' or newjs.get('rolec') is None:
 		return jsonify({ 'status' : 'empty role'})
-
+	
+	admin_role = Role.query.filter_by(name="Admin").first()
 	check_role = Role.query.filter_by(ID=newjs.get('rolec')).first()
 	if not check_role:
 		return jsonify({ 'status' : 'No such role exists'})
@@ -221,7 +226,7 @@ def modifylogjson():
 		return jsonify({'status' : 'modify fail'})
 
 @log_sysbp.route('/delete_log_json',methods=['POST'])
-@token_required
+@token_required(Permission.ADMIN)
 def dellogjson():
 	if not request.get_data('username'):
 		return jsonify({ 'status' : 'No id given'})

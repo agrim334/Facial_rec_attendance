@@ -6,15 +6,11 @@ from app.forms import CourseForm,ViewCourseForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Course,Department
+from ..models import User,Role,Course,Department,Permission
 from datetime import datetime,timedelta
 from app.tables import CourseResults
 import re
-
-#fa_role = Role.query.filter_by(name="Faculty").first()
-#stud_role = Role.query.filter_by(name="Student").first()
-#ta_role = Role.query.filter_by(name="TA").first()
-#admin_role = Role.query.filter_by(name="Admin").first()
+from app.log_sys.routes import token_required
 
 @course_sysbp.before_request
 def make_session_permanent():
@@ -31,6 +27,7 @@ def after_request(response):									#security
 	return response
 
 @course_sysbp.route('/check_course_json',methods=['GET','POST'])
+@token_required(Permission.READ | Permission.ADMIN)
 def checkcoursejson():
 	try:
 		courserec = [course.to_json() for course in Course.query.all()]
@@ -40,6 +37,7 @@ def checkcoursejson():
 		return {'status':'data fetch failed'}
 
 @course_sysbp.route('/add_course_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def addcoursejson():
 	jsdat = request.json
 	check_course = Course.query.filter_by(ID = jsdat.get('id'),name = jsdat.get('name')).all()
@@ -65,6 +63,7 @@ def addcoursejson():
 		return jsonify({ 'status' : 'fail'})
 
 @course_sysbp.route('/modify_course_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def modifycoursejson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
@@ -95,6 +94,7 @@ def modifycoursejson():
 		return jsonify({ 'status' : 'Course modify fail'})
 
 @course_sysbp.route('/delete_course_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def delcoursejson():
 	if not request.get_data('id'):
 		return jsonify({ 'status' : 'No id given'})

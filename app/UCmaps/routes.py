@@ -8,10 +8,11 @@ from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
 from ..models import User,Role,Department,Course,stud_courses,ta_courses,prof_courses
 from datetime import datetime,timedelta
-from app.models import stud_courses,prof_courses,ta_courses,Role
+from app.models import stud_courses,prof_courses,ta_courses,Role,Permission
 from app.tables import MapResults
 import os
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+from app.log_sys.routes import token_required
 
 AP = current_app._get_current_object()
 
@@ -37,6 +38,7 @@ def after_request(response):									#security
 	return response
 
 @mapbp.route('/check_map_json',methods=['GET','POST'])
+@token_required(Permission.ADMIN)
 def checkmapjson():
 	value = int(request.get_data('choice'))
 	pc = []
@@ -57,6 +59,7 @@ def checkmapjson():
 	return jsonify(response)
 
 @mapbp.route('/add_map_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def addmapjson():
 	if request.json:
 		jsdat = request.json
@@ -109,6 +112,7 @@ def addmapjson():
 		return jsonify({'status':'fail'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def modifymapjson():
 
 	isstud = 0
@@ -198,6 +202,7 @@ def modifymapjson():
 		return jsonify({'status':'fail'})
 
 @mapbp.route('/delete_map_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def delmapjson():
 	jsdat = request.json
 	if jsdat is None:

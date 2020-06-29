@@ -10,20 +10,15 @@ import LogForm from '@/components/LogForm.vue';
 import axios from 'axios';
 
 export default {
-  name: 'Form',
+  name: 'Login',
   components: {
     LogForm,
   },
   methods: {
     validate(cred) {
-      const path = 'http://localhost:5000/users/login';
-      axios.post(path, cred)
-        .then((res) => {
-          alert(res.data.status);
-        })
-        .catch((res) => {
-          console.log(res);
-        });
+      const path = 'http://localhost:5000/users/login/';
+      this.$store.dispatch('login', { url: path, data: { user: cred.user, password: cred.pass } })
+        .then(() => this.$router.push('/home'));
     },
   },
 };

@@ -52,6 +52,7 @@ def create_app():
 	migrate.init_app(APP,db)
 	login.init_app(APP)
 	CORS(APP, resources={r'/*': {'origins': '*'}})
+
 	with APP.app_context():
 		from .log_sys import log_sysbp 
 		from .attd_sys import attd_sysbp 

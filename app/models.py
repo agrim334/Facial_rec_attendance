@@ -23,18 +23,38 @@ prof_courses = db.Table('prof_courses',
 			db.Column('FID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True),
 			db.Column('CID',db.String(64),db.ForeignKey('course.ID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
 			)
+class Permission:
+	READ = 0x01
+	CUD_ATTD = 0X02
+	ADMIN = 0xff
 
 class Role(db.Model):
 	ID = db.Column(db.Integer,primary_key=True,autoincrement=True)
 	name = db.Column(db.String(20))
+	default = db.Column(db.Boolean, default=False, index=True)
+	permissions = db.Column(db.Integer)
 	users_name= db.relationship('User', backref='role')
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,
 				}
+	@staticmethod
+	def insert_roles():
+		roles = {	'Student': (Permission.READ,True),
+					'TA': (Permission.READ | Permission.CUD_ATTD,False),
+					'Prof': (Permission.READ | Permission.CUD_ATTD,False),
+					'Admin': (Permission.ADMIN,False)
+				}
+		for r in roles:
+			role = Role.query.filter_by(name=r).first()
+			if role is None:
+				role = Role(name=r)
+				role.permissions = roles[r][0]
+			db.session.add(role)
+		db.session.commit()
 
 class Department(db.Model):
-	ID = db.Column(db.String(64), primary_key=True,autoincrement=True)
+	ID = db.Column(db.String(64), primary_key=True)
 	name = db.Column(db.String(64))
 	users_dept = db.relationship('User', backref='udept', cascade="all,delete",)
 	courses_dept = db.relationship('Course', backref='cdept', cascade="all,delete",)
@@ -132,16 +152,11 @@ class User(UserMixin,db.Model):
 	def get_reset_password_token(self, expires_in=600):
 		return jwt.encode({'reset_password': self.username, 'exp': time() + expires_in},APP.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
-	def get_id(self):
-			return self.username
-	def is_active(self):
-			return self.is_active
-	def activate_user(self):
-			self.is_active = True         
-	def get_username(self):
-			return self.username
-	def get_urole(self):
-			return self.role
+	def can(self, permissions):
+		return self.role is not None and (self.role.permissions & permissions) == permissions
+
+	def is_administrator(self):
+		return self.can(Permission.ADMINISTER)
 
 	@staticmethod
 	def verify_reset_password_token(token):

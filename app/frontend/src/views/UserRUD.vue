@@ -35,15 +35,12 @@ export default {
     },
     getUsers() {
       const path = 'http://localhost:5000/users/check_user_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.users = res.data.records;
           for (let i = 0; i < this.users.length; i += 1) {
             this.users[i].actions = '';
           }
-        })
-        .catch((error) => {
-          console.error(error);
         });
     },
   },

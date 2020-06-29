@@ -6,9 +6,7 @@ import re
 from flask import current_app
 from datetime import datetime,timedelta
 
-
 APP = current_app._get_current_object()
-
 
 @role_sysbp.before_request
 def make_session_permanent():

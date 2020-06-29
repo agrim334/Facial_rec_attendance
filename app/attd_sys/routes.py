@@ -8,13 +8,14 @@ from app.log_sys import log_sysbp
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from app.models import User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department,Role
+from app.models import Permission,User,Course,Attendance,ta_courses,prof_courses,stud_courses,Department,Role
 import numpy as np
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from datetime import datetime,timedelta
 import re
 from app.tables import AttendanceResults
+from app.log_sys.routes import token_required
 
 AP = current_app._get_current_object()
 
@@ -37,15 +38,20 @@ def after_request(response):									#security
 	response.headers['X-Frame-Options'] = 'SAMEORIGIN'
 	response.headers['X-XSS-Protection'] = '1; mode=block'
 	response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+	response.headers.add('Access-Control-Allow-Origin', '*')
+	response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+	response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
 	return response
 
 @attd_sysbp.route('/check_attd_json',methods=['GET','POST'])
+@token_required(permission = Permission.READ | Permission.ADMIN)
 def checkattdjson():
 	attdrec = [attd.to_json() for attd in Attendance.query.all()]
 	response = { 'records': attdrec }
 	return jsonify(response)
 
-@attd_sysbp.route('/add_attd_json',methods=['POST'])
+@attd_sysbp.route('/add_attd_json',methods=['GET','POST'])
+@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
 def addattdjson():
 	if request.json:
 		fa_role = Role.query.filter_by(name="Prof").first()
@@ -101,6 +107,7 @@ def addattdjson():
 		return jsonify({'studlist' : reglist, 'status': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
+@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
 def modifyattdjson():
 	oldjs = request.json['old']
 
@@ -182,6 +189,7 @@ def modifyattdjson():
 		return jsonify({ 'status' : 'fail'})
 
 @attd_sysbp.route('/delete_attd_json',methods=['POST'])
+@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
 def delattdjson():
 	jsdat = request.json
 	if not jsdat:

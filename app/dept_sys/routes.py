@@ -6,15 +6,11 @@ from app.forms import DeptForm,ViewDeptForm
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Department
+from ..models import User,Role,Department,Permission
 from datetime import datetime,timedelta
 import re
 from app.tables import DeptTable
-
-#fa_role = Role.query.filter_by(name="Faculty").first()
-#ta_role = Role.query.filter_by(name="TA").first()
-#admin_role = Role.query.filter_by(name="Admin").first()
-#stud_role = Role.query.filter_by(name="Student").first()
+from app.log_sys.routes import token_required
 
 @dept_sysbp.before_request
 def make_session_permanent():
@@ -31,6 +27,7 @@ def after_request(response):									#security
 	return response
 
 @dept_sysbp.route('/check_dept_json',methods=['GET','POST'])
+@token_required(Permission.ADMIN)
 def checkdeptjson():
 	try:
 		deptrec = [dept.to_json() for dept in Department.query.all()]
@@ -40,6 +37,7 @@ def checkdeptjson():
 		return {'status':'data fetch failed'}
 
 @dept_sysbp.route('/add_dept_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def adddeptjson():
 	jsdat = request.json
 	check_dept = Department.query.filter_by(ID = jsdat.get('id')).all()
@@ -64,6 +62,7 @@ def adddeptjson():
 		return jsonify({ 'status' : 'Dept add fail'})
 
 @dept_sysbp.route('/modify_dept_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def modifydeptjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
@@ -93,6 +92,7 @@ def modifydeptjson():
 		return jsonify({ 'status' : 'Dept modify fail'})
 
 @dept_sysbp.route('/delete_dept_json',methods=['POST'])
+@token_required(Permission.ADMIN)
 def deldeptjson():
 	if not request.get_data('id'):
 		return jsonify({ 'status' : 'No id given'})

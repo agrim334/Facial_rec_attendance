@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-import LogForm from '../views/Login.vue';
+import Login from '../views/Login.vue';
 import UserTable from '../views/UserRUD.vue';
 import Reg from '../views/UserAdd.vue';
 import UserModify from '../views/UserModify.vue';
@@ -29,9 +29,9 @@ const routes = [
     component: Home,
   },
   {
-    path: '/logform',
-    name: 'LogForm',
-    component: LogForm,
+    path: '/login',
+    name: 'Login',
+    component: Login,
   },
   {
     path: '/register',

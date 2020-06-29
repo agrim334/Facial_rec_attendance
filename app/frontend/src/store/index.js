@@ -1,34 +1,28 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { authenticate, register } from '../api';
-import { isValidJwt, EventBus } from '../utils';
+import {
+  isValidJwt, login, authenticate, EventBus,
+} from '../services';
 
 Vue.use(Vuex);
 
-const getters = {
-  isAuthenticated(state) {
-    return isValidJwt(state.jwt.token);
-  },
-};
-
 const actions = {
   login(context, userData) {
-    context.commit('setUserData', { userData });
-    return authenticate(userData)
-      .then((response) => { context.commit('setJwtToken', { jwt: response.data }); })
+    console.log(userData);
+    const path = userData.url;
+    const userdat = userData.data;
+    context.commit('setUserData', { userdat });
+    return login(path, userdat)
+      .then((response) => context.commit('setJwtToken', { jwt: response.data }))
       .catch((error) => {
         console.log('Error Authenticating: ', error);
         EventBus.$emit('failedAuthentication', error);
       });
   },
-  register(context, userData) {
-    context.commit('setUserData', { userData });
-    return register(userData)
-      .then(context.dispatch('login', userData))
-      .catch((error) => {
-        console.log('Error Registering: ', error);
-        EventBus.$emit('failedRegistering: ', error);
-      });
+  authrequest(context, userData) {
+    const path = userData.url;
+    const userdat = userData.data;
+    return authenticate(path, userdat, context.state.jwt.token);
   },
 };
 
@@ -41,12 +35,19 @@ const mutations = {
     console.log('setJwtToken payload = ', payload);
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
+    console.log(state);
   },
 };
 
+const getters = {
+  isAuthenticated(state) {
+    console.log(state);
+    return isValidJwt(state.jwt.token);
+  },
+};
 const state = {
   user: {},
-  jwt: '',
+  jwt: { token: localStorage.getItem('token') },
 };
 
 const store = new Vuex.Store({

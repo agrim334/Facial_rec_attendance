@@ -33,6 +33,11 @@ export default {
       auto: 1,
     };
   },
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated;
+    },
+  },
   methods: {
     addface(attddat) {
       const path = 'http://localhost:5000/attd/add_attd_json';

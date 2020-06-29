@@ -1,6 +1,6 @@
 <template>
  <div>
-  <b-form @submit.prevent="authenticate">
+  <b-form @submit.prevent="logsubmit">
     <label for='username'> Username </label>
     <b-input :state='ustate' type='text' placeholder ="enter name" v-model = 'cred.user'>
     </b-input>
@@ -20,7 +20,6 @@
 </template>
 
 <script>
-import { EventBus } from '@/utils';
 
 export default {
   name: 'LogForm',
@@ -50,26 +49,6 @@ export default {
         this.$emit('login', this.cred);
       }
     },
-    authenticate() {
-      this.$store.dispatch('login', { user: this.cred.user, password: this.cred.pass })
-        .then(() => this.$router.push('/'));
-    },
-    register() {
-      this.$store.dispatch('register', { user: this.cred.user, password: this.cred.pass })
-        .then(() => this.$router.push('/'));
-    },
-  },
-  mounted() {
-    EventBus.$on('failedRegistering', (msg) => {
-      this.errorMsg = msg;
-    });
-    EventBus.$on('failedAuthentication', (msg) => {
-      this.errorMsg = msg;
-    });
-  },
-  beforeDestroy() {
-    EventBus.$off('failedRegistering');
-    EventBus.$off('failedAuthentication');
   },
 };
 </script>
