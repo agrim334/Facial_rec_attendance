@@ -92,6 +92,38 @@ def after_request(response):									#security
 	response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
 	return response
 
+@log_sysbp.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+	if not request.json:
+		return jsonify({'status: bad data'})
+	uid = request.json.get('uid')
+	if check(uid):
+		user = User.query.filter_by(email=uid).first()
+	else:
+		user = User.query.filter_by(username=uid).first()
+	if user:
+		send_password_reset_email(user,user.email)
+		return jsonify({'status: Sent Email.Check mail'})
+	else:
+		return jsonify({'status: User not found with given email id.Please contact admin'})
+
+@log_sysbp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+	if not request.json:
+		return jsonify({'status: bad data'})
+
+	user = User.verify_reset_password_token(token)
+	if not user:
+		return jsonify({'status: Reset link expired'})
+	
+	pwd = request.json
+	if pwd.get('newpass') !=  jsdat.get('confirmpass') or ( pwd.get('pass') ==  pwd.get('confirmpass') and (pwd.get('pass') == '' or pwd.get('pass') is None )):
+		return jsonify({'status: Password not match'})
+
+	user.set_password(pwd.get('newpass'))
+	db.session.commit()
+	return jsonify({'status: Password has been reset'})
+
 @log_sysbp.route('/check_user_json',methods=['POST'])
 @token_required(Permission.ADMIN)
 def checklogjson():

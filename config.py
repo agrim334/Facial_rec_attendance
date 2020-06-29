@@ -13,3 +13,4 @@ class Config(object):
 	ADMINS = ['agrim334@gmail.com']
 	UPL_DIR = os.path.join(basedir, 'uploads')
 	KWN_DIR = os.path.join(basedir, 'known')
+	FRONTEND_URL = "http://localhost:8080/"

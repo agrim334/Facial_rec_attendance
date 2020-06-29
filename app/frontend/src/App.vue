@@ -15,6 +15,7 @@
       <router-link to="/addmap"> Add Mapping </router-link> |
       <router-link to="/maptable"> Mapping List </router-link>
       <router-link to="/pwdchg"> Change Password </router-link>
+      <router-link to="/resetreq"> Send Reset Request </router-link>
       <b-button @click='logout'> Logout </b-button>
     </div>
     <router-view/>

@@ -167,7 +167,7 @@ class User(UserMixin,db.Model):
 			id = jwt.decode(token, APP.config['SECRET_KEY'],algorithms=['HS256'])['reset_password']
 		except:
 			return
-		return User.query.get(id)
+		return User.query.get(username)
 
 	@classmethod
 	def authenticate(self,username,password):

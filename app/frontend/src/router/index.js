@@ -19,6 +19,8 @@ import MapTable from '../views/MapRUD.vue';
 import AddMap from '../views/MapAdd.vue';
 import MapModify from '../views/MapModify.vue';
 import PasswordChange from '../views/PasswordChange.vue';
+import PasswordReset from '../views/PasswordReset.vue';
+import RequestReset from '../views/PasswordResetRequest.vue';
 import store from '../store';
 
 Vue.use(VueRouter);
@@ -48,6 +50,24 @@ const routes = [
     component: Reg,
     beforeEnter(to, from, next) {
       if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
+  },
+  {
+    path: '/resetreq',
+    name: 'RequestReset',
+    component: RequestReset,
+    beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated) next('/');
+      else next();
+    },
+  },
+  {
+    path: '/resetpwd/:token',
+    name: 'PasswordReset',
+    component: PasswordReset,
+    beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated) next('/');
       else next();
     },
   },
