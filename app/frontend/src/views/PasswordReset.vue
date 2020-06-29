@@ -23,12 +23,12 @@ export default {
   methods: {
     updaterec(userdat) {
       if (this.token !== '' || this.token !== null) {
-        const path = 'http://localhost:5000/users/reset_password';
+        const path = 'http://localhost:5000/users/resetpwd/';
+        console.log(this.$router.currentRouter);
         path.concat(this.token);
-        console.log(path);
         axios.post(path, userdat)
-          .then(() => {
-            console.log(this);
+          .then((res) => {
+            console.log(res.data.status);
           })
           .catch((error) => {
             console.error(error);

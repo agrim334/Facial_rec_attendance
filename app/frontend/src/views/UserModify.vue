@@ -9,7 +9,7 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios';
-import ModifyUser from '@/components/ModifyUser.vue';
+import ModifyUser from '../components/ModifyUser.vue';
 
 export default {
   name: 'UserModify',
@@ -37,6 +37,7 @@ export default {
       const path = 'http://localhost:5000/dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
+          console.log(res.data);
           this.depts = res.data.records;
         })
         .catch((error) => {
@@ -47,6 +48,7 @@ export default {
       const path = 'http://localhost:5000/roles/check_role_json';
       axios.get(path)
         .then((res) => {
+          console.log(res.data);
           this.roles = res.data.records;
         })
         .catch((error) => {
@@ -55,6 +57,7 @@ export default {
     },
   },
   created() {
+    console.log(this.user);
     this.getDept();
     this.getRoles();
   },

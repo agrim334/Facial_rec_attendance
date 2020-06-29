@@ -102,12 +102,14 @@ def reset_password_request():
 	else:
 		user = User.query.filter_by(username=uid).first()
 	if user:
-		send_password_reset_email(user,user.email)
-		return jsonify({'status: Sent Email.Check mail'})
+		if user.email:
+			send_password_reset_email(user,user.email)
+			return jsonify({'status: Sent Email.Check mail'})
+		return jsonify({'status: User has no email id set'})
 	else:
 		return jsonify({'status: User not found with given email id.Please contact admin'})
 
-@log_sysbp.route('/reset_password/<token>', methods=['GET', 'POST'])
+@log_sysbp.route('/resetpwd/<token>', methods=['GET', 'POST'])
 def reset_password(token):
 	if not request.json:
 		return jsonify({'status: bad data'})

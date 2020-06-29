@@ -60,16 +60,16 @@ const validator = require('email-validator');
 
 export default {
   name: 'ModifyUser',
-  props: { userrec: Array, depts: Array, roles: Array },
+  props: { userrec: Object, depts: Array, roles: Array },
   data() {
     return {
       moduser: {
-        username: this.userrec.username,
-        fname: this.userrec.fname,
-        lname: this.userrec.lname,
-        email: this.userrec.email,
-        rolec: this.userrec.role,
-        deptc: this.userrec.dept,
+        username: this.userrec.username || '',
+        fname: this.userrec.fname || '',
+        lname: this.userrec.lname || '',
+        email: this.userrec.email || '',
+        rolec: this.userrec.role || '',
+        deptc: this.userrec.dept || '',
         pass: '',
         confirmpass: '',
       },

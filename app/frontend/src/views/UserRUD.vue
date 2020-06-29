@@ -21,6 +21,7 @@ export default {
   },
   methods: {
     updaterec(userdat) {
+      console.log(userdat);
       this.$router.push({ name: 'UserModify', params: { user: userdat } });
     },
     deleterec(userdat) {

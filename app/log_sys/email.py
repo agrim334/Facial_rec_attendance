@@ -10,8 +10,8 @@ def send_password_reset_email(user,email):
 	send_email('Reset Your Password',
 				sender=current_app._get_current_object().config['ADMINS'][0],
 				recipients=[email],
-				text_body=render_template('reset_password.txt',url=url,user=user),
-				html_body=render_template('reset_password.html',url=url,user=user))
+				text_body=render_template('email/reset_password.txt',url=url,user=user),
+				html_body=render_template('email/reset_password.txt',url=url,user=user))
 
 def send_async_email(app, msg):
 	with app.app_context():
