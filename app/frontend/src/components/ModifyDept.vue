@@ -24,8 +24,8 @@ export default {
   data() {
     return {
       moddept: {
-        id: this.deptrec.id,
-        name: this.deptrec.name,
+        id: this.deptrec.id || '',
+        name: this.deptrec.name || '',
       },
     };
   },

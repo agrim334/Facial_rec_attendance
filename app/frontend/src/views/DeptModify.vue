@@ -21,7 +21,7 @@ export default {
   methods: {
     updaterec(deptdat) {
       alert(deptdat);
-      const path = 'http://localhost:5000/depts/modify_dept_json';
+      const path = 'depts/modify_dept_json';
       const updat = { old: this.dept, new: deptdat };
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then(() => {

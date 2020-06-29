@@ -29,8 +29,8 @@ export default {
   data() {
     return {
       map: {
-        cid: this.ogmap.cid,
-        uid: this.ogmap.uid,
+        cid: this.ogmap.cid || '',
+        uid: this.ogmap.uid || '',
       },
       file: '',
     };

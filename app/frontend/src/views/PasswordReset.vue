@@ -26,7 +26,7 @@ export default {
     },
     updaterec(userdat) {
       if (this.token !== '' || this.token !== null) {
-        let path = 'http://localhost:5000/users';
+        let path = 'users';
         path = path.concat(this.$route.path);
         console.log(path);
         axios.post(path, userdat)

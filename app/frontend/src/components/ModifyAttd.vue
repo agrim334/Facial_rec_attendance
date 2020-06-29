@@ -35,10 +35,10 @@ export default {
   data() {
     return {
       modattd: {
-        mid: this.attdrec.taid || this.attdrec.fid,
-        sid: this.attdrec.sid,
-        cid: this.attdrec.cid,
-        time: this.attdrec.time,
+        mid: this.attdrec.taid || this.attdrec.fid || '',
+        sid: this.attdrec.sid || '',
+        cid: this.attdrec.cid || '',
+        time: this.attdrec.time || '',
       },
     };
   },

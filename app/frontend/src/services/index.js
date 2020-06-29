@@ -2,6 +2,7 @@ import Vue from 'vue';
 import axios from 'axios';
 
 export const EventBus = new Vue();
+const API_URL = 'http://192.168.43.70:5000/';
 
 export function isValidJwt(jwt) {
   if (!jwt || jwt.split('.').length < 3) {
@@ -13,14 +14,23 @@ export function isValidJwt(jwt) {
   return now < exp;
 }
 
-export function authenticate(API_URL, userData, jwt) {
-  return axios.post(`${API_URL}`, userData, { headers: { Authorization: `Bearer: ${jwt}` } });
+export function authenticate(remain, userData, jwt) {
+  let finalurl = `${API_URL}`;
+  finalurl = finalurl.concat(remain);
+  return axios.post(`${finalurl}`, userData, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
-export function authenticateimg(API_URL, userData, jwt) {
-  return axios.post(`${API_URL}`, userData, { headers: { Authorization: `Bearer: ${jwt}`, 'Content-Type': 'multipart/form-data' } });
+export function authenticateimg(remain, userData, jwt) {
+  let finalurl = `${API_URL}`;
+  finalurl = finalurl.concat(remain);
+  const headerdata = {
+    Authorization: `Bearer: ${jwt}`, 'Content-Type': 'multipart/form-data',
+  };
+  return axios.post(`${finalurl}`, userData, { headers: headerdata });
 }
 
-export function login(API_URL, userData) {
-  return axios.post(`${API_URL}`, userData);
+export function login(remain, userData) {
+  let finalurl = `${API_URL}`;
+  finalurl = finalurl.concat(remain);
+  return axios.post(`${finalurl}`, userData);
 }

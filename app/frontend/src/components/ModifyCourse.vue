@@ -24,8 +24,8 @@ export default {
   data() {
     return {
       modcourse: {
-        id: this.courserec.id,
-        name: this.courserec.name,
+        id: this.courserec.id || '',
+        name: this.courserec.name || '',
       },
     };
   },

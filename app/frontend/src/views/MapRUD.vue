@@ -38,7 +38,7 @@ export default {
       this.$router.push({ name: 'MapModify', params: { map: mapdat } });
     },
     deleterec(mapdat) {
-      const path = 'http://localhost:5000/map/delete_map_json';
+      const path = 'map/delete_map_json';
       this.$store.dispatch('authrequest', { url: path, data: mapdat })
         .then((res) => {
           alert(res.data.status);
@@ -49,7 +49,7 @@ export default {
         });
     },
     getMaps() {
-      const path = 'http://localhost:5000/map/check_map_json';
+      const path = 'map/check_map_json';
       this.$store.dispatch('authrequest', { url: path, data: this.choice })
         .then((res) => {
           const temp = res.data.records_t.concat(res.data.records_p);

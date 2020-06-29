@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     getDept() {
-      const path = 'http://localhost:5000/dept/check_dept_json';
+      const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;
@@ -33,7 +33,7 @@ export default {
         });
     },
     getRole() {
-      const path = 'http://localhost:5000/roles/check_role_json';
+      const path = 'roles/check_role_json';
       axios.get(path)
         .then((res) => {
           this.roles = res.data.records;
@@ -43,7 +43,7 @@ export default {
         });
     },
     add(data) {
-      const path = 'http://localhost:5000/users/add_log_json';
+      const path = 'users/add_log_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {

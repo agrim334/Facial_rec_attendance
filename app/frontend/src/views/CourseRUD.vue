@@ -24,7 +24,7 @@ export default {
       this.$router.push({ name: 'CourseModify', params: { course: coursedat } });
     },
     deleterec(coursedat) {
-      const path = 'http://localhost:5000/courses/delete_course_json';
+      const path = 'courses/delete_course_json';
       this.$store.dispatch('authrequest', { url: path, data: coursedat.id })
         .then(() => {
           this.getCourse();
@@ -34,7 +34,7 @@ export default {
         });
     },
     getCourse() {
-      const path = 'http://localhost:5000/courses/check_course_json';
+      const path = 'courses/check_course_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.courses = res.data.records;

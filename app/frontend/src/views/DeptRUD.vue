@@ -24,7 +24,7 @@ export default {
       this.$router.push({ name: 'DeptModify', params: { dept: deptdat } });
     },
     deleterec(deptdat) {
-      const path = 'http://localhost:5000/dept/delete_dept_json';
+      const path = 'dept/delete_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: deptdat.id })
         .then(() => {
           this.getDept();
@@ -34,7 +34,7 @@ export default {
         });
     },
     getDept() {
-      const path = 'http://localhost:5000/dept/check_dept_json';
+      const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;

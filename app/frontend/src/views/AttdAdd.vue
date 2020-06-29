@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     addface(attddat) {
-      const path = 'http://localhost:5000/attd/add_attd_json';
+      const path = 'attd/add_attd_json';
       this.uid = attddat.rec.uid;
       this.cid = attddat.rec.cid;
 
@@ -55,7 +55,7 @@ export default {
         });
     },
     uplimg(attddat) {
-      const path = 'http://localhost:5000/attd/add_attd_json';
+      const path = 'attd/add_attd_json';
       const formData = new FormData();
       for (let i = 0; i < attddat.img.length; i += 1) {
         const tfile = attddat.img[i];
@@ -76,7 +76,7 @@ export default {
         });
     },
     addman() {
-      const path = 'http://localhost:5000/attd/add_attd_json';
+      const path = 'attd/add_attd_json';
       const updat = {
         studlist: this.studlist,
         uid: this.uid,

@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     updaterec(modcourse) {
-      const path = 'http://localhost:5000/courses/modify_course_json';
+      const path = 'courses/modify_course_json';
       const updat = { old: this.course, new: modcourse };
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then(() => {

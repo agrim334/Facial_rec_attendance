@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      const path = 'http://localhost:5000/users/change_pwd';
+      const path = 'users/change_pwd';
       this.$store.dispatch('authrequest', { url: path, data: userdat })
         .then(() => {
           console.log(this);

@@ -24,7 +24,7 @@ export default {
       this.$router.push({ name: 'AttdModify', params: { attd: attddat } });
     },
     deleterec(attddat) {
-      const path = 'http://localhost:5000/attd/delete_attd_json';
+      const path = 'attd/delete_attd_json';
       this.$store.dispatch('authrequest', { url: path, data: attddat })
         .then(() => {
           this.getAttd();
@@ -34,7 +34,7 @@ export default {
         });
     },
     getAttd() {
-      const path = 'http://localhost:5000/attd/check_attd_json';
+      const path = 'attd/check_attd_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.attds = res.data.records;

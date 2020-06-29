@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     add(data) {
-      const path = 'http://localhost:5000/dept/add_dept_json';
+      const path = 'dept/add_dept_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {

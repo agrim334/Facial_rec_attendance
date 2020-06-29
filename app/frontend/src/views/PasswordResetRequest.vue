@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      const path = 'http://localhost:5000/users/reset_password_request';
+      const path = 'users/reset_password_request';
       axios.post(path, userdat)
         .then(() => {
           console.log(this);

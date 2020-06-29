@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     updaterec(modattd) {
-      const path = 'http://localhost:5000/attd/modify_attd_json';
+      const path = 'attd/modify_attd_json';
       const updat = { old: this.attd, new: modattd };
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {

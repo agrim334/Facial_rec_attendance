@@ -11,10 +11,9 @@ from datetime import datetime,timedelta
 import jwt
 import re
 from functools import wraps
-from flask_cors import CORS,cross_origin
 
 APP = current_app._get_current_object()
-gu = None
+
 def check(email):
 	regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 	if(re.search(regex,email)):  
@@ -47,7 +46,6 @@ def token_required(permission):
 					raise RuntimeError('User not found')
 				if not user.can(permission):
 					abort(403)
-				gu = user.username
 				return f( *args, **kwargs)
 			except jwt.ExpiredSignatureError:
 				return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
