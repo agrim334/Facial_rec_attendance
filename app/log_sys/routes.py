@@ -14,7 +14,7 @@ from functools import wraps
 from flask_cors import CORS,cross_origin
 
 APP = current_app._get_current_object()
-
+gu = None
 def check(email):
 	regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 	if(re.search(regex,email)):  
@@ -43,12 +43,11 @@ def token_required(permission):
 				token = auth_headers[1]
 				data = jwt.decode(token, current_app.config['SECRET_KEY'])
 				user = User.query.filter_by(username=data['sub']).first()
-				print(user,data)
 				if not user:
 					raise RuntimeError('User not found')
 				if not user.can(permission):
 					abort(403)
-				print(user)
+				gu = user.username
 				return f( *args, **kwargs)
 			except jwt.ExpiredSignatureError:
 				return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
@@ -59,14 +58,12 @@ def token_required(permission):
 	return decorator_act
 
 @log_sysbp.route('/login/', methods=['POST'])
-@cross_origin
 def login():
 	data = request.json
 	uname = data.get('user')
 	password = data.get('password')  
 
 	user = User.authenticate(uname,password)
-	print(user)
 
 	if not user:
 		return jsonify({ 'message': 'Invalid credentials', 'authenticated': False }), 401
@@ -97,7 +94,6 @@ def after_request(response):									#security
 
 @log_sysbp.route('/check_user_json',methods=['POST'])
 @token_required(Permission.ADMIN)
-@cross_origin
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]
@@ -108,7 +104,6 @@ def checklogjson():
 
 @log_sysbp.route('/add_log_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)
-@cross_origin
 def addlogjson():
 	if not request.json:
 		return jsonify({ 'status' : 'bad info'})
@@ -163,6 +158,32 @@ def addlogjson():
 	except:
 		return jsonify({ 'status' : 'User add fail'})
 
+@log_sysbp.route('/change_pwd',methods=['POST'])
+@token_required(Permission.READ)
+def pwdchange():
+	if not request.json:
+		return jsonify({'status': 'bad input'})
+
+	auth_headers = request.headers.get('Authorization', '').split()
+	token = auth_headers[1]
+	data = jwt.decode(token, current_app.config['SECRET_KEY'])
+	user = User.query.filter_by(username=data['sub']).first()
+	
+	jsdat = request.json
+
+	if not user.check_password(jsdat.get('oldpass')):
+		return jsonify({'status': 'old password does not match'})
+		
+	if jsdat.get('newpass') !=  jsdat.get('confirmpass') or ( jsdat.get('newpass') ==  jsdat.get('confirmpass') and (jsdat.get('newpass') == '' or jsdat.get('newpass') is None )):
+		return jsonify({ 'status' : 'password not match'})
+
+	try:
+		user.set_password(jsdat.get('newpass'))
+		db.session.commit()
+		return jsonify({'status': 'pwd changed'})
+	except:
+		return jsonify({'status': 'pwd change failed'})
+
 @log_sysbp.route('/modify_log_json',methods=['POST'])
 @token_required(Permission.ADMIN)
 def modifylogjson():
@@ -215,6 +236,9 @@ def modifylogjson():
 		if not check_dept:
 			return jsonify({ 'status' : 'No such Department as {}'.format(newjs.get('deptc'))})
 
+	if newjs.get('pass') !=  newjs.get('confirmpass') or ( newjs.get('pass') ==  newjs.get('confirmpass') and (newjs.get('pass') == '' or newjs.get('pass') is None )):
+		return jsonify({ 'status' : 'password not match'})
+
 	try:
 		user.username = newjs.get('username') or user.username
 		user.fname = newjs.get('fname') or user.fname 
@@ -222,6 +246,7 @@ def modifylogjson():
 		user.email = newjs.get('email') or user.email
 		user.role_id = newjs.get('rolec') or user.email
 		user.dept = newjs.get('deptc') or user.email
+		user.set_password(newjs.get('pass'))
 
 		db.session.commit()
 		return jsonify({'status' : 'modify success'})

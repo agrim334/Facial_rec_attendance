@@ -20,8 +20,9 @@ from app.log_sys.routes import token_required
 AP = current_app._get_current_object()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-AP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'uploads')
-upldir = os.path.join(basedir, 'uploads')
+AP.config['UPLOADED_PHOTOS_DEST'] = AP.config['UPL_DIR']
+upldir = AP.config['UPL_DIR']
+known_dir = AP.config['KWN_DIR']
 photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
@@ -93,17 +94,18 @@ def addattdjson():
 			return jsonify({ 'status' : 'Success'})
 
 	elif request.files:
-		if not os.path.exists(upldir):
-			os.makedirs(upldir)
 		uid = request.form.get('uid')
 		cid = request.form.get('cid')
+		temp = os.path.join(upldir,cid)
+		if not os.path.exists(temp):
+			os.makedirs(temp)
+
 		for f in request.files:
 			t = request.files[f]
 			filename = secure_filename(request.files[f].filename)
-			t.save(os.path.join(upldir, filename))
+			t.save(os.path.join(temp, filename))
 
 		reglist = detect_faces_in_image(upldir,cid,uid)
-		print(reglist)
 		return jsonify({'studlist' : reglist, 'status': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
@@ -217,7 +219,6 @@ def detect_faces_in_image(file_stream,CID,user):
 	for r in db.session.query(stud_courses).filter_by(CID=CID):
 		reglist.append({ 'id' : r.SID, 'status': 0 })
 	try:
-		known_dir = "/home/agrim/Downloads/known/"+str(CID)+"/"
 		base = os.path.abspath(os.path.dirname(__file__))
 		known_face_encd = []
 		known_face_name = {}

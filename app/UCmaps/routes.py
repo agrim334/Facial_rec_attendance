@@ -17,8 +17,9 @@ from app.log_sys.routes import token_required
 AP = current_app._get_current_object()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-AP.config['UPLOADED_PHOTOS_DEST'] = os.path.join(basedir, 'known')
-known_dir = os.path.join(basedir, 'known')
+AP.config['UPLOADED_PHOTOS_DEST'] = AP.config['UPL_DIR']
+upldir = AP.config['UPL_DIR']
+known_dir = AP.config['KWN_DIR']
 photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
@@ -189,16 +190,19 @@ def modifymapjson():
 		return jsonify({'isstud': isstud, 'status':'success'})
 
 	elif request.files:
-		if not os.path.exists(known_dir):
-			os.makedirs(known_dir)
 		uid = request.form.get('uid')
+		cid = request.form.get('cid')
+		temp = os.path.join(known_dir,cid)
+		if not os.path.exists(temp):
+			os.makedirs(temp)
+
 		for f in request.files:
 			t = request.files[f]
 			filename = secure_filename(request.files[f].filename)
-			t.save(os.path.join(known_dir, filename))
-			filename_old, file_extension = os.path.splitext(os.path.join(known_dir, filename))		#save images renaming them appropriately
+			t.save(os.path.join(temp, filename))
+			filename_old, file_extension = os.path.splitext(os.path.join(temp, filename))		#save images renaming them appropriately
 			new_file = uid + file_extension
-			os.rename(os.path.join(known_dir, filename),os.path.join(known_dir, new_file))
+			os.rename(os.path.join(temp, filename),os.path.join(temp, new_file))
 
 		return jsonify({'status':'success'})
 	else:

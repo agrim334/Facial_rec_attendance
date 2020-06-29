@@ -11,3 +11,5 @@ class Config(object):
 	MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 	MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 	ADMINS = ['agrim334@gmail.com']
+	UPL_DIR = os.path.join(basedir, 'uploads')
+	KWN_DIR = os.path.join(basedir, 'known')

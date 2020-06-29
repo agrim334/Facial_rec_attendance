@@ -18,6 +18,7 @@ import AttdModify from '../views/AttdModify.vue';
 import MapTable from '../views/MapRUD.vue';
 import AddMap from '../views/MapAdd.vue';
 import MapModify from '../views/MapModify.vue';
+import PasswordChange from '../views/PasswordChange.vue';
 import store from '../store';
 
 Vue.use(VueRouter);
@@ -36,11 +37,24 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login,
+    beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated) next('/');
+      else next();
+    },
   },
   {
     path: '/register',
     name: 'Register',
     component: Reg,
+    beforeEnter(to, from, next) {
+      if (!store.getters.isAuthenticated) next('/login');
+      else next();
+    },
+  },
+  {
+    path: '/pwdchg',
+    name: 'PasswordChange',
+    component: PasswordChange,
     beforeEnter(to, from, next) {
       if (!store.getters.isAuthenticated) next('/login');
       else next();

@@ -1,55 +1,55 @@
 <template>
-  <div id="modify-form">
+  <div id="register-form">
     <b-form @submit.prevent="validate">
     <label>User ID</label>
     <b-input :state='uidstate' placeholder = "Enter UID"
-    v-model = 'moduser.username' required>
+    v-model = 'newuser.username' required>
     </b-input>
 
     <label>First name</label>
     <b-input :state='fnstate' placeholder = "Enter first name"
-    v-model = 'moduser.fname' required>
+    v-model = 'newuser.fname' required>
     </b-input>
     <br>
 
     <label>Last name</label>
     <b-input :state='lnstate' placeholder = "Enter last name"
-    v-model = 'moduser.lname' required>
+    v-model = 'newuser.lname' required>
     </b-input>
     <br>
 
     <label> User Email </label>
     <b-input :state='emstate' placeholder = "Enter email id"
-    v-model = 'moduser.email' required>
+    v-model = 'newuser.email' required>
     </b-input>
     <br>
 
     <b-form-group label="Roles">
       <b-form-radio-group :options='roles' name-field='name' html-field='name'
-      value-field = 'id' v-model="moduser.rolec">
+      value-field = 'id' v-model="newuser.rolec">
       </b-form-radio-group>
     </b-form-group>
     <br>
 
     <b-form-group label="Department">
       <b-form-radio-group :options='depts' name-field='name' html-field='name'
-      value-field = 'id' v-model="moduser.deptc">
+      value-field = 'id' v-model="newuser.deptc">
       </b-form-radio-group>
     </b-form-group>
     <br>
 
     <label> Enter Password </label>
-    <b-input :state='pwstate' type="password" v-model = 'moduser.pass' required>
+    <b-input :state='pwstate' type="password" v-model = 'newuser.pass' required>
     </b-input>
     <br>
 
     <label> Confirm Password </label>
     <b-input :state='cfpstate' type="password"
-    v-model = 'moduser.confirmpass' required>
+    v-model = 'newuser.confirmpass' required>
     </b-input>
     <br>
 
-    <b-button type="submit"> Modify user </b-button>
+    <b-button type="submit"> Add user </b-button>
 
     </b-form>
   </div>
@@ -59,41 +59,34 @@
 const validator = require('email-validator');
 
 export default {
-  name: 'ModifyUser',
-  props: { userrec: Array, depts: Array, roles: Array },
+  name: 'RegisterForm',
+  props: { depts: Array, roles: Array },
   data() {
     return {
-      moduser: {
-        username: this.userrec.username,
-        fname: this.userrec.fname,
-        lname: this.userrec.lname,
-        email: this.userrec.email,
-        rolec: this.userrec.role,
-        deptc: this.userrec.dept,
-        pass: '',
-        confirmpass: '',
+      newuser: {
+        username: '', fname: '', lname: '', email: '', rolec: '', deptc: '', pass: '', confirmpass: '',
       },
     };
   },
   computed: {
     uidstate() {
-      return this.moduser.username.length > 0;
+      return this.newuser.username.length > 0;
     },
     fnstate() {
-      return this.moduser.fname.length > 0;
+      return this.newuser.fname.length > 0;
     },
     lnstate() {
-      return this.moduser.lname.length > 0;
+      return this.newuser.lname.length > 0;
     },
     emstate() {
-      return (this.moduser.email.length > 0) && validator.validate(this.moduser.email);
+      return (this.newuser.email.length > 0) && validator.validate(this.newuser.email);
     },
     pwstate() {
-      return (this.moduser.pass.length > 0) && this.moduser.pass === this.moduser.confirmpass;
+      return (this.newuser.pass.length > 0) && this.newuser.pass === this.newuser.confirmpass;
     },
     cfpstate() {
-      return ((this.moduser.confirmpass.length > 0)
-      && this.moduser.pass === this.moduser.confirmpass);
+      return ((this.newuser.confirmpass.length > 0)
+      && this.newuser.pass === this.newuser.confirmpass);
     },
   },
   methods: {
@@ -106,36 +99,36 @@ export default {
           break;
         }
       }
-      if (this.moduser.username === null || this.moduser.username === '') {
+      if (this.newuser.username === null || this.newuser.username === '') {
         alert('Fill in user name');
         f = 1;
       }
-      if (this.moduser.fname === null || this.moduser.fname === '') {
+      if (this.newuser.fname === null || this.newuser.fname === '') {
         alert('Fill in first name');
         f = 1;
       }
-      if (this.moduser.lname === null || this.moduser.lname === '') {
+      if (this.newuser.lname === null || this.newuser.lname === '') {
         alert('Fill in last name');
         f = 1;
       }
-      if (this.moduser.email === null || this.moduser.email === '' || validator.validate(this.moduser.email) === false) {
+      if (this.newuser.email === null || this.newuser.email === '' || validator.validate(this.newuser.email) === false) {
         alert('email format incorrect');
         f = 1;
       }
-      if (this.moduser.rolec === null || this.moduser.rolec === '') {
+      if (this.newuser.rolec === null || this.newuser.rolec === '') {
         alert('Choose a role');
         f = 1;
       }
-      if (this.moduser.rolec !== ad && (this.moduser.deptc === '' || this.moduser.deptc === null)) {
+      if (this.newuser.rolec !== ad && (this.newuser.deptc === '' || this.newuser.deptc === null)) {
         alert('Non admin must have a department');
         f = 1;
       }
-      if (this.moduser.pass !== this.moduser.confirmpass || (this.moduser.pass === this.moduser.confirmpass && (this.moduser.pass === null || this.moduser.pass === ''))) {
+      if (this.newuser.pass !== this.newuser.confirmpass || (this.newuser.pass === this.newuser.confirmpass && (this.newuser.pass === null || this.newuser.pass === ''))) {
         alert('Password no match');
         f = 1;
       }
       if (f === 0) {
-        this.$emit('userupd', this.moduser);
+        this.$emit('userreg', this.newuser);
       }
     },
   },

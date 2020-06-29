@@ -158,6 +158,9 @@ class User(UserMixin,db.Model):
 	def is_administrator(self):
 		return self.can(Permission.ADMINISTER)
 
+	def check_password(self,password):
+		return check_password_hash(self.password_hash, password)
+
 	@staticmethod
 	def verify_reset_password_token(token):
 		try:
