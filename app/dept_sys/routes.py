@@ -69,7 +69,6 @@ def adddeptjson():
 def modifydeptjson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
-	
 	dept = Department.query.filter_by(ID=oldjs.get('id'),name=oldjs.get('name')).first_or_404()
 	if dept is None:
 		return jsonify({ 'status' : 'No such Department as {}'.format(newjs.get('name'))})

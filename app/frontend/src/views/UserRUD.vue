@@ -39,8 +39,10 @@ export default {
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.users = res.data.records;
-          for (let i = 0; i < this.users.length; i += 1) {
-            this.users[i].actions = '';
+          if (this.$store.state.userrole === 'Admin') {
+            for (let i = 0; i < this.users.length; i += 1) {
+              this.users[i].actions = '';
+            }
           }
         })
         .catch((error) => {

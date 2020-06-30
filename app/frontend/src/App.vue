@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about"> About </router-link> |
+    <div id="nav" v-if="this.$store.state.userrole === ''">
       <router-link to="/login"> Login </router-link> |
+      <router-link to="/resetreq"> Send Reset Request </router-link>
+      <router-view/>
+     </div>
+     <div id="nav" v-else-if="this.$store.state.userrole === 'Admin'">
+      <router-link to="/">Home</router-link> |
       <router-link to="/usertable"> User List </router-link> |
       <router-link to="/register"> Add Users </router-link> |
       <router-link to="/addcourse"> Add Course </router-link> |
@@ -15,10 +18,36 @@
       <router-link to="/addmap"> Add Mapping </router-link> |
       <router-link to="/maptable"> Mapping List </router-link>
       <router-link to="/pwdchg"> Change Password </router-link>
-      <router-link to="/resetreq"> Send Reset Request </router-link>
       <b-button @click='logout'> Logout </b-button>
+      <router-view/>
     </div>
-    <router-view/>
+     <div id="nav" v-else-if="this.$store.state.userrole === 'TA'
+     || this.$store.state.userrole === 'Prof'">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/usertable"> User List </router-link> |
+      <router-link to="/coursetable"> Course List </router-link>
+      <router-link to="/depttable"> Department List </router-link>
+      <router-link to="/addattd"> Mark Attendance </router-link> |
+      <router-link to="/attdtable"> Attendance List </router-link>
+      <router-link to="/maptable"> Mapping List </router-link>
+      <router-link to="/pwdchg"> Change Password </router-link>
+      <b-button @click='logout'> Logout </b-button>
+      <router-view/>
+    </div>
+     <div id="nav" v-else-if="this.$store.state.userrole === 'Student'">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/usertable"> User List </router-link> |
+      <router-link to="/coursetable"> Course List </router-link>
+      <router-link to="/depttable"> Department List </router-link>
+      <router-link to="/attdtable"> Attendance List </router-link>
+      <router-link to="/maptable"> Mapping List </router-link>
+      <router-link to="/pwdchg"> Change Password </router-link>
+      <b-button @click='logout'> Logout </b-button>
+      <router-view/>
+    </div>
+     <div id="nav" v-else>
+      <p> Unknown User Type </p>
+    </div>
   </div>
 </template>
 

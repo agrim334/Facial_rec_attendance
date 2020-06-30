@@ -1,6 +1,6 @@
 <template>
   <div id="coursemod-form">
-    <b-form @submit.prevent="handle">
+    <b-form @submit.prevent="validate">
     <label>Course ID</label>
     <b-input :state='cidstate' placeholder = "Enter Course ID"
     v-model = 'modcourse.id' >

@@ -46,7 +46,7 @@ export default {
     },
     getRoles() {
       const path = 'roles/check_role_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           console.log(res.data);
           this.roles = res.data.records;

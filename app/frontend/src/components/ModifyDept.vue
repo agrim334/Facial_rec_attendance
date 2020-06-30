@@ -1,6 +1,6 @@
 <template>
   <div id="modifydept-form">
-    <b-form @submit.prevent="handle">
+    <b-form @submit.prevent="validate">
 
     <label>Department ID</label>
     <b-input :state='depidstate' placeholder = "Enter Department ID"

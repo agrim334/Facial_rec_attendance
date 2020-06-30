@@ -42,8 +42,12 @@ def token_required(permission):
 				token = auth_headers[1]
 				data = jwt.decode(token, current_app.config['SECRET_KEY'])
 				user = User.query.filter_by(username=data['sub']).first()
+				u_role = data['role']
+				print(user)
 				if not user:
 					raise RuntimeError('User not found')
+				if u_role != user.role.name:
+					raise RuntimeError('Token has been tampered')
 				if not user.can(permission):
 					abort(403)
 				return f( *args, **kwargs)
@@ -68,6 +72,7 @@ def login():
 
 	token = jwt.encode({
 		'sub': user.username,
+		'role': user.role.name,
 		'iat':datetime.utcnow(),
 		'exp': datetime.utcnow() + timedelta(minutes=30)},
 		current_app.config['SECRET_KEY'])

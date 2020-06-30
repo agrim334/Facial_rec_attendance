@@ -55,8 +55,10 @@ export default {
           const temp = res.data.records_t.concat(res.data.records_p);
           const t2 = res.data.records_s.concat(temp);
           this.maps = t2;
-          for (let i = 0; i < this.maps.length; i += 1) {
-            this.maps[i].actions = '';
+          if (this.$store.state.userrole === 'Admin') {
+            for (let i = 0; i < this.users.length; i += 1) {
+              this.users[i].actions = '';
+            }
           }
         })
         .catch((error) => {

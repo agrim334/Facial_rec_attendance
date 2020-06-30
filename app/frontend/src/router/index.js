@@ -31,7 +31,12 @@ const routes = [
     name: 'Home',
     component: Home,
     beforeEnter(to, from, next) {
-      if (!store.getters.isAuthenticated) next('/login');
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA' && role !== 'Student')) {
+        t = 0;
+      }
+      if (!store.getters.isAuthenticated || t === 0) next('/login');
       else next();
     },
   },
@@ -49,7 +54,13 @@ const routes = [
     name: 'Register',
     component: Reg,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (!t) next('/');
       else next();
     },
   },
@@ -86,7 +97,13 @@ const routes = [
     component: UserModify,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -96,7 +113,13 @@ const routes = [
     component: UserTable,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -105,7 +128,13 @@ const routes = [
     name: 'AddCourse',
     component: AddCourse,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -115,7 +144,13 @@ const routes = [
     component: CourseModify,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -125,7 +160,13 @@ const routes = [
     component: CourseTable,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -134,7 +175,13 @@ const routes = [
     name: 'AddDept',
     component: AddDept,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -144,7 +191,13 @@ const routes = [
     component: DeptModify,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -153,7 +206,13 @@ const routes = [
     name: 'DeptTable',
     component: DeptTable,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -162,7 +221,14 @@ const routes = [
     name: 'AddAttd',
     component: AddAttd,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      console.log(role);
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -172,7 +238,13 @@ const routes = [
     component: AttdModify,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -182,7 +254,13 @@ const routes = [
     component: AttdTable,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -191,7 +269,13 @@ const routes = [
     name: 'AddMap',
     component: AddMap,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -201,7 +285,13 @@ const routes = [
     component: MapModify,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || role !== 'Admin') {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },
@@ -211,7 +301,13 @@ const routes = [
     component: MapTable,
     props: true,
     beforeEnter(to, from, next) {
+      let t = 1;
+      const role = store.state.userrole;
+      if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
+        t = 0;
+      }
       if (!store.getters.isAuthenticated) next('/login');
+      else if (t === 0) next('/');
       else next();
     },
   },

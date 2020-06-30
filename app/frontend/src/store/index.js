@@ -1,10 +1,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {
-  isValidJwt, login, authenticate, authenticateimg, noauthroute, EventBus,
+  isValidJwt, login, authenticate, authenticateimg, EventBus,
 } from '../services';
 
 Vue.use(Vuex);
+
+const jwtDecode = require('jwt-decode');
 
 const actions = {
   login(context, userData) {
@@ -18,11 +20,6 @@ const actions = {
         console.log('Error Authenticating: ', error);
         EventBus.$emit('failedAuthentication', error);
       });
-  },
-  noauthrequest(context, userData) {
-    const path = userData.url;
-    const userdat = userData.data;
-    return noauthroute(path, userdat);
   },
   authrequest(context, userData) {
     const path = userData.url;
@@ -49,11 +46,13 @@ const mutations = {
     console.log('setJwtToken payload = ', payload);
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
+    state.userrole = jwtDecode(payload.jwt.token).role;
     console.log(state);
   },
   resetJwtToken(state) {
     localStorage.removeItem('token');
     state.jwt = '';
+    state.userrole = '';
     console.log(state);
   },
 };
@@ -65,9 +64,8 @@ const getters = {
   },
 };
 const state = {
-  userrole: '',
-  user: {},
   jwt: { token: localStorage.getItem('token') },
+  userrole: jwtDecode(localStorage.getItem('token')).role || '',
 };
 
 const store = new Vuex.Store({
