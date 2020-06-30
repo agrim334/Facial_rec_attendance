@@ -1,5 +1,6 @@
 <template>
-  <div class='home' v-if='this.attds.length !== 0'>
+  <div>
+  <div class='home' v-if='this.attds && this.attds.length !== 0'>
     <b-row>
       <b-col lg="6" class="my-1">
         <b-form-group label="Filter"
@@ -63,8 +64,11 @@
         <b-button @click='deleterec(row)'> Delete </b-button>
         <b-button @click='updaterec(row)'> Update </b-button>
       </template>
-
     </b-table>
+  </div>
+  <div v-else>
+    <p> No data available to display </p>
+    </div>
   </div>
 </template>
 

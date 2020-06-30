@@ -42,7 +42,7 @@ def after_request(response):									#security
 	return response
 
 @mapbp.route('/check_map_json',methods=['GET','POST'])
-@token_required(Permission.ADMIN)
+@token_required(Permission.READ)
 def checkmapjson():
 	value = int(request.get_data('choice'))
 	pc = []

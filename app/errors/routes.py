@@ -1,4 +1,4 @@
-from . import errrorsbp
+from . import errorsbp
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
@@ -35,3 +35,16 @@ def unhandled_exception(e):
 	db.session.rollback()
     APP.logger.error('Unhandled Exception: %s', (e))
     return render_template('500.html'), 500
+
+@errorsbp.app_errorhandler(404)
+def page_not_found(e):
+	if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+		response = jsonify({'error': 'not found'})
+		response.status_code = 404
+		return response
+	return render_template('404.html'), 404
+
+def forbidden(message):
+	response = jsonify({'error': 'forbidden', 'message': message})
+	response.status_code = 403
+	return response

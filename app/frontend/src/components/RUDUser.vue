@@ -1,5 +1,6 @@
 <template>
-  <div class='home' v-if='this.users.length !== 0'>
+<div>
+  <div class='home' v-if='this.users && this.users.length !== 0'>
     <b-row>
       <b-col lg="6" class="my-1">
         <b-form-group label="Filter"
@@ -65,6 +66,10 @@
       </template>
 
     </b-table>
+  </div>
+  <div v-else >
+  <p> No data available to display </p>
+  </div>
   </div>
 </template>
 

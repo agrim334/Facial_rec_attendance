@@ -125,7 +125,7 @@ def reset_password(token):
 	return jsonify({'status': 'Password has been reset'})
 
 @log_sysbp.route('/check_user_json',methods=['POST'])
-@token_required(Permission.ADMIN)
+@token_required(Permission.READ)
 def checklogjson():
 	try:
 		logrec = [user.to_json() for user in User.query.all()]

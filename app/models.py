@@ -131,7 +131,7 @@ class User(UserMixin,db.Model):
 					'fname' : self.fname,
 					'lname' : self.lname,
 					'dept' : self.dept,
-					'role' : self.role_id,
+					'role' : self.role.name,
 					}
 		return user_obj
 
@@ -178,7 +178,6 @@ class User(UserMixin,db.Model):
 	@classmethod
 	def authenticate(self,username,password):
 		
-		print(password)
 		if not username or not password:
 			return None
 

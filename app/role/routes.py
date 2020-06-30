@@ -1,10 +1,11 @@
 from .. import db,errors
 from . import role_sysbp
 from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from ..models import User,Role,Department
+from ..models import User,Role,Department,Permission
 import re
 from flask import current_app
 from datetime import datetime,timedelta
+from app.log_sys.routes import token_required
 
 APP = current_app._get_current_object()
 
@@ -25,7 +26,8 @@ def after_request(response):									#security
 	response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE'
 	return response
 
-@role_sysbp.route('/check_role_json',methods=['GET'])
+@role_sysbp.route('/check_role_json',methods=['GET','POST'])
+@token_required(Permission.READ)
 def checkrolejson():
 	roles = [role.to_json() for role in Role.query.all()]
 	response = { 'records': roles }

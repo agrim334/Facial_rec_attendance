@@ -14,6 +14,12 @@ export function isValidJwt(jwt) {
   return now < exp;
 }
 
+export function noauthroute(remain, userData) {
+  let finalurl = `${API_URL}`;
+  finalurl = finalurl.concat(remain);
+  return axios.post(`${finalurl}`, userData);
+}
+
 export function authenticate(remain, userData, jwt) {
   let finalurl = `${API_URL}`;
   finalurl = finalurl.concat(remain);

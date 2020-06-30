@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {
-  isValidJwt, login, authenticate, authenticateimg, EventBus,
+  isValidJwt, login, authenticate, authenticateimg, noauthroute, EventBus,
 } from '../services';
 
 Vue.use(Vuex);
@@ -18,6 +18,11 @@ const actions = {
         console.log('Error Authenticating: ', error);
         EventBus.$emit('failedAuthentication', error);
       });
+  },
+  noauthrequest(context, userData) {
+    const path = userData.url;
+    const userdat = userData.data;
+    return noauthroute(path, userdat);
   },
   authrequest(context, userData) {
     const path = userData.url;
@@ -60,6 +65,7 @@ const getters = {
   },
 };
 const state = {
+  userrole: '',
   user: {},
   jwt: { token: localStorage.getItem('token') },
 };

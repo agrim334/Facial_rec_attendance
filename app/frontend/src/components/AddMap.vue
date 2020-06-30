@@ -2,12 +2,12 @@
   <div id="register-form">
     <b-form @submit.prevent="validate" v-if='isstud === 0'>
     <label>User ID</label>
-    <b-input :state='uidstate' placeholder = "Enter UID" v-model = 'map.uid'>
+    <b-input :state='uidstate' placeholder = "Enter UID" v-model = 'map.uid' required>
     </b-input>
     <br>
 
     <label>Course ID</label>
-    <b-input :state='cidstate' placeholder = "Enter CID" v-model = 'map.cid'>
+    <b-input :state='cidstate' placeholder = "Enter CID" v-model = 'map.cid' required>
     </b-input>
     <br>
 

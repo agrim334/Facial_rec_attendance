@@ -30,7 +30,7 @@ def after_request(response):									#security
 	return response
 
 @dept_sysbp.route('/check_dept_json',methods=['GET','POST'])
-@token_required(Permission.ADMIN)
+@token_required(Permission.READ)
 def checkdeptjson():
 	try:
 		deptrec = [dept.to_json() for dept in Department.query.all()]

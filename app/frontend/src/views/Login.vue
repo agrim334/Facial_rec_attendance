@@ -18,7 +18,7 @@ export default {
     validate(cred) {
       const path = 'users/login/';
       this.$store.dispatch('login', { url: path, data: { user: cred.user, password: cred.pass } })
-        .then(() => this.$router.push('/home'));
+        .then(() => this.$router.push('/'));
     },
   },
 };

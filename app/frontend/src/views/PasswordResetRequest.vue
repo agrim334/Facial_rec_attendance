@@ -18,7 +18,7 @@ export default {
   methods: {
     updaterec(userdat) {
       const path = 'users/reset_password_request';
-      axios.post(path, userdat)
+      this.$store.dispatch('authrequest', { url: path, data: userdat })
         .then(() => {
           console.log(this);
         })

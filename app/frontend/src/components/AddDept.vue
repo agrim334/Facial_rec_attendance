@@ -3,13 +3,13 @@
     <b-form @submit.prevent="handle">
     <label>Department ID</label>
     <b-input :state='didstate' placeholder = "Enter Department ID"
-    v-model = 'dept.id' >
+    v-model = 'dept.id' required >
     </b-input>
     <br>
 
     <label>Department name</label>
     <b-input :state='dnstate' placeholder = "Enter Department name"
-    v-model = 'dept.name' ></b-input>
+    v-model = 'dept.name' required ></b-input>
     <br>
 
     <b-button type="submit"> Add Department </b-button>

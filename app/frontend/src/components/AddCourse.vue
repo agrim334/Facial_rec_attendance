@@ -3,13 +3,13 @@
     <b-form @submit.prevent="handle">
     <label>Course ID</label>
     <b-input :state='cidstate' placeholder = "Enter CID"
-    v-model = 'course.id' >
+    v-model = 'course.id'  required >
     </b-input>
     <br>
 
     <label>Course name</label>
     <b-input :state='cnstate' placeholder = "Enter course name"
-    v-model = 'course.name' ></b-input>
+    v-model = 'course.name' required ></b-input>
     <br>
 
     <b-button type="submit"> Add Course </b-button>

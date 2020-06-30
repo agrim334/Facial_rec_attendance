@@ -45,14 +45,14 @@ def after_request(response):									#security
 	return response
 
 @attd_sysbp.route('/check_attd_json',methods=['GET','POST'])
-@token_required(permission = Permission.READ | Permission.ADMIN)
+@token_required(Permission.READ)
 def checkattdjson():
 	attdrec = [attd.to_json() for attd in Attendance.query.all()]
 	response = { 'records': attdrec }
 	return jsonify(response)
 
 @attd_sysbp.route('/add_attd_json',methods=['GET','POST'])
-@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
+@token_required(Permission.CUD_ATTD)
 def addattdjson():
 	if request.json:
 		fa_role = Role.query.filter_by(name="Prof").first()
@@ -109,7 +109,7 @@ def addattdjson():
 		return jsonify({'studlist' : reglist, 'status': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
-@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
+@token_required(Permission.CUD_ATTD)
 def modifyattdjson():
 	oldjs = request.json['old']
 
@@ -191,7 +191,7 @@ def modifyattdjson():
 		return jsonify({ 'status' : 'fail'})
 
 @attd_sysbp.route('/delete_attd_json',methods=['POST'])
-@token_required(permission = Permission.ADMIN | Permission.CUD_ATTD)
+@token_required(Permission.CUD_ATTD)
 def delattdjson():
 	jsdat = request.json
 	if not jsdat:

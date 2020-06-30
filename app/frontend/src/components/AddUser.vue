@@ -32,7 +32,7 @@
     <br>
 
     <b-form-group label="Department">
-      <b-form-radio-group :options='depts' name-field='name' html-field='name'
+      <b-form-radio-group :options='depts' name-field='Deptartment' html-field='name'
       value-field = 'id' v-model="newuser.deptc">
       </b-form-radio-group>
     </b-form-group>

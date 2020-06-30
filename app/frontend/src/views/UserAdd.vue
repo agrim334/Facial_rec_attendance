@@ -27,6 +27,7 @@ export default {
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.depts = res.data.records;
+          console.log(this.depts);
         })
         .catch((error) => {
           console.error(error);
@@ -34,9 +35,10 @@ export default {
     },
     getRole() {
       const path = 'roles/check_role_json';
-      axios.get(path)
+      this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
           this.roles = res.data.records;
+          console.log(this.roles);
         })
         .catch((error) => {
           console.error(error);

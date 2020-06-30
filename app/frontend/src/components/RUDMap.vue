@@ -1,6 +1,6 @@
 <template>
   <div>
-  <div class='home' v-if='this.maps.length !== 0'>
+  <div class='home' v-if='this.maps && this.maps.length !== 0'>
     <b-row>
       <b-col lg="6" class="my-1">
         <b-form-group label="Filter"
@@ -66,6 +66,9 @@
       </template>
 
     </b-table>
+    </div>
+    <div v-else>
+     <p> No data to display </p>
     </div>
   </div>
 </template>

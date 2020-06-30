@@ -30,7 +30,7 @@ def after_request(response):									#security
 	return response
 
 @course_sysbp.route('/check_course_json',methods=['GET','POST'])
-@token_required(Permission.ADMIN)
+@token_required(Permission.READ)
 def checkcoursejson():
 	try:
 		courserec = [course.to_json() for course in Course.query.all()]
