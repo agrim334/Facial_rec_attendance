@@ -33,6 +33,7 @@ const routes = [
     beforeEnter(to, from, next) {
       let t = 1;
       const role = store.state.userrole;
+      console.log(process.env.BASE_URL);
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA' && role !== 'Student')) {
         t = 0;
       }

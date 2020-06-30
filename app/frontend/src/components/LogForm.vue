@@ -14,8 +14,9 @@
     </b-form-checkbox>
     <br>
     <b-button type = 'submit'> Login </b-button>
-
    </b-form>
+    <b-button @click='alert(process.env.VUE_APP_TITLE)'> temp </b-button>
+
  </div>
 </template>
 

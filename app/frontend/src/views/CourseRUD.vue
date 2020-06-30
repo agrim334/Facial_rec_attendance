@@ -39,8 +39,8 @@ export default {
         .then((res) => {
           this.courses = res.data.records;
           if (this.$store.state.userrole === 'Admin') {
-            for (let i = 0; i < this.users.length; i += 1) {
-              this.users[i].actions = '';
+            for (let i = 0; i < this.courses.length; i += 1) {
+              this.courses[i].actions = '';
             }
           }
         })

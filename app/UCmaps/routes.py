@@ -1,15 +1,8 @@
-from .. import db,errors
+from .. import db
 from . import mapbp
-from app.log_sys import log_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session,current_app
-from app.forms import CourseUserForm
-from werkzeug.urls import url_parse
+from flask import jsonify,request,current_app
 from werkzeug.utils import secure_filename
-from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Department,Course,stud_courses,ta_courses,prof_courses
-from datetime import datetime,timedelta
-from app.models import stud_courses,prof_courses,ta_courses,Role,Permission
-from app.tables import MapResults
+from ..models import Permission,User,Course,stud_courses,ta_courses,prof_courses
 import os
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from app.log_sys.routes import token_required
@@ -24,10 +17,6 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
 
-@mapbp.before_request
-def make_session_permanent():
-	session.permanent = True
-	mapbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
 @mapbp.after_request
 def after_request(response):									#security
@@ -78,17 +67,13 @@ def addmapjson():
 		if course is None:
 			return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
 
-		fa_role = Role.query.filter_by(name="Prof").first()
-		stud_role = Role.query.filter_by(name="Student").first()
-		ta_role = Role.query.filter_by(name="TA").first()
-		admin_role = Role.query.filter_by(name="Admin").first()
 		isstud = 0
 		try:
-			if user.role_id == fa_role.ID:
+			if user.role.name == 'Prof':
 				user.facult.append(course)
-			elif user.role_id == ta_role.ID:
+			elif user.role.name == 'TA':
 				user.tutoring.append(course)
-			elif user.role_id == stud_role.ID:
+			elif  user.role.name == 'Student':
 				user.opted.append(course)
 				isstud = 1
 
@@ -162,27 +147,22 @@ def modifymapjson():
 		if course_new is None:
 			return jsonify({'status':'Course by ID {} does not exist'.format(newjs.get('cid'))})
 
-		fa_role = Role.query.filter_by(name="Prof").first()
-		stud_role = Role.query.filter_by(name="Student").first()
-		ta_role = Role.query.filter_by(name="TA").first()
-		admin_role = Role.query.filter_by(name="Admin").first()
-
-		if user_old.role_id == fa_role.ID:
+		if user_old.role.name == 'Prof':
 			user_old.facult.remove(course_old)
 
-		elif user_old.role_id == ta_role.ID:
+		elif user_old.role.name == 'TA':
 			user_old.tutoring.remove(course_old)
 
-		elif user_old.role_id == stud_role.ID:
+		elif user_old.role.name == 'Student':
 			user_old.opted.remove(course_old)
 
-		if user_new.role_id == fa_role.ID:
+		if user_new.role.name == 'Prof':
 			user_new.facult.append(course_new)
 
-		elif user_new.role_id == ta_role.ID:
+		elif user_new.role.name == 'TA':
 			user_new.tutoring.append(course_new)
 
-		elif user_new.role_id == stud_role.ID:
+		elif user_new.role.name == 'Student':
 			user_new.opted.append(course_new)
 			isstud = 1
 
@@ -223,17 +203,14 @@ def delmapjson():
 	if course is None:
 		return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
 
-	fa_role = Role.query.filter_by(name="Prof").first()
-	stud_role = Role.query.filter_by(name="Student").first()
-	ta_role = Role.query.filter_by(name="TA").first()
-	admin_role = Role.query.filter_by(name="Admin").first()
-
 	try:
-		if user.role_id == fa_role.ID:
+		if user.role.name == 'Prof':
 			user.facult.remove(course)
-		elif user.role_id == ta_role.ID:
+
+		elif user.role.name == 'TA':
 			user.tutoring.remove(course)
-		elif user.role_id == stud_role.ID:
+
+		elif user.role.name == 'Student':
 			user.opted.remove(course)
 
 		db.session.commit()

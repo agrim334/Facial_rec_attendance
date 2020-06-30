@@ -40,8 +40,8 @@ export default {
           this.attds = res.data.records;
           const role = this.$store.state.userrole || '';
           if (role === 'Admin' || role === 'TA' || role === 'Prof') {
-            for (let i = 0; i < this.users.length; i += 1) {
-              this.users[i].actions = '';
+            for (let i = 0; i < this.attds.length; i += 1) {
+              this.attds[i].actions = '';
             }
           }
         })

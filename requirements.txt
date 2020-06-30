@@ -4,15 +4,9 @@ click
 Pillow
 opencv-python
 flask
-flask-wtf
 flask-sqlalchemy
 flask-migrate
-flask-mail
-flask-login
-flask-bootstrap
 flask-uploads
 flask-mysql
 flask-mysqldb
-flask-tables
-face_recognition
 python3-mysqldb

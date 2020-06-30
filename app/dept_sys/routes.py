@@ -1,21 +1,8 @@
-from .. import db,errors
+from .. import db
 from . import dept_sysbp
-from app.log_sys import log_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import DeptForm,ViewDeptForm
-from werkzeug.urls import url_parse
-from werkzeug.utils import secure_filename
-from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Department,Permission
-from datetime import datetime,timedelta
-import re
-from app.tables import DeptTable
+from flask import jsonify, request
+from ..models import Department,Permission
 from app.log_sys.routes import token_required
-
-@dept_sysbp.before_request
-def make_session_permanent():
-	session.permanent = True
-	dept_sysbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
 @dept_sysbp.after_request
 def after_request(response):									#security

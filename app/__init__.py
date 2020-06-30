@@ -2,22 +2,16 @@ from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 import logging
 from logging.handlers import SMTPHandler,RotatingFileHandler
 import os
-import MySQLdb
-from flask_table import Table, Col
 from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
-login = LoginManager()
 mail = Mail()
-bootstrap = Bootstrap()
-login.login_view = 'log_sysbp.login'
 
 def create_app():
 	APP = Flask(__name__)
@@ -46,11 +40,9 @@ def create_app():
 
 		APP.logger.setLevel(logging.INFO)
 		APP.logger.info('Microblog startup')
-	bootstrap.init_app(APP)
 	mail.init_app(APP)
 	db.init_app(APP)
 	migrate.init_app(APP,db)
-	login.init_app(APP)
 	CORS(APP, resources={r'/*': {'origins': '*'}})
 
 	with APP.app_context():

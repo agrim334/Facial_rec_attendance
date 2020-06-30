@@ -1,21 +1,8 @@
-from .. import db,errors
+from .. import db
 from . import course_sysbp
-from app.log_sys import log_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from app.forms import CourseForm,ViewCourseForm
-from werkzeug.urls import url_parse
-from werkzeug.utils import secure_filename
-from flask_login import current_user, login_user,logout_user,login_required
-from ..models import User,Role,Course,Department,Permission
-from datetime import datetime,timedelta
-from app.tables import CourseResults
-import re
+from flask import jsonify, request
+from ..models import Course,Permission
 from app.log_sys.routes import token_required
-
-@course_sysbp.before_request
-def make_session_permanent():
-	session.permanent = True
-	course_sysbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
 @course_sysbp.after_request
 def after_request(response):									#security

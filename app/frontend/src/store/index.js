@@ -10,7 +10,6 @@ const jwtDecode = require('jwt-decode');
 
 const actions = {
   login(context, userData) {
-    console.log(userData);
     const path = userData.url;
     const userdat = userData.data;
     context.commit('setUserData', { userdat });
@@ -39,21 +38,17 @@ const actions = {
 
 const mutations = {
   setUserData(state, payload) {
-    console.log('setUserData payload = ', payload);
     state.userData = payload.userData;
   },
   setJwtToken(state, payload) {
-    console.log('setJwtToken payload = ', payload);
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
     state.userrole = jwtDecode(payload.jwt.token).role;
-    console.log(state);
   },
   resetJwtToken(state) {
     localStorage.removeItem('token');
     state.jwt = '';
     state.userrole = '';
-    console.log(state);
   },
 };
 
@@ -65,7 +60,7 @@ const getters = {
 };
 const state = {
   jwt: { token: localStorage.getItem('token') },
-  userrole: jwtDecode(localStorage.getItem('token')).role || '',
+  userrole: localStorage.getItem('token') ? jwtDecode(localStorage.getItem('token')).role : '',
 };
 
 const store = new Vuex.Store({

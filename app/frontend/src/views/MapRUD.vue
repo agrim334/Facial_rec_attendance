@@ -56,8 +56,8 @@ export default {
           const t2 = res.data.records_s.concat(temp);
           this.maps = t2;
           if (this.$store.state.userrole === 'Admin') {
-            for (let i = 0; i < this.users.length; i += 1) {
-              this.users[i].actions = '';
+            for (let i = 0; i < this.maps.length; i += 1) {
+              this.maps[i].actions = '';
             }
           }
         })

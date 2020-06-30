@@ -1,10 +1,6 @@
-from .. import db,errors
+from .. import db
 from . import log_sysbp
-from flask import Flask,jsonify,request,redirect,url_for,session,current_app
-from app.forms import LoginForm,RegistrationForm,ResetPasswordRequestForm,ResetPasswordForm,EditProfileForm,ChangePWDForm,ViewUserForm
-from werkzeug.urls import url_parse
-from werkzeug.utils import secure_filename
-from flask_login import current_user, login_user,logout_user,login_required
+from flask import jsonify,request,current_app
 from ..models import User,Role,Department,Permission
 from .email import send_password_reset_email
 from datetime import datetime,timedelta
@@ -74,14 +70,9 @@ def login():
 		'sub': user.username,
 		'role': user.role.name,
 		'iat':datetime.utcnow(),
-		'exp': datetime.utcnow() + timedelta(minutes=30)},
+		'exp': datetime.utcnow() + timedelta(minutes=10)},
 		current_app.config['SECRET_KEY'])
 	return jsonify({ 'token': token.decode('UTF-8') })
-
-@log_sysbp.before_request
-def make_session_permanent():
-	session.permanent = True
-	log_sysbp.permanent_session_lifetime = timedelta(minutes=30)		#idle timeout for user session
 
 @log_sysbp.after_request
 def after_request(response):									#security

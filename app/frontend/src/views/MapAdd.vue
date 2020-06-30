@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     add(data) {
-      const path = '/map/add_map_json';
+      const path = 'map/add_map_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((res) => {
@@ -36,7 +36,7 @@ export default {
         });
     },
     imgupl(data) {
-      const path = '/map/add_map_json';
+      const path = 'map/add_map_json';
       const formData = new FormData();
       formData.append('file', data.img);
       formData.append('uid', data.dat.uid);

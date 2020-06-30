@@ -1,16 +1,11 @@
-from app import db,login
+from app import db
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin
 from time import time
 import jwt
-from datetime import datetime
 from flask import current_app
 
 APP = current_app._get_current_object()
-
-@login.user_loader
-def load_user(username):
-	return User.query.get(username)
 
 stud_courses = 	db.Table('stud_courses',
 				db.Column('SID',db.String(64),db.ForeignKey('user.username',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True),
@@ -209,7 +204,7 @@ class Attendance(db.Model):													#attendance records
 		TAID = json_data.get('taid')
 		timestamp = json_data.get('timestamp')
 		FID = json_data.get('fid')
-		if TAID and ID and timestamp and FID and SID:
+		if (TAID or FID) and CID and timestamp and SID:
 			return Attendance(FID=FID,TAID=TAID,CID=CID,SID=SID,timestamp=timestamp)
 		else:
 			pass

@@ -1,18 +1,9 @@
-from .. import db,errors
 from . import role_sysbp
-from flask import render_template,flash,Flask, jsonify, request, redirect,url_for,session
-from ..models import User,Role,Department,Permission
-import re
-from flask import current_app
-from datetime import datetime,timedelta
+from flask import jsonify,current_app
+from ..models import Role,Permission
 from app.log_sys.routes import token_required
 
 APP = current_app._get_current_object()
-
-@role_sysbp.before_request
-def make_session_permanent():
-	session.permanent = True
-	role_sysbp.permanent_session_lifetime = timedelta(minutes=10)		#idle timeout for user session
 
 @role_sysbp.after_request
 def after_request(response):									#security
