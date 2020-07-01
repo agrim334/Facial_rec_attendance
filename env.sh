@@ -12,4 +12,6 @@ export MAIL_USERNAME="admin's email address"
 export MAIL_PASSWORD="admin's email password"
 export LD_LIBRARY_PATH=/usr/local/cuda/lib
 export PATH=$PATH:/usr/local/cuda/bin
-export VUE_FRONT_URL="http://ip_address_where_vue_runs:port_number_where_vue_runs/resetpwd/"
+export VUE_HOST="ip address of vue"
+export VUE_PORT="port of vue"
+export VUE_FRONT_URL="http://$VUE_HOST:$VUE_PORT/resetpwd/"
