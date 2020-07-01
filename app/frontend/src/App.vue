@@ -45,7 +45,7 @@
       <b-button @click='logout'> Logout </b-button>
       <router-view/>
     </div>
-     <div id="nav" v-else>
+     <div v-else>
       <p> Unknown User Type </p>
     </div>
   </div>

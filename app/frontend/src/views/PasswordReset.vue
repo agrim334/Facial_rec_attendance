@@ -29,7 +29,7 @@ export default {
         let path = 'users';
         path = path.concat(this.$route.path);
         console.log(path);
-        axios.post(path, userdat)
+        this.$store.dispatch('noauthroutrereq', { url: path, data: userdat })
           .then((res) => {
             console.log(res.data.status);
           })

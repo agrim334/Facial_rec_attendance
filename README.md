@@ -62,13 +62,18 @@ work. Will update for other OS as well.**
                   DATABASE_URL user --> your username 
                               pwd  --> your mysql password
                               db   --> the database name where data will be stored
-                  FLASK_APP  microblog.py --> whatever new name you choose for your app.Do update microblog.py's name to if                changes made
+                  FLASK_APP  microblog.py --> whatever new name you choose for your app.
                   MAIL_USERNAME  emailid --> the admin's email id
                   MAIL_PASSWORD  pwd --> admin's email password
-                  FRONTEND_URL --> url of the frontend(vuejs) route + /resetpwd/ (crucial needed for email sending)
-                  
-                  E.g if vuejs is at 192.168.12.72:8000
-                  then write http://192.168.12.72:8000/resetpwd
+                  VUE_FRONT_URL --> url of the frontend(vuejs) route + /resetpwd/ (crucial needed for email sending)
+                  FLASK_HOST --> ip address of server where flask will run (e.g 192.168.42.56). default value is localhost
+                  FLASK_PORT --> port number at which flask will run (e.g 2000). default value is 5000
+            
+                  VUE_HOST --> ip address of server where vuejs will run (e.g 192.168.42.56) default value is localhost
+                  VUE_PORT --> port number at which vuejs will run  (e.g. 7000) default value is 8080
+                   
+                  VUE_FRONT_URL and FLASK_URL must NOT be the same. At least differ the ports.
+
                   ADMINS --> the admins email id
                 The remaining environment variables are to be set up according to your email server
                 
@@ -76,27 +81,30 @@ work. Will update for other OS as well.**
                where images of known persons are kept.   
       7.) Create a table department in your database as per the fields given in models.py
       8.) In the cloned directory run
-                     . path_to_env.sh
+                     . env.sh
                      flask db init
                      flask db migrate
                      flask db upgrade
-      9.) Insert database records (for first time usage) using mysql or flask shell 
+      9.) In the same directory run:
+                    flask shell
+                    from app.models import *
+                    Role.insert_roles()
+          and then exit
+      10.) Insert database records (for first time setup) using mysql or flask shell 
           (refer https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database or mysql docs for relevant commands)
-      10.) Make sure npm is installed on your system
-      11.) navigate to app/frontend/ and run 
+      11.) Make sure npm is installed on your system
+      12.) navigate to app/frontend/ (in terminal session) in the directory and run 
                     npm install
           to install requisite vue packages
-      12.) In app/frontend/src/services update API_URL in index.js to the address and port of the new machine where flask backend api is running. 
-           e.g if flask is running at 192.168.12.72:5000 then API_URL = http://192.168.12.72:8000/
  
  # **Usage**
       1.) Open a terminal session in the cloned repo directory.
       2.) Ensure MySQL is running and requisite credentials have been added in env.sh
       2.) Run the following ([] means optional):
                   . env.sh
-                  flask run [--with-threads] [--host=IPADDRESS:port]
+                  flask run [--with-threads] --host=$FLASK_HOST --port=$FLASK_PORT
           By default the server runs on localhost:5000/
-      3.) In another terminal session (opened to app/frontend) run
+      3.) In another terminal session (opened at app/frontend/) run
                   npm run serve (for development)
-      4.) If you wish to use CUDA for better performance, then set the value of model argument in routes.py as "cnn". if not set it "hog"
+      4.) If you wish to use CUDA for better performance, then set the value of model argument in attd_sys/routes.py as "cnn" everywhere. if not set it "hog"
       

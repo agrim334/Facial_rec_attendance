@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import {
-  isValidJwt, login, authenticate, authenticateimg, EventBus,
+  isValidJwt, login, authenticate, authenticateimg, noauthroute, EventBus,
 } from '../services';
 
 Vue.use(Vuex);
@@ -12,6 +12,7 @@ const actions = {
   login(context, userData) {
     const path = userData.url;
     const userdat = userData.data;
+    console.log(process.argv.VUE_APP_FLASK_URL);
     context.commit('setUserData', { userdat });
     return login(path, userdat)
       .then((response) => context.commit('setJwtToken', { jwt: response.data }))
@@ -29,6 +30,11 @@ const actions = {
     const path = userData.url;
     const userdat = userData.data;
     return authenticateimg(path, userdat, context.state.jwt.token);
+  },
+  noauthroutrereq(context, userData) {
+    const path = userData.url;
+    const userdat = userData.data;
+    return noauthroute(path, userdat);
   },
   logout(context) {
     context.commit('resetJwtToken');
@@ -54,7 +60,6 @@ const mutations = {
 
 const getters = {
   isAuthenticated(state) {
-    console.log(state);
     return isValidJwt(state.jwt.token);
   },
 };

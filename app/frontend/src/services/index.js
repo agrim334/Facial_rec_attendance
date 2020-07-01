@@ -2,7 +2,7 @@ import Vue from 'vue';
 import axios from 'axios';
 
 export const EventBus = new Vue();
-const API_URL = 'http://192.168.43.70:5000/';
+const API_URL = process.env.VUE_APP_FLASK_URL;
 
 export function isValidJwt(jwt) {
   if (!jwt || jwt.split('.').length < 3) {

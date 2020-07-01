@@ -1,0 +1,15 @@
+export FLASK_HOST="host address for flask server e.g 192.168.43.45"
+export FLASK_PORT="port number for flask server e.g. 5000"
+export FLASK_URL="http://$FLASK_HOST:$FLASK_PORT/"
+echo "VUE_APP_FLASK_URL=$FLASK_URL" > ./app/frontend/.env
+export DATABASE_URL="mysql://mysql_username:mysql_userpassword@mysql_server_address/database"
+export FLASK_APP=app
+export FLASK_ENV=development #use production here for production build
+export MAIL_SERVER=smtp.googlemail.com
+export MAIL_PORT=587
+export MAIL_USE_TLS=1
+export MAIL_USERNAME="admin's email address"
+export MAIL_PASSWORD="admin's email password"
+export LD_LIBRARY_PATH=/usr/local/cuda/lib
+export PATH=$PATH:/usr/local/cuda/bin
+export VUE_FRONT_URL="http://ip_address_where_vue_runs:port_number_where_vue_runs/resetpwd/"
