@@ -57,15 +57,15 @@ def addmapjson():
 	if request.json:
 		jsdat = request.json
 		if jsdat is None:
-			return jsonify({'status':'Bad data'})
+			return jsonify({'result':'Bad data'})
 
 		user = User.query.filter_by(username=request.json['uid']).first()	
 		if user is None:
-			return jsonify({'status':'User by ID {} does not exist'.format(jsdat['uid'])})
+			return jsonify({'result':'User by ID {} does not exist'.format(jsdat['uid'])})
 
 		course = Course.query.filter_by(ID=request.json['cid']).first()
 		if course is None:
-			return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
+			return jsonify({'result':'Course by ID {} does not exist'.format(jsdat['cid'])})
 
 		isstud = 0
 		try:
@@ -78,9 +78,9 @@ def addmapjson():
 				isstud = 1
 
 			db.session.commit()
-			return jsonify({'isstud': isstud, 'status':'success'})
+			return jsonify({'isstud': isstud, 'result':'success'})
 		except:
-			return jsonify({'status':'fail'})
+			return jsonify({'result':'fail'})
 	elif request.files:
 		uid = request.form.get('uid')
 		cid = request.form.get('cid')
@@ -96,9 +96,9 @@ def addmapjson():
 			new_file = uid + file_extension
 			os.rename(os.path.join(temp, filename),os.path.join(temp, new_file))
 
-		return jsonify({'status':'success'})
+		return jsonify({'result':'success'})
 	else:
-		return jsonify({'status':'fail'})
+		return jsonify({'result':'fail'})
 
 @mapbp.route('/modify_map_json',methods=['POST'])
 @token_required(Permission.ADMIN)
@@ -110,42 +110,42 @@ def modifymapjson():
 		newjs = request.json['new']
 
 		if oldjs is None:
-			return jsonify({'status':'Bad original data'})
+			return jsonify({'result':'Bad original data'})
 
 		if newjs is None:
-			return jsonify({'status':'Bad submission data'})
+			return jsonify({'result':'Bad submission data'})
 
 		if oldjs.get('uid') == '' or oldjs.get('uid') is None:
-			return jsonify({'status':'Bad data. Give original user ID'})
+			return jsonify({'result':'Bad data. Give original user ID'})
 
 		if oldjs.get('cid') == '' or oldjs.get('cid') is None:
-			return jsonify({'status':'Bad data. Give original course ID'})
+			return jsonify({'result':'Bad data. Give original course ID'})
 
 		if newjs.get('uid') == '' or newjs.get('uid') is None:
-			return jsonify({'status':'Bad data. Give new course ID'})
+			return jsonify({'result':'Bad data. Give new course ID'})
 
 		if newjs.get('uid') == '' or newjs.get('uid') is None:
-			return jsonify({'status':'Bad data. Give new user ID'})
+			return jsonify({'result':'Bad data. Give new user ID'})
 
 		user_old = User.query.filter_by(username=oldjs.get('uid')).first()
 
 		if user_old is None:
-			return jsonify({'status':'User by ID {} does not exist'.format(oldjs.get('uid'))})
+			return jsonify({'result':'User by ID {} does not exist'.format(oldjs.get('uid'))})
 
 		user_new = User.query.filter_by(username=newjs.get('uid')).first()
 
 		if user_new is None:
-			return jsonify({'status':'User by ID {} does not exist'.format(newjs.get('uid'))})
+			return jsonify({'result':'User by ID {} does not exist'.format(newjs.get('uid'))})
 
 		course_old = Course.query.filter_by(ID = oldjs.get('cid')).first()
 
 		if course_old is None:
-			return jsonify({'status':'Course by ID {} does not exist'.format(oldjs.get('cid'))})
+			return jsonify({'result':'Course by ID {} does not exist'.format(oldjs.get('cid'))})
 
 		course_new = Course.query.filter_by(ID = newjs.get('cid')).first()
 
 		if course_new is None:
-			return jsonify({'status':'Course by ID {} does not exist'.format(newjs.get('cid'))})
+			return jsonify({'result':'Course by ID {} does not exist'.format(newjs.get('cid'))})
 
 		if user_old.role.name == 'Prof':
 			user_old.facult.remove(course_old)
@@ -167,7 +167,7 @@ def modifymapjson():
 			isstud = 1
 
 		db.session.commit()
-		return jsonify({'isstud': isstud, 'status':'success'})
+		return jsonify({'isstud': isstud, 'result':'success'})
 
 	elif request.files:
 		uid = request.form.get('uid')
@@ -184,24 +184,24 @@ def modifymapjson():
 			new_file = uid + file_extension
 			os.rename(os.path.join(temp, filename),os.path.join(temp, new_file))
 
-		return jsonify({'status':'success'})
+		return jsonify({'result':'success'})
 	else:
-		return jsonify({'status':'fail'})
+		return jsonify({'result':'fail'})
 
 @mapbp.route('/delete_map_json',methods=['POST'])
 @token_required(Permission.ADMIN)
 def delmapjson():
 	jsdat = request.json
 	if jsdat is None:
-		return jsonify({'status':'Bad data'})
+		return jsonify({'result':'Bad data'})
 
 	user = User.query.filter_by(username=request.json['uid']).first()
 	if user is None:
-		return jsonify({'status':'User by ID {} does not exist'.format(jsdat['uid'])})
+		return jsonify({'result':'User by ID {} does not exist'.format(jsdat['uid'])})
 
 	course = Course.query.filter_by(ID=request.json['cid']).first()
 	if course is None:
-		return jsonify({'status':'Course by ID {} does not exist'.format(jsdat['cid'])})
+		return jsonify({'result':'Course by ID {} does not exist'.format(jsdat['cid'])})
 
 	try:
 		if user.role.name == 'Prof':
@@ -214,6 +214,6 @@ def delmapjson():
 			user.opted.remove(course)
 
 		db.session.commit()
-		return jsonify({'status':'success'})
+		return jsonify({'result':'success'})
 	except:
-		return jsonify({'status':'fail'})
+		return jsonify({'result':'fail'})

@@ -36,7 +36,10 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA' && role !== 'Student')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated || t === 0) next('/login');
+      if (!store.getters.isAuthenticated || t === 0) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
       else next();
     },
   },
@@ -59,8 +62,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (!t) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -102,8 +111,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -133,8 +148,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -149,8 +170,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -180,8 +207,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -196,8 +229,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -227,8 +266,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("You don't have requisite credentials to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -243,8 +288,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("You don't have requisite credentials to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -274,8 +325,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -290,8 +347,14 @@ const routes = [
       if (!role || role !== 'Admin') {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (!t) {
+        alert("Only admins can access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },

@@ -136,7 +136,8 @@ class User(UserMixin,db.Model):
 		fname = json_data.get('fname')
 		lname = json_data.get('lname')
 		dept = json_data.get('deptc')
-		role_id = json_data.get('rolec')
+		t = Role.query.filter_by(name=json_data.get('rolec')).first()
+		role_id = t.id
 		if dept == '':
 			dept = None
 		return User(username=username,email=email,fname=fname,lname=lname,dept=dept,role_id=role_id)

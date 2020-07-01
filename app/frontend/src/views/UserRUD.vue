@@ -21,31 +21,43 @@ export default {
   },
   methods: {
     updaterec(userdat) {
-      console.log(userdat);
       this.$router.push({ name: 'UserModify', params: { user: userdat } });
     },
     deleterec(userdat) {
       const path = 'users/delete_log_json';
-      this.$store.dispatch('authrequest', { url: path, data: userdat.username })
-        .then(() => {
-          this.getUsers();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      if (this.$store.state.user === userdat.username) {
+        alert("Can't delete this user as currently logged in by the same");
+      }
+      else {
+        this.$store.dispatch('authrequest', { url: path, data: userdat.username })
+          .then(() => {
+            this.getUsers();
+          })
+          .catch((error) => {
+            alert("Internal error has occured.");
+            console.error(error);
+          });
+      }
     },
     getUsers() {
       const path = 'users/check_user_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
-          this.users = res.data.records;
-          if (this.$store.state.userrole === 'Admin') {
-            for (let i = 0; i < this.users.length; i += 1) {
-              this.users[i].actions = '';
+          if (res) {
+            this.users = res.data.records;
+            console.log(this.users);
+            if (this.$store.state.userrole === 'Admin') {
+              for (let i = 0; i < this.users.length; i += 1) {
+                this.users[i].actions = '';
+              }
             }
+          }
+          else {
+            alert("No user data is available");
           }
         })
         .catch((error) => {
+          alert("Internal error has occured");
           console.error(error);
         });
     },

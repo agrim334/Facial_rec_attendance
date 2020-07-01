@@ -26,7 +26,7 @@
 
     <b-form-group label="Roles">
       <b-form-radio-group :options='roles' name-field='name' html-field='name'
-      value-field = 'id' v-model="moduser.rolec">
+      value-field = 'name' v-model="moduser.rolec">
       </b-form-radio-group>
     </b-form-group>
     <br>
@@ -139,5 +139,8 @@ export default {
       }
     },
   },
+  created() {
+    console.log(this.userrec);
+  }
 };
 </script>

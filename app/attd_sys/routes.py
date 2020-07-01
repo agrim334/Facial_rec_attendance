@@ -48,22 +48,22 @@ def addattdjson():
 		jsdat = request.json
 		if jsdat.get('mancheck') == 1:
 			manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
-			return jsonify({ 'status' : 'success'})
+			return jsonify({ 'result' : 'success'})
 		else:
 			if jsdat.get('uid') == '' or jsdat.get('uid') is None:
-				return jsonify({ 'status' : 'bad info'})
+				return jsonify({ 'result' : 'bad info'})
 
 			check_user = User.query.filter_by(username = jsdat.get('uid')).first()
 			if not check_user:
-				return jsonify({ 'status' : 'User not in database'})
+				return jsonify({ 'result' : 'User not in database'})
 
 			if jsdat.get('cid') == '' or jsdat.get('cid') is None:
-				return jsonify({ 'status' : 'No such course'})
+				return jsonify({ 'result' : 'No such course'})
 
 			check_course = Course.query.filter_by(ID = jsdat.get('cid')).first()
 
 			if not check_course:
-				return jsonify({ 'status' : 'Course not in database'})
+				return jsonify({ 'result' : 'Course not in database'})
 
 			check_map = None
 			cid = jsdat.get('cid')
@@ -74,9 +74,9 @@ def addattdjson():
 				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
 				
 			if check_map is None:
-				return jsonify({ 'status' : 'No such mapping'})
+				return jsonify({ 'result' : 'No such mapping'})
 
-			return jsonify({ 'status' : 'Success'})
+			return jsonify({ 'result' : 'Success'})
 
 	elif request.files:
 		uid = request.form.get('uid')
@@ -91,7 +91,7 @@ def addattdjson():
 			t.save(os.path.join(temp, filename))
 
 		reglist = detect_faces_in_image(upldir,cid,uid)
-		return jsonify({'studlist' : reglist, 'status': 'success'})
+		return jsonify({'studlist' : reglist, 'result': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
 @token_required(Permission.CUD_ATTD)
@@ -99,97 +99,97 @@ def modifyattdjson():
 	oldjs = request.json['old']
 
 	if not oldjs:
-		return jsonify({ 'status' : 'not received original record info'})
+		return jsonify({ 'result' : 'not received original record info'})
 
 	newjs = request.json['new']	
 
 	if not newjs:
-		return jsonify({ 'status' : 'not received modified record info'})
+		return jsonify({ 'result' : 'not received modified record info'})
 
 	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('sid'),timestamp=oldjs.get('ts')).all()
 
 	if not attd:
-		return jsonify({ 'status' : 'original record not in database'})
+		return jsonify({ 'result' : 'original record not in database'})
 
 	if newjs.get('cid') == '' or newjs.get('cid') is None:
-		return jsonify({ 'status' : 'no cid given'})
+		return jsonify({ 'result' : 'no cid given'})
 
 	course = Course.query.filter_by(username=newjs.get('cid')).first()
 	if not course:
-		return jsonify({ 'status' : 'no course with given course id'})
+		return jsonify({ 'result' : 'no course with given course id'})
 
 
 	if newjs.get('mid') == '' or newjs.get('mid') is None:
-		return jsonify({ 'status' : 'missing marker id'})
+		return jsonify({ 'result' : 'missing marker id'})
 
 	if newjs.get('sid') == '' or newjs.get('sid') is None:
-		return jsonify({ 'status' : 'missing student id'})
+		return jsonify({ 'result' : 'missing student id'})
 
 	user = User.query.filter_by(username=newjs.get('sid')).all()
 	if not user:
-		return jsonify({ 'status' : 'no student with given student id'})
+		return jsonify({ 'result' : 'no student with given student id'})
 
 	user = User.query.filter_by(username=newjs.get('mid')).all()
 	if not user:
-		return jsonify({ 'status' : 'No faculty or ta with given marker id'})
+		return jsonify({ 'result' : 'No faculty or ta with given marker id'})
 
 	attd.CID = newjs.get('cid') or attd.CID
 	attd.SID = newjs.get('sid') or attd.SID
 	
 	check_stud_map = db.session.query(stud_courses).filter_by(SID=newjs.get('sid'),CID=newjs.get('cid')).all()
 	if not check_stud_map:
-		return jsonify({ 'status' : 'Student with id {} not registered for course {}'.format(newjs.get('sid'),newjs.get('cid'))})
+		return jsonify({ 'result' : 'Student with id {} not registered for course {}'.format(newjs.get('sid'),newjs.get('cid'))})
 
 	if user.role.name == 'TA':
 		check_ta_map = db.session.query(ta_courses).filter_by(TAID=newjs.get('mid'),CID=newjs.get('cid')).all()
 		if not check_ta_map:
-			return jsonify({ 'status' : 'TA with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
+			return jsonify({ 'result' : 'TA with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
 
 		attd.TAID = newjs.get('mid') or attd.TAID
 	
 	elif user.role.name == 'Prof':
 		check_prof_map = db.session.query(prof_courses).filter_by(FID=newjs.get('mid'),CID=newjs.get('cid')).all()
 		if not check_prof_map:
-			return jsonify({ 'status' : 'Faculty with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
+			return jsonify({ 'result' : 'Faculty with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
 
 		attd.FID = newjs.get('mid') or attd.FID
 
 	if newjs.get('time') == '' or newjs.get('time') is None:
-		return jsonify({ 'status' : 'missing timestamp'})
+		return jsonify({ 'result' : 'missing timestamp'})
 	
 
 	attd.timestamp = newjs.get('time') or attd.timestamp
 
 	try:
 		db.session.commit()
-		return jsonify({ 'status' : 'success'})
+		return jsonify({ 'result' : 'success'})
 	except:
-		return jsonify({ 'status' : 'fail'})
+		return jsonify({ 'result' : 'fail'})
 
 @attd_sysbp.route('/delete_attd_json',methods=['POST'])
 @token_required(Permission.CUD_ATTD)
 def delattdjson():
 	jsdat = request.json
 	if not jsdat:
-		return jsonify({ 'status' : 'bad info'})
+		return jsonify({ 'result' : 'bad info'})
 
 	try:
 		attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('sid'),timestamp=jsdat.get('time')).first()
 		if not attd:
-			return jsonify({ 'status' : 'no such record'})
+			return jsonify({ 'result' : 'no such record'})
 
 		db.session.delete(attd)
 		db.session.commit()
-		return jsonify({ 'status' : 'Record deletion success'})
+		return jsonify({ 'result' : 'Record deletion success'})
 	except:
-		return jsonify({ 'status' : 'Record deletion failed'})
+		return jsonify({ 'result' : 'Record deletion failed'})
 
 def detect_faces_in_image(file_stream,CID,user):
 	result = []
 
 	reglist = []
 	for r in db.session.query(stud_courses).filter_by(CID=CID):
-		reglist.append({ 'id' : r.SID, 'status': 0 })
+		reglist.append({ 'id' : r.SID, 'result': 0 })
 	try:
 		known_face_encd = []
 		known_face_name = {}
@@ -250,7 +250,7 @@ def detect_faces_in_image(file_stream,CID,user):
 		for r in db.session.query(stud_courses).join(Attendance,Attendance.CID == stud_courses.c.CID).filter_by(CID=CID,timestamp=datetime.today().strftime('%Y-%m-%d')):
 			for d in reglist:
 				if d['id'] == r.SID:
-					d['status'] = 1
+					d['result'] = 1
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
@@ -277,7 +277,7 @@ def manmark(studlist,CID,uid):
 
 	for stu in studlist:
 		stud_id = stu['id']
-		if int(stu['status']) == 1:
+		if int(stu['result']) == 1:
 			stud = User.query.filter_by(username=stud_id).first() 
 			if stud and stud.role.name == 'Student':
 				c1 = db.session.query(stud_courses).filter_by(SID=stud_id,CID = CID)

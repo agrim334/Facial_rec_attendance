@@ -10,8 +10,6 @@
     </b-input>
     <br>
     <label for='rembme'> Remember me? </label>
-    <b-form-checkbox  v-model = 'cred.rem' value='true'>
-    </b-form-checkbox>
     <br>
     <b-button type = 'submit'> Login </b-button>
    </b-form>
@@ -24,7 +22,7 @@
 export default {
   name: 'LogForm',
   data() {
-    return { cred: { user: '', pass: '', rem: false } };
+    return { cred: { user: '', pass: '' } };
   },
   computed: {
     ustate() {

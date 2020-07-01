@@ -12,11 +12,12 @@ const actions = {
   login(context, userData) {
     const path = userData.url;
     const userdat = userData.data;
-    console.log(process.argv.VUE_APP_FLASK_URL);
     context.commit('setUserData', { userdat });
     return login(path, userdat)
-      .then((response) => context.commit('setJwtToken', { jwt: response.data }))
-      .catch((error) => {
+      .then((response) => {
+        context.commit('setJwtToken', { jwt: response.data });
+      }).catch((error) => {
+        alert('Login Failed. Bad Credentials');
         console.log('Error Authenticating: ', error);
         EventBus.$emit('failedAuthentication', error);
       });
@@ -55,6 +56,7 @@ const mutations = {
     localStorage.removeItem('token');
     state.jwt = '';
     state.userrole = '';
+    state.user = '';
   },
 };
 
@@ -66,6 +68,7 @@ const getters = {
 const state = {
   jwt: { token: localStorage.getItem('token') },
   userrole: localStorage.getItem('token') ? jwtDecode(localStorage.getItem('token')).role : '',
+  user: localStorage.getItem('token') ? jwtDecode(localStorage.getItem('token')).sub : '',
 };
 
 const store = new Vuex.Store({
