@@ -101,7 +101,7 @@ class User(UserMixin,db.Model):
 
 	facult = db.relationship('Course',
 			secondary=prof_courses,
-			primaryjoin = (prof_courses.c.FID == username and role_id == Role.query.filter_by(name='Faculty').first().role_id),
+			primaryjoin = (prof_courses.c.FID == username and role_id == Role.query.filter_by(name='Prof').first().role_id),
 			secondaryjoin = (prof_courses.c.CID == Course.ID),
 			backref = db.backref('appointed_faculty',lazy='dynamic'),
 			lazy = 'dynamic') 
@@ -179,6 +179,9 @@ class User(UserMixin,db.Model):
 
 		if username:
 			user = User.query.filter_by(username=username).first()
+
+		if not user:
+			user = User.query.filter_by(email=username).first()
 
 		if not user or not check_password_hash(user.password_hash, password):
 			return None

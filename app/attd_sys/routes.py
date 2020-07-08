@@ -73,7 +73,7 @@ def addattdjson():
 			elif check_user.role.name == 'TA':
 				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
 				
-			if check_map is None:
+			if not check_map:
 				return jsonify({ 'result' : 'No such mapping'})
 
 			return jsonify({ 'result' : 'Success'})

@@ -43,17 +43,20 @@ export default {
       const path = 'users/check_user_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
-          if (res) {
-            this.users = res.data.records;
-            console.log(this.users);
-            if (this.$store.state.userrole === 'Admin') {
-              for (let i = 0; i < this.users.length; i += 1) {
-                this.users[i].actions = '';
-              }
-            }
+          console.log(res);
+          if (res.data.message === 'Invalid token') {
+            alert("Bad session logging out");
+            context.commit('resetJwtToken');
           }
-          else {
-            alert("No user data is available");
+          if(res.data.message === 'Expired token') {
+            alert("Session expired. You have to login again");
+            context.commit('resetJwtToken');
+          }
+          this.users = res.data.records;
+          if (this.$store.state.userrole === 'Admin') {
+            for (let i = 0; i < this.users.length; i += 1) {
+              this.users[i].actions = '';
+            }
           }
         })
         .catch((error) => {

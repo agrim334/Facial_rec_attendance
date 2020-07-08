@@ -18,8 +18,8 @@ const actions = {
         context.commit('setJwtToken', { jwt: response.data });
       }).catch((error) => {
         alert('Login Failed. Bad Credentials');
-        console.log('Error Authenticating: ', error);
-        EventBus.$emit('failedAuthentication', error);
+        console.log('Error Logging in: ', error);
+        EventBus.$emit('failedlogin', error);
       });
   },
   authrequest(context, userData) {
@@ -35,7 +35,13 @@ const actions = {
   noauthroutrereq(context, userData) {
     const path = userData.url;
     const userdat = userData.data;
-    return noauthroute(path, userdat);
+    return noauthroute(path, userdat)
+      .then((response) => {
+        alert(response.data);
+      }).catch((error) => {
+        console.log('Error Authenticating: ', error);
+        EventBus.$emit('failedauthentication', error);
+      });
   },
   logout(context) {
     context.commit('resetJwtToken');

@@ -19,8 +19,8 @@ export default {
     updaterec(userdat) {
       const path = 'users/reset_password_request';
       this.$store.dispatch('authrequest', { url: path, data: userdat })
-        .then(() => {
-          console.log(this);
+        .then((response) => {
+          alert(response.data.result);
         })
         .catch((error) => {
           console.error(error);

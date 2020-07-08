@@ -23,11 +23,11 @@ def token_required(permission):
 			auth_headers = request.headers.get('Authorization', '').split()
 
 			invalid_msg = {
-				'message': 'Invalid token. Registeration and / or authentication required',
+				'message': 'Invalid token',
 				'authenticated': False
 			}
 			expired_msg = {
-				'message': 'Expired token. Reauthentication required.',
+				'message': 'Expired token',
 				'authenticated': False
 			}
 
@@ -37,15 +37,18 @@ def token_required(permission):
 			try:
 				token = auth_headers[1]
 				data = jwt.decode(token, current_app.config['SECRET_KEY'])
-				user = User.query.filter_by(username=data['sub']).first()
+				user = None
+				if check(data['sub']):
+					user = User.query.filter_by(email=data['sub']).first()
+				else:
+					user = User.query.filter_by(username=data['sub']).first()
 				u_role = data['role']
-				print(user)
 				if not user:
 					raise RuntimeError('User not found')
 				if u_role != user.role.name:
 					raise RuntimeError('Token has been tampered')
 				if not user.can(permission):
-					abort(403)
+					raise RuntimeError('Not Authorized')
 				return f( *args, **kwargs)
 			except jwt.ExpiredSignatureError:
 				return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
@@ -91,17 +94,21 @@ def reset_password_request():
 	if not request.json:
 		return jsonify({'result: bad data'})
 	uid = request.json.get('uid')
+	user = None
 	if check(uid):
 		user = User.query.filter_by(email=uid).first()
 	else:
 		user = User.query.filter_by(username=uid).first()
 	if user:
 		if user.email:
-			send_password_reset_email(user,user.email)
-			return jsonify({'result: Sent Email.Check mail'})
-		return jsonify({'result: User has no email id set'})
+			try:
+				send_password_reset_email(user,user.email)
+				return jsonify({'result': 'Sent Email.Check mail'})
+			except:
+				return jsonify({'result': 'Failed sending email. Internal Error'})
+		return jsonify({'result': 'User has no email id set'})
 	else:
-		return jsonify({'result: User not found with given email id.Please contact admin'})
+		return jsonify({'result': 'User not found with given email id.Please contact admin'})
 
 @log_sysbp.route('/resetpwd/<token>', methods=['GET', 'POST'])
 def reset_password(token):
@@ -114,7 +121,7 @@ def reset_password(token):
 
 	pwd = request.json
 	if pwd.get('newpass') !=  pwd.get('confirmpass') or ( pwd.get('pass') ==  pwd.get('confirmpass') and (pwd.get('pass') == '' or pwd.get('pass') is None )):
-		return jsonify({'result: Password not match'})
+		return jsonify({'result': 'Password not match'})
 
 	user.set_password(pwd.get('newpass'))
 	db.session.commit()
@@ -176,7 +183,7 @@ def addlogjson():
 
 	user = User.from_json(jsdat)
 	user.set_password(jsdat.get('pass'))
-	if user is None:
+	if not user or user is None:
 		return jsonify({ 'result' : 'can\'t create user'})
 
 	try:
@@ -220,7 +227,7 @@ def modifylogjson():
 	if oldjs.get('username') == '' or oldjs.get('username') is None:
 		return jsonify({ 'result' : 'Empty old user id'})
 
-	user = User.query.filter_by(username=oldjs.get('username')).first_or_404()
+	user = User.query.filter_by(username=oldjs.get('username')).first()
 
 	if not user:
 		return jsonify({ 'result' : 'No such user exists'})
@@ -228,7 +235,7 @@ def modifylogjson():
 	if newjs.get('username') == '' or newjs.get('username') is None:
 		return jsonify({ 'result' : 'Empty new user id'})
 
-	check_user = User.query.filter_by(username=newjs.get('username')).first_or_404()
+	check_user = User.query.filter_by(username=newjs.get('username')).first()
 
 	if check_user and check_user != user:
 		return jsonify({ 'result' : 'User with id {} already in database'.format(newjs.get('username'))})
@@ -242,7 +249,7 @@ def modifylogjson():
 	if newjs.get('email') == '' or newjs.get('email') is None or check(newjs.get('email')) is False:
 		return jsonify({ 'result' : 'email empty or bad email format'})
 
-	check_user = User.query.filter_by(email=newjs.get('email')).first_or_404()
+	check_user = User.query.filter_by(email=newjs.get('email')).first()
 
 	if check_user and check_user != user:
 		return jsonify({ 'result' : 'email id {} already used in database'.format(newjs.get('email'))})
@@ -287,7 +294,7 @@ def dellogjson():
 	if not request.get_data('username'):
 		return jsonify({ 'result' : 'No id given'})
 
-	user = User.query.filter_by(username=request.get_data('username')).first_or_404()
+	user = User.query.filter_by(username=request.get_data('username')).first()
 	if not user:
 		return jsonify({ 'result' : 'No such user in database'}),
 	try:

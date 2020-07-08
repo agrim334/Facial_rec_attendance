@@ -2,11 +2,11 @@
  <div>
   <b-form @submit.prevent="logsubmit">
     <label for='username'> Username </label>
-    <b-input :state='ustate' type='text' placeholder ="enter name" v-model = 'cred.user'>
+    <b-input :state='ustate' type='text' placeholder ="enter name" v-model = 'cred.user' required>
     </b-input>
     <br>
     <label for='pwd'> Password </label>
-    <b-input :state='pwstate' type='password' placeholder ="enter password" v-model = 'cred.pass'>
+    <b-input :state='pwstate' type='password' placeholder ="enter password" v-model = 'cred.pass' required>
     </b-input>
     <br>
     <label for='rembme'> Remember me? </label>
