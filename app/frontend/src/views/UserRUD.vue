@@ -20,8 +20,18 @@ export default {
     },
   },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     updaterec(userdat) {
-      this.$router.push({ name: 'UserModify', params: { user: userdat } });
+      if (this.isAuthenticated) {
+        this.$router.push({ name: 'UserModify', params: { user: userdat } });
+      }
+      else{
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
     },
     deleterec(userdat) {
       const path = 'users/delete_log_json';
@@ -43,14 +53,13 @@ export default {
       const path = 'users/check_user_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((res) => {
-          console.log(res);
           if (res.data.message === 'Invalid token') {
             alert("Bad session logging out");
-            context.commit('resetJwtToken');
+            this.logout();
           }
-          if(res.data.message === 'Expired token') {
+          if (res.data.message === 'Expired token') {
             alert("Session expired. You have to login again");
-            context.commit('resetJwtToken');
+            this.logout();
           }
           this.users = res.data.records;
           if (this.$store.state.userrole === 'Admin') {
@@ -60,7 +69,9 @@ export default {
           }
         })
         .catch((error) => {
+          alert(error);
           alert("Internal error has occured");
+          this.logout();
           console.error(error);
         });
     },

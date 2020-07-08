@@ -17,7 +17,7 @@ const actions = {
       .then((response) => {
         context.commit('setJwtToken', { jwt: response.data });
       }).catch((error) => {
-        alert('Login Failed. Bad Credentials');
+        alert('Login Failed. Bad Credentials');z
         console.log('Error Logging in: ', error);
         EventBus.$emit('failedlogin', error);
       });
