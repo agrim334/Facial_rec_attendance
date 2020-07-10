@@ -44,7 +44,7 @@ export default {
             this.getUsers();
           })
           .catch((error) => {
-            alert("Internal error has occured.");
+            alert(error);
             console.error(error);
           });
       }
@@ -70,7 +70,6 @@ export default {
         })
         .catch((error) => {
           alert(error);
-          alert("Internal error has occured");
           this.logout();
           console.error(error);
         });

@@ -9,8 +9,6 @@
     <b-input :state='pwstate' type='password' placeholder ="enter password" v-model = 'cred.pass' required>
     </b-input>
     <br>
-    <label for='rembme'> Remember me? </label>
-    <br>
     <b-button type = 'submit'> Login </b-button>
    </b-form>
 
