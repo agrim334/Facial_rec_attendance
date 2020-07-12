@@ -40,6 +40,7 @@ export default {
         .then((response) => {
           this.attds = response.data.records;
           const role = this.$store.state.userrole || '';
+          console.log(this.attds);
           if (role === 'Admin' || role === 'TA' || role === 'Prof') {
             for (let i = 0; i < this.attds.length; i += 1) {
               this.attds[i].actions = '';
@@ -47,7 +48,6 @@ export default {
           }
         })
         .catch((error) => {
-          alert(error.response.data.result);
           console.error(error);
         });
     },

@@ -111,7 +111,10 @@ def modifyattdjson():
 	if not newjs:
 		return jsonify({ 'result' : 'not received modified record info'})
 
-	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('sid'),timestamp=oldjs.get('ts')).all()
+	timestamp = oldjs.get('time')
+	date_format = "%a, %d %b %Y %H:%M:%S %Z"
+	date_obj = datetime.strptime(timestamp, date_format)
+	attd = Attendance.query.filter_by(CID=oldjs.get('cid'),SID=oldjs.get('sid'),timestamp=date_obj).first()
 
 	if not attd:
 		return jsonify({ 'result' : 'original record not in database'})
@@ -119,7 +122,7 @@ def modifyattdjson():
 	if newjs.get('cid') == '' or newjs.get('cid') is None:
 		return jsonify({ 'result' : 'no cid given'})
 
-	course = Course.query.filter_by(username=newjs.get('cid')).first()
+	course = Course.query.filter_by(ID=newjs.get('cid')).first()
 	if not course:
 		return jsonify({ 'result' : 'no course with given course id'})
 
@@ -130,40 +133,40 @@ def modifyattdjson():
 	if newjs.get('sid') == '' or newjs.get('sid') is None:
 		return jsonify({ 'result' : 'missing student id'})
 
-	user = User.query.filter_by(username=newjs.get('sid')).all()
+	user = User.query.filter_by(username=newjs.get('sid')).first()
 	if not user:
 		return jsonify({ 'result' : 'no student with given student id'})
 
-	user = User.query.filter_by(username=newjs.get('mid')).all()
+	user = User.query.filter_by(username=newjs.get('mid')).first()
 	if not user:
 		return jsonify({ 'result' : 'No faculty or ta with given marker id'})
 
 	attd.CID = newjs.get('cid') or attd.CID
 	attd.SID = newjs.get('sid') or attd.SID
 	
-	check_stud_map = db.session.query(stud_courses).filter_by(SID=newjs.get('sid'),CID=newjs.get('cid')).all()
+	check_stud_map = db.session.query(stud_courses).filter_by(SID=newjs.get('sid'),CID=newjs.get('cid')).first()
 	if not check_stud_map:
 		return jsonify({ 'result' : 'Student with id {} not registered for course {}'.format(newjs.get('sid'),newjs.get('cid'))})
 
 	if user.role.name == 'TA':
-		check_ta_map = db.session.query(ta_courses).filter_by(TAID=newjs.get('mid'),CID=newjs.get('cid')).all()
+		check_ta_map = db.session.query(ta_courses).filter_by(TAID=newjs.get('mid'),CID=newjs.get('cid')).first()
 		if not check_ta_map:
 			return jsonify({ 'result' : 'TA with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
 
 		attd.TAID = newjs.get('mid') or attd.TAID
 	
 	elif user.role.name == 'Prof':
-		check_prof_map = db.session.query(prof_courses).filter_by(FID=newjs.get('mid'),CID=newjs.get('cid')).all()
+		check_prof_map = db.session.query(prof_courses).filter_by(FID=newjs.get('mid'),CID=newjs.get('cid')).first()
 		if not check_prof_map:
 			return jsonify({ 'result' : 'Faculty with id {} not authorized for course {}'.format(newjs.get('mid'),newjs.get('cid'))})
 
 		attd.FID = newjs.get('mid') or attd.FID
 
-	if newjs.get('time') == '' or newjs.get('time') is None:
+	if newjs.get('timestamp') == '' or newjs.get('timestamp') is None:
 		return jsonify({ 'result' : 'missing timestamp'})
-	
 
-	attd.timestamp = newjs.get('time') or attd.timestamp
+	timestamp = newjs.get('timestamp')
+	attd.timestamp = timestamp or attd.timestamp
 
 	try:
 		db.session.commit()
@@ -178,7 +181,11 @@ def delattdjson():
 	if not jsdat:
 		return jsonify({ 'result' : 'bad info'})
 	try:
-		attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('sid'),timestamp=jsdat.get('time')).first()
+		timestamp = jsdat.get('time')
+		date_format = "%a, %d %b %Y %H:%M:%S %Z"
+		date_obj = datetime.strptime(timestamp, date_format)
+
+		attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('sid'),timestamp=date_obj).first()
 		if not attd:
 			return jsonify({ 'result' : 'no such record'})
 		db.session.delete(attd)
@@ -256,6 +263,11 @@ def detect_faces_in_image(file_stream,CID,user):
 				os.remove(upldir+image)
 
 	except MemoryError:
+		for image in os.listdir(upldir):
+			if os.path.isfile(upldir+image):
+				os.remove(upldir+image)
+
+	except:
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)

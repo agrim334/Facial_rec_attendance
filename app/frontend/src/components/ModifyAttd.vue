@@ -19,7 +19,7 @@
 
     <label>TimeStamp(Date of class) </label>
     <b-input type='date' :state='timdstate' placeholder = "Enter new Timestamp"
-    v-model = 'modattd.time'>
+    v-model = 'modattd.timestamp'>
     </b-input>
     <br>
 
@@ -38,7 +38,7 @@ export default {
         mid: this.attdrec.taid || this.attdrec.fid || '',
         sid: this.attdrec.sid || '',
         cid: this.attdrec.cid || '',
-        time: this.attdrec.time || '',
+        timestamp: this.attdrec.timestamp || '',
       },
     };
   },
@@ -53,7 +53,7 @@ export default {
       return this.modattd.cid.length > 0;
     },
     timdstate() {
-      return this.modattd.time.length > 0;
+      return this.modattd.timestamp.length > 0;
     },
   },
   methods: {
@@ -68,7 +68,7 @@ export default {
       if (this.modattd.cid === null || this.modattd.cid === '') {
         f = 1;
       }
-      if (this.modattd.time === null || this.modattd.time === '') {
+      if (this.modattd.timestamp === null || this.modattd.timestamp === '') {
         f = 1;
       }
       if (f === 0) {
