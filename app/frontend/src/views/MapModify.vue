@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     updaterec(mapdat) {
-      const path = '/map/modify_map_json';
+      const path = 'map/modify_map_json';
       const updat = { old: this.map, new: mapdat };
       this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((response) => {
@@ -39,7 +39,7 @@ export default {
         });
     },
     imgupl(data) {
-      const path = '/map/modify_map_json';
+      const path = 'map/modify_map_json';
       const formData = new FormData();
       formData.append('file', data.img);
       formData.append('uid', this.isstud.uid);

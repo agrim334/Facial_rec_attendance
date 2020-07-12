@@ -14,53 +14,46 @@ export default {
   components: {
     UserRecord,
   },
-  computed: {
-    isAuthenticated() {
-      return this.$store.getters.isAuthenticated;
-    },
-  },
   methods: {
     logout() {
       this.$store.dispatch('logout')
         .then(() => this.$router.push('/login'));
     },
     updaterec(userdat) {
-      if (this.isAuthenticated) {
+      if (this.$store.getters.isAuthenticated) {
         this.$router.push({ name: 'UserModify', params: { user: userdat } });
       }
-      else{
+      else {
         alert("Session expired. You have to login again");
         this.logout();
       }
     },
     deleterec(userdat) {
-      const path = 'users/delete_log_json';
-      if (this.$store.state.user === userdat.username) {
-        alert("Can't delete this user as currently logged in by the same");
+      if (this.$store.getters.isAuthenticated) {
+        const path = 'users/delete_log_json';
+        if (this.$store.state.user === userdat.username) {
+          alert("Can't delete this user as currently logged in by the same");
+        }
+        else {
+          this.$store.dispatch('authrequest', { url: path, data: userdat.username })
+            .then(() => {
+              this.getUsers();
+            })
+            .catch((error) => {
+              alert(error.response.data.result);
+              console.error(error);
+            });
+        }
       }
       else {
-        this.$store.dispatch('authrequest', { url: path, data: userdat.username })
-          .then(() => {
-            this.getUsers();
-          })
-          .catch((error) => {
-            alert(error.response.data.result);
-            console.error(error);
-          });
+        alert("Session expired. You have to login again");
+        this.logout();
       }
     },
     getUsers() {
       const path = 'users/check_user_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
         .then((response) => {
-          if (response.data.message === 'Invalid token') {
-            alert("Bad session logging out");
-            this.logout();
-          }
-          if (response.data.message === 'Expired token') {
-            alert("Session expired. You have to login again");
-            this.logout();
-          }
           this.users = response.data.records;
           if (this.$store.state.userrole === 'Admin') {
             for (let i = 0; i < this.users.length; i += 1) {
@@ -70,13 +63,18 @@ export default {
         })
         .catch((error) => {
           alert(error);
-          this.logout();
           console.error(error);
         });
     },
   },
   created() {
-    this.getUsers();
+    if (this.$store.getters.isAuthenticated) {
+      this.getUsers();
+    }    
+    else {      
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>

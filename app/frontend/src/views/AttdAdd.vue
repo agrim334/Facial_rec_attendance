@@ -4,7 +4,7 @@
     <b-form @submit.prevent='addman' v-if='auto === 0'>
       <b-table :items='studlist'>
         <template v-slot:cell(choices)='row'>
-          <b-form-radio-group v-model='row.item.status'>
+          <b-form-radio-group v-model='row.item.result'>
             <b-form-radio value='1'> Present </b-form-radio>
             <b-form-radio value='0'> Absent </b-form-radio>
           </b-form-radio-group>
@@ -51,6 +51,7 @@ export default {
           else alert(response.data.result);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
@@ -66,7 +67,8 @@ export default {
       this.$store.dispatch('authrequestimg', { url: path, data: formData })
         .then((response) => {
           alert(response.data.result);
-          this.studlist = res.data.studlist;
+          console.log(response);
+          this.studlist = response.data.studlist;
           for (let i = 0; i < this.studlist.length; i += 1) {
             this.studlist[i].choices = '';
           }
@@ -83,10 +85,10 @@ export default {
         cid: this.cid,
         mancheck: 1,
       };
-      this.$store.dispatch('authrequestimg', { url: path, data: updat })
+      this.$store.dispatch('authrequest', { url: path, data: updat })
         .then((response) => {
           alert(response.data.result);
-          console.log(res.data);
+          console.log(response.data);
         })
         .catch((error) => {
           alert(error.response.data.result);

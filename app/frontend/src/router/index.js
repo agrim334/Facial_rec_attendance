@@ -48,7 +48,10 @@ const routes = [
     name: 'Login',
     component: Login,
     beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated) next('/');
+      if (store.getters.isAuthenticated) {
+        alert("Already logged in.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -66,8 +69,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -78,7 +81,10 @@ const routes = [
     name: 'RequestReset',
     component: RequestReset,
     beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated) next('/');
+      if (store.getters.isAuthenticated) {
+        alert("Already logged in.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -87,7 +93,10 @@ const routes = [
     name: 'PasswordReset',
     component: PasswordReset,
     beforeEnter(to, from, next) {
-      if (store.getters.isAuthenticated) next('/');
+      if (store.getters.isAuthenticated) {
+        alert("Already logged in.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -96,7 +105,10 @@ const routes = [
     name: 'PasswordChange',
     component: PasswordChange,
     beforeEnter(to, from, next) {
-      if (!store.getters.isAuthenticated) next('/login');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
       else next();
     },
   },
@@ -115,8 +127,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -133,8 +145,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -152,8 +170,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -174,8 +192,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -192,8 +210,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -211,8 +235,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -233,8 +257,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -250,8 +274,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -270,8 +300,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("You don't have requisite credentials to access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -292,8 +322,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("You don't have requisite credentials to access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -310,8 +340,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },
@@ -329,8 +365,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -351,8 +387,8 @@ const routes = [
         alert("Login to access this page.Redirecting to login");
         next('/login');
       }
-      else if (!t) {
-        alert("Only admins can access this page.Redirecting to home");
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
         next('/');
       }
       else next();
@@ -369,8 +405,14 @@ const routes = [
       if (!role || (role !== 'Admin' && role !== 'Prof' && role !== 'Student' && role !== 'TA')) {
         t = 0;
       }
-      if (!store.getters.isAuthenticated) next('/login');
-      else if (t === 0) next('/');
+      if (!store.getters.isAuthenticated) {
+        alert("Login to access this page.Redirecting to login");
+        next('/login');
+      }
+      else if (t === 0) {
+        alert("You are not authorized to access this page.Redirecting to home");
+        next('/');
+      }
       else next();
     },
   },

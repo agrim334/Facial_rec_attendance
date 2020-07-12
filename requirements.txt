@@ -9,4 +9,3 @@ flask-migrate
 flask-uploads
 flask-mysql
 flask-mysqldb
-python3-mysqldb

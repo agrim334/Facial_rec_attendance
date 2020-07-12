@@ -22,6 +22,10 @@ export default {
     };
   },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     getDept() {
       const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
@@ -45,22 +49,34 @@ export default {
         });
     },
     add(data) {
-      const path = 'users/add_log_json';
-      const updat = data;
-      this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((response) => {
-          alert(response.data.result);
-          console.log(response);
-        })
-        .catch((error) => {
-          alert(error.response.data.result);
-          console.error(error);
-        });
+      if (this.$store.getters.isAuthenticated) {
+        const path = 'users/add_log_json';
+        const updat = data;
+        this.$store.dispatch('authrequest', { url: path, data: updat })
+          .then((response) => {
+            alert(response.data.result);
+            console.log(response);
+          })
+          .catch((error) => {
+            alert(error.response.data.result);
+            console.error(error);
+          });
+        }
+      else {
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
     },
   },
   created() {
-    this.getDept();
-    this.getRole();
+    if (this.$store.getters.isAuthenticated) {
+      this.getDept();
+      this.getRole();
+    }
+    else {      
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>

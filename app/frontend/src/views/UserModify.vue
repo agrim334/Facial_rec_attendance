@@ -22,17 +22,27 @@ export default {
     ModifyUser,
   },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     updaterec(userdat) {
-      const path = 'users/modify_log_json';
-      const updat = { old: this.user, new: userdat };
-      this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((response) => {
-          alert(response.data.result);
-        })
-        .catch((error) => {
-          alert(error.response.data.result);
-          console.error(error);
-        });
+      if (this.$store.getters.isAuthenticated) {
+        const path = 'users/modify_log_json';
+        const updat = { old: this.user, new: userdat };
+        this.$store.dispatch('authrequest', { url: path, data: updat })
+          .then((response) => {
+            alert(response.data.result);
+          })
+          .catch((error) => {
+            alert(error.response.data.result);
+            console.error(error);
+          });
+      }
+      else {      
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
     },
     getDept() {
       const path = 'dept/check_dept_json';
@@ -58,9 +68,14 @@ export default {
     },
   },
   created() {
-    this.getDept();
-    this.getRoles();
+    if (this.$store.getters.isAuthenticated) {
+      this.getDept();
+      this.getRoles();
+    }
+    else {      
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
-
 };
 </script>

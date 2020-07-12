@@ -46,6 +46,7 @@ def checkattdjson():
 def addattdjson():
 	if request.json:
 		jsdat = request.json
+		print(jsdat)
 		if jsdat.get('mancheck') == 1:
 			res = manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
 			if res == True:
@@ -72,9 +73,9 @@ def addattdjson():
 			cid = jsdat.get('cid')
 			uid = jsdat.get('uid')
 			if check_user.role.name == 'Prof':
-				check_map = db.session.query(prof_courses).filter_by(FID=uid,CID=cid).all()
+				check_map = db.session.query(prof_courses).filter_by(FID=uid,CID=cid).first()
 			elif check_user.role.name == 'TA':
-				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).all()
+				check_map = db.session.query(ta_courses).filter_by(TAID=uid,CID=cid).first()
 				
 			if not check_map:
 				return jsonify({ 'result' : 'No such mapping'})
@@ -94,6 +95,7 @@ def addattdjson():
 			t.save(os.path.join(temp, filename))
 
 		reglist = detect_faces_in_image(upldir,cid,uid)
+		print(reglist)
 		return jsonify({'studlist' : reglist, 'result': 'success'})
 
 @attd_sysbp.route('/modify_attd_json',methods=['POST'])
@@ -175,12 +177,10 @@ def delattdjson():
 	jsdat = request.json
 	if not jsdat:
 		return jsonify({ 'result' : 'bad info'})
-
 	try:
 		attd = Attendance.query.filter_by(CID=jsdat.get('cid'),SID=jsdat.get('sid'),timestamp=jsdat.get('time')).first()
 		if not attd:
 			return jsonify({ 'result' : 'no such record'})
-
 		db.session.delete(attd)
 		db.session.commit()
 		return jsonify({ 'result' : 'Record deletion success'})
@@ -188,8 +188,6 @@ def delattdjson():
 		return jsonify({ 'result' : 'Record deletion failed'})
 
 def detect_faces_in_image(file_stream,CID,user):
-	result = []
-
 	reglist = []
 	for r in db.session.query(stud_courses).filter_by(CID=CID):
 		reglist.append({ 'id' : r.SID, 'result': 0 })
@@ -199,9 +197,12 @@ def detect_faces_in_image(file_stream,CID,user):
 		result = []
 		num = 0
 		pat = re.compile('[0-9A-Za-z]+\.')
+		p = os.path.join(known_dir, CID)
 
-		for image in os.listdir(known_dir):
-			temp = face_recognition.load_image_file(known_dir+image)
+		file_stream = os.path.join(file_stream,CID)
+
+		for image in os.listdir(p):
+			temp = face_recognition.load_image_file(os.path.join(p, image))
 			inp_face_locations = face_recognition.face_locations(temp, model = "cnn")
 			encd= face_recognition.face_encodings(temp, known_face_locations = inp_face_locations)[0]
 			known_face_encd.append(encd)
@@ -209,9 +210,9 @@ def detect_faces_in_image(file_stream,CID,user):
 			image = image[:-1]
 			known_face_name[str(encd)] = image
 
+	
 		for file in os.listdir(file_stream):
-
-			un_image = face_recognition.load_image_file(file_stream+file)
+			un_image = face_recognition.load_image_file(os.path.join(file_stream, file))
 
 			face_locations = face_recognition.face_locations(un_image,model = "cnn")
 
@@ -229,29 +230,27 @@ def detect_faces_in_image(file_stream,CID,user):
 					if matches[best_match_index]:
 						im = known_face_encd[best_match_index]
 						name = known_face_name[str(im)]
-					result.append(("Face number " + str(num),name))
 
 					if name != "Unknown":
-						name = pat.match(name)[0]
-						name = name[:-1]
 						stud = User.query.filter_by(username=name).first() 
 						if stud and stud.role.name == 'Student':
-							c1 = db.session.query(stud_courses).filter_by(SID=name,CID = CID)
+							c1 = db.session.query(stud_courses).filter_by(SID=name,CID=CID)
 							if c1:
-								check = Attendance.query.filter_by(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d')) 
-								if not check or check.count() == 0:
+								check = Attendance.query.filter_by(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d')).first()
+								if not check:
 									if user.role.name == 'TA' :
 										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = user.username)
 										db.session.add(atdrecord)
-
 									elif user.role.name == 'Prof':
 										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = user.username)
 										db.session.add(atdrecord)
 
+		db.session.commit()
 		for r in db.session.query(stud_courses).join(Attendance,Attendance.CID == stud_courses.c.CID).filter_by(CID=CID,timestamp=datetime.today().strftime('%Y-%m-%d')):
 			for d in reglist:
 				if d['id'] == r.SID:
 					d['result'] = 1
+
 		for image in os.listdir(upldir):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
@@ -261,14 +260,10 @@ def detect_faces_in_image(file_stream,CID,user):
 			if os.path.isfile(upldir+image):
 				os.remove(upldir+image)
 
-	except:
-		for image in os.listdir(upldir):
-			if os.path.isfile(upldir+image):
-				os.remove(upldir+image)
 	return reglist
 
 def manmark(studlist,CID,uid):
-	check_course = Course.query.filter_by(ID=CID).all()
+	check_course = Course.query.filter_by(ID=CID).first()
 	if not check_course:
 		return False
 
@@ -283,14 +278,14 @@ def manmark(studlist,CID,uid):
 			if stud and stud.role.name == 'Student':
 				c1 = db.session.query(stud_courses).filter_by(SID=stud_id,CID = CID)
 				if c1:
-					check = Attendance.query.filter_by(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d')) 
-					if not check or check.count() == 0:
+					check = Attendance.query.filter_by(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d')).first() 
+					if not check:
 						if check_user.role.name == 'TA' :
-							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = check_user.username)
+							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = uid)
 							db.session.add(atdrecord)
 
 						elif check_user.role.name == 'Prof':
-							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = check_user.username)
+							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = uid)
 							db.session.add(atdrecord)
 
 	check_course.classes_held = check_course.classes_held + 1
