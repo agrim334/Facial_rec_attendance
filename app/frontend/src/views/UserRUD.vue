@@ -36,7 +36,8 @@ export default {
         }
         else {
           this.$store.dispatch('authrequest', { url: path, data: userdat.username })
-            .then(() => {
+            .then((response) => {
+              alert(response.data.result);
               this.getUsers();
             })
             .catch((error) => {

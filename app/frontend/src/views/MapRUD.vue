@@ -40,8 +40,8 @@ export default {
     deleterec(mapdat) {
       const path = 'map/delete_map_json';
       this.$store.dispatch('authrequest', { url: path, data: mapdat })
-        .then((res) => {
-          alert(res.data.status);
+        .then((response) => {
+          alert(response.data.result);
           this.getMaps();
         })
         .catch((error) => {

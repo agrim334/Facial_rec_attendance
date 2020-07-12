@@ -19,6 +19,10 @@ export default {
     ModifyAttdForm,
   },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     updaterec(modattd) {
       const path = 'attd/modify_attd_json';
       const updat = { old: this.attd, new: modattd };
@@ -32,6 +36,12 @@ export default {
           console.error(error);
         });
     },
+  },
+  created() {
+    if (!this.$store.getters.isAuthenticated) {
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>

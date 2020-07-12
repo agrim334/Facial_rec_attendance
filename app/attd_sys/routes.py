@@ -21,7 +21,6 @@ photos = UploadSet('photos', IMAGES)
 configure_uploads(AP, photos)
 patch_request_class(AP)
 
-
 @attd_sysbp.after_request
 def after_request(response):									#security
 	response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
@@ -46,7 +45,6 @@ def checkattdjson():
 def addattdjson():
 	if request.json:
 		jsdat = request.json
-		print(jsdat)
 		if jsdat.get('mancheck') == 1:
 			res = manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
 			if res == True:

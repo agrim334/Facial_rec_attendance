@@ -71,15 +71,13 @@ def modifydeptjson():
 	if check_dept:
 		return jsonify({ 'result' : 'Dept {} already in database'.format(newjs.get('id'))})
 
-#	try:
-	dept.ID = newjs.get('id') or dept.ID
-	dept.name = newjs.get('name') or dept.name
-	print(dept.ID)
-	db.session.commit()
-	return jsonify({ 'result' : 'Dept modify success'})
-#	except:
-#		print('fail')
-#		return jsonify({ 'result' : 'Dept modify fail'})
+	try:
+		dept.ID = newjs.get('id') or dept.ID
+		dept.name = newjs.get('name') or dept.name
+		db.session.commit()
+		return jsonify({ 'result' : 'Dept modify success'})
+	except:
+		return jsonify({ 'result' : 'Dept modify fail'})
 
 @dept_sysbp.route('/delete_dept_json',methods=['GET','POST'])
 @token_required(Permission.ADMIN)

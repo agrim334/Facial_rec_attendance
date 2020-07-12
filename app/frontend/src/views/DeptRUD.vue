@@ -26,7 +26,8 @@ export default {
     deleterec(deptdat) {
       const path = 'dept/delete_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: deptdat.id })
-        .then(() => {
+        .then((response) => {
+          alert(response.data.result);
           this.getDept();
         })
         .catch((error) => {

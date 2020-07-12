@@ -16,6 +16,10 @@ export default {
     AddCourseForm,
   },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     add(data) {
       const path = 'courses/add_course_json';
       const updat = data;
@@ -28,6 +32,12 @@ export default {
           console.error(error);
         });
     },
+  },
+  created() {
+    if (!this.$store.getters.isAuthenticated) {
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>

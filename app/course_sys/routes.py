@@ -30,7 +30,7 @@ def checkcoursejson():
 @token_required(Permission.ADMIN)
 def addcoursejson():
 	jsdat = request.json
-	check_course = Course.query.filter_by(ID = jsdat.get('id'),name = jsdat.get('name')).first()
+	check_course = Course.query.filter_by(ID = jsdat.get('id')).first()
 
 	if check_course:
 		return jsonify({ 'result' : 'Course already in database'})
@@ -58,7 +58,7 @@ def modifycoursejson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
 	
-	course = Course.query.filter_by(ID=oldjs.get('id'),name=oldjs.get('name')).first()
+	course = Course.query.filter_by(ID=oldjs.get('id')).first()
 
 	if not course:
 		return jsonify({ 'result' : 'No course {} in database'.format(oldjs.get('id'))})
@@ -68,7 +68,7 @@ def modifycoursejson():
 	if newjs.get('name') == '' or newjs.get('name') is None:
 		return jsonify({ 'result' : 'empty course name'})
 
-	check_course = Course.query.filter_by(ID = newjs.get('id'),name = newjs.get('name')).first()
+	check_course = Course.query.filter_by(ID = newjs.get('id')).first()
 
 	if check_course:
 		return jsonify({ 'result' : 'Course already in database'})

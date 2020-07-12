@@ -33,68 +33,91 @@ export default {
       auto: 1,
     };
   },
-  computed: {
-    isAuthenticated() {
-      return this.$store.getters.isAuthenticated;
-    },
-  },
   methods: {
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
+    },
     addface(attddat) {
-      const path = 'attd/add_attd_json';
-      this.uid = attddat.rec.uid;
-      this.cid = attddat.rec.cid;
+      if (!this.$store.getters.isAuthenticated) {
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
+      else {
+        const path = 'attd/add_attd_json';
+        this.uid = attddat.rec.uid;
+        this.cid = attddat.rec.cid;
 
-      this.$store.dispatch('authrequest', { url: path, data: attddat.rec })
-        .then((response) => {
-          this.auto = 0;
-          if (response.data.result === 'Success') this.uplimg(attddat);
-          else alert(response.data.result);
-        })
-        .catch((error) => {
-          alert(error.response.data.result);
-          console.error(error);
-        });
+        this.$store.dispatch('authrequest', { url: path, data: attddat.rec })
+          .then((response) => {
+            this.auto = 0;
+            if (response.data.result === 'Success') this.uplimg(attddat);
+            else alert(response.data.result);
+          })
+          .catch((error) => {
+            alert(error.response.data.result);
+            console.error(error);
+          });
+      }
     },
     uplimg(attddat) {
-      const path = 'attd/add_attd_json';
-      const formData = new FormData();
-      for (let i = 0; i < attddat.img.length; i += 1) {
-        const tfile = attddat.img[i];
-        formData.append('files['.concat(i).concat(']'), tfile);
+      if (!this.$store.getters.isAuthenticated) {
+        alert("Session expired. You have to login again");
+        this.logout();
       }
-      formData.append('uid', this.uid);
-      formData.append('cid', this.cid);
-      this.$store.dispatch('authrequestimg', { url: path, data: formData })
-        .then((response) => {
-          alert(response.data.result);
-          console.log(response);
-          this.studlist = response.data.studlist;
-          for (let i = 0; i < this.studlist.length; i += 1) {
+      else {
+        const path = 'attd/add_attd_json';
+        const formData = new FormData();
+        for (let i = 0; i < attddat.img.length; i += 1) {
+          const tfile = attddat.img[i];
+          formData.append('files['.concat(i).concat(']'), tfile);
+        }
+        formData.append('uid', this.uid);
+        formData.append('cid', this.cid);
+        this.$store.dispatch('authrequestimg', { url: path, data: formData })
+          .then((response) => {
+            alert(response.data.result);
+            console.log(response);
+            this.studlist = response.data.studlist;
+            for (let i = 0; i < this.studlist.length; i += 1) {
             this.studlist[i].choices = '';
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
     },
     addman() {
-      const path = 'attd/add_attd_json';
-      const updat = {
-        studlist: this.studlist,
-        uid: this.uid,
-        cid: this.cid,
-        mancheck: 1,
-      };
-      this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((response) => {
-          alert(response.data.result);
-          console.log(response.data);
-        })
-        .catch((error) => {
-          alert(error.response.data.result);
-          console.error(error);
-        });
+      if (!this.$store.getters.isAuthenticated) {
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
+      else {
+        const path = 'attd/add_attd_json';
+        const updat = {
+          studlist: this.studlist,
+          uid: this.uid,
+          cid: this.cid,
+          mancheck: 1,
+        };
+        this.$store.dispatch('authrequest', { url: path, data: updat })
+          .then((response) => {
+            alert(response.data.result);
+            console.log(response.data);
+          })
+          .catch((error) => {
+            alert(error.response.data.result);
+            console.error(error);
+          });
+      }
     },
+  },
+  created() {
+    if (!this.$store.getters.isAuthenticated) {
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>

@@ -26,7 +26,8 @@ export default {
     deleterec(attddat) {
       const path = 'attd/delete_attd_json';
       this.$store.dispatch('authrequest', { url: path, data: attddat })
-        .then(() => {
+        .then((response) => {
+          alert(response.data.result);
           this.getAttd();
         })
         .catch((error) => {

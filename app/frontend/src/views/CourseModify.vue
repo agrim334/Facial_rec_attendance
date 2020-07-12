@@ -19,19 +19,35 @@ export default {
     ModifyCourseForm,
   },
   methods: {
-    updaterec(modcourse) {
-      const path = 'courses/modify_course_json';
-      const updat = { old: this.course, new: modcourse };
-      this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((response) => {
-          alert(response.data.result);
-          console.log(response);
-        })
-        .catch((error) => {
-          alert(error.response.data.result);
-          console.error(error);
-        });
+    logout() {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'));
     },
+    updaterec(modcourse) {
+      if (!this.$store.getters.isAuthenticated) {
+        alert("Session expired. You have to login again");
+        this.logout();
+      }
+      else {
+        const path = 'courses/modify_course_json';
+        const updat = { old: this.course, new: modcourse };
+        this.$store.dispatch('authrequest', { url: path, data: updat })
+          .then((response) => {
+            alert(response.data.result);
+            console.log(response);
+          })
+          .catch((error) => {
+            alert(error.response.data.result);
+            console.error(error);
+          });
+      }
+    },
+  },
+  created() {
+    if (!this.$store.getters.isAuthenticated) {
+      alert("Session expired. You have to login again");
+      this.logout();
+    }
   },
 };
 </script>
