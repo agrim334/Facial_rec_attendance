@@ -20,10 +20,11 @@ export default {
       const path = 'dept/add_dept_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((res) => {
-          alert(res.data);
+        .then((response) => {
+          alert(response.data.result);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

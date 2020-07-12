@@ -26,38 +26,38 @@ export default {
       const path = 'users/modify_log_json';
       const updat = { old: this.user, new: userdat };
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then(() => {
-          console.log(this);
+        .then((response) => {
+          alert(response.data.result);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
     getDept() {
       const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          console.log(res.data);
-          this.depts = res.data.records;
+        .then((response) => {
+          this.depts = response.data.records;
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
     getRoles() {
       const path = 'roles/check_role_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          console.log(res.data);
-          this.roles = res.data.records;
+        .then((response) => {
+          this.roles = response.data.records;
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
   },
   created() {
-    console.log(this.user);
     this.getDept();
     this.getRoles();
   },

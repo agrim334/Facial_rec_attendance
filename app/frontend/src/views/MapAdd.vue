@@ -26,12 +26,15 @@ export default {
       const path = 'map/add_map_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((res) => {
-          this.isstud = res.data.isstud;
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
+          this.isstud = response.data.isstud;
           this.cid = data.cid;
           if (this.isstud === 0) alert('Success in adding map');
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
@@ -42,10 +45,12 @@ export default {
       formData.append('uid', data.dat.uid);
       formData.append('cid', data.dat.cid);
       this.$store.dispatch('authrequestimg', { url: path, data: formData })
-        .then((res) => {
-          alert(res.data);
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

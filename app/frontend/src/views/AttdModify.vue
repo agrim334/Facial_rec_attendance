@@ -23,10 +23,12 @@ export default {
       const path = 'attd/modify_attd_json';
       const updat = { old: this.attd, new: modattd };
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((res) => {
-          console.log(res);
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

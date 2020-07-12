@@ -23,6 +23,7 @@ export default {
           alert(response.data.result);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

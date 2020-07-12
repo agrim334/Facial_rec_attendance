@@ -28,10 +28,11 @@ export default {
       const path = '/map/modify_map_json';
       const updat = { old: this.map, new: mapdat };
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((res) => {
-          console.log(res.data.status);
-          this.isstud.val = res.data.isstud;
+        .then((response) => {
+          alert(response.data.result);
+          this.isstud.val = response.data.isstud;
           this.isstud.uid = mapdat.uid;
+          console.log(response);
         })
         .catch((error) => {
           console.error(error);
@@ -43,10 +44,12 @@ export default {
       formData.append('file', data.img);
       formData.append('uid', this.isstud.uid);
       this.$store.dispatch('authrequestimg', { url: path, data: formData })
-        .then((res) => {
-          alert(res.data);
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

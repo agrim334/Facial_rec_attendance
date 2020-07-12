@@ -31,7 +31,7 @@ class Role(db.Model):
 	name = db.Column(db.String(20))
 	default = db.Column(db.Boolean, default=False, index=True)
 	permissions = db.Column(db.Integer)
-	users_name= db.relationship('User', backref='role')
+	users_name= db.relationship('User', backref='role',cascade="save-update,all,delete")
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,
@@ -54,8 +54,8 @@ class Role(db.Model):
 class Department(db.Model):
 	ID = db.Column(db.String(64), primary_key=True)
 	name = db.Column(db.String(64))
-	users_dept = db.relationship('User', backref='udept', cascade="all,delete",)
-	courses_dept = db.relationship('Course', backref='cdept', cascade="all,delete",)
+	users_dept = db.relationship('User', backref='udept', cascade="save-update,all,delete",)
+	courses_dept = db.relationship('Course', backref='cdept', cascade="save-update,all,delete",)
 	def to_json(self):
 		return	{	'id' : self.ID,
 					'name' : self.name,
@@ -96,7 +96,7 @@ class User(UserMixin,db.Model):
 	fname = db.Column(db.String(64), index=True)
 	lname = db.Column(db.String(64), index=True)
 	password_hash = db.Column(db.String(128))
-	dept = db.Column(db.String(64),db.ForeignKey('department.ID'))
+	dept = db.Column(db.String(64),db.ForeignKey('department.ID',onupdate="CASCADE",ondelete="CASCADE"))
 	role_id = db.Column(db.Integer, db.ForeignKey('role.ID',onupdate="CASCADE",ondelete="CASCADE"))
 
 	facult = db.relationship('Course',
@@ -136,8 +136,7 @@ class User(UserMixin,db.Model):
 		fname = json_data.get('fname')
 		lname = json_data.get('lname')
 		dept = json_data.get('deptc')
-		t = Role.query.filter_by(name=json_data.get('rolec')).first()
-		role_id = t.id
+		role_id = json_data.get('rolec')
 		if dept == '':
 			dept = None
 		return User(username=username,email=email,fname=fname,lname=lname,dept=dept,role_id=role_id)
@@ -189,11 +188,11 @@ class User(UserMixin,db.Model):
 		return user
 
 class Attendance(db.Model):													#attendance records
-	CID = db.Column(db.String(64),db.ForeignKey('stud_courses.CID'),primary_key=True)
-	SID = db.Column(db.String(64),db.ForeignKey('stud_courses.SID'),primary_key=True)
+	CID = db.Column(db.String(64),db.ForeignKey('stud_courses.CID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
+	SID = db.Column(db.String(64),db.ForeignKey('stud_courses.SID',onupdate="CASCADE",ondelete="CASCADE"),primary_key=True)
 	timestamp = db.Column(db.Date,primary_key=True)
-	FID = db.Column(db.String(64),db.ForeignKey('prof_courses.FID'))
-	TAID = db.Column(db.String(64),db.ForeignKey('ta_courses.TAID'))
+	FID = db.Column(db.String(64),db.ForeignKey('prof_courses.FID',onupdate="CASCADE",ondelete="CASCADE"))
+	TAID = db.Column(db.String(64),db.ForeignKey('ta_courses.TAID',onupdate="CASCADE",ondelete="CASCADE"))
 
 	def to_json(self):
 		return 	{	'cid' : self.CID,

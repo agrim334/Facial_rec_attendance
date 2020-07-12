@@ -23,10 +23,12 @@ export default {
       const path = 'courses/modify_course_json';
       const updat = { old: this.course, new: modcourse };
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then(() => {
-          console.log(this);
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

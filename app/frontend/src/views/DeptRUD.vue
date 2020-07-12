@@ -30,14 +30,15 @@ export default {
           this.getDept();
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
     getDept() {
       const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          this.depts = res.data.records;
+        .then((response) => {
+          this.depts = response.data.records;
           if (this.$store.state.userrole === 'Admin') {
             for (let i = 0; i < this.depts.length; i += 1) {
               this.depts[i].actions = '';
@@ -45,6 +46,7 @@ export default {
           }
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

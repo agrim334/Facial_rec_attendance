@@ -44,7 +44,7 @@ export default {
             this.getUsers();
           })
           .catch((error) => {
-            alert(error);
+            alert(error.response.data.result);
             console.error(error);
           });
       }
@@ -52,16 +52,16 @@ export default {
     getUsers() {
       const path = 'users/check_user_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          if (res.data.message === 'Invalid token') {
+        .then((response) => {
+          if (response.data.message === 'Invalid token') {
             alert("Bad session logging out");
             this.logout();
           }
-          if (res.data.message === 'Expired token') {
+          if (response.data.message === 'Expired token') {
             alert("Session expired. You have to login again");
             this.logout();
           }
-          this.users = res.data.records;
+          this.users = response.data.records;
           if (this.$store.state.userrole === 'Admin') {
             for (let i = 0; i < this.users.length; i += 1) {
               this.users[i].actions = '';

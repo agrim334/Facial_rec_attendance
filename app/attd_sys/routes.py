@@ -47,8 +47,11 @@ def addattdjson():
 	if request.json:
 		jsdat = request.json
 		if jsdat.get('mancheck') == 1:
-			manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
-			return jsonify({ 'result' : 'success'})
+			res = manmark(jsdat.get('studlist'),jsdat.get('cid'),jsdat.get('uid'))
+			if res == True:
+				return jsonify({ 'result' : 'success'})
+			else:
+				return jsonify({ 'result' : 'failed'})
 		else:
 			if jsdat.get('uid') == '' or jsdat.get('uid') is None:
 				return jsonify({ 'result' : 'bad info'})
@@ -240,12 +243,10 @@ def detect_faces_in_image(file_stream,CID,user):
 									if user.role.name == 'TA' :
 										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = user.username)
 										db.session.add(atdrecord)
-										db.session.commit()
 
 									elif user.role.name == 'Prof':
 										atdrecord = Attendance(CID=CID,SID=name,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = user.username)
 										db.session.add(atdrecord)
-										db.session.commit()
 
 		for r in db.session.query(stud_courses).join(Attendance,Attendance.CID == stud_courses.c.CID).filter_by(CID=CID,timestamp=datetime.today().strftime('%Y-%m-%d')):
 			for d in reglist:
@@ -287,13 +288,15 @@ def manmark(studlist,CID,uid):
 						if check_user.role.name == 'TA' :
 							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),TAID = check_user.username)
 							db.session.add(atdrecord)
-							db.session.commit()
 
 						elif check_user.role.name == 'Prof':
 							atdrecord = Attendance(CID=CID,SID=stud_id,timestamp=datetime.today().strftime('%Y-%m-%d'),FID = check_user.username)
 							db.session.add(atdrecord)
-							db.session.commit()
 
 	check_course.classes_held = check_course.classes_held + 1
-	db.session.close()
-	return True
+	try:
+		db.session.commit()
+		return True
+	except:
+		db.session.rollback()
+		return False

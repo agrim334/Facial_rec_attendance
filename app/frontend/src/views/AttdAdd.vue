@@ -45,10 +45,10 @@ export default {
       this.cid = attddat.rec.cid;
 
       this.$store.dispatch('authrequest', { url: path, data: attddat.rec })
-        .then((res) => {
+        .then((response) => {
           this.auto = 0;
-          if (res.data.status === 'Success') this.uplimg(attddat);
-          else alert(res.data.status);
+          if (response.data.result === 'Success') this.uplimg(attddat);
+          else alert(response.data.result);
         })
         .catch((error) => {
           console.error(error);
@@ -64,8 +64,8 @@ export default {
       formData.append('uid', this.uid);
       formData.append('cid', this.cid);
       this.$store.dispatch('authrequestimg', { url: path, data: formData })
-        .then((res) => {
-          alert(res.data.status);
+        .then((response) => {
+          alert(response.data.result);
           this.studlist = res.data.studlist;
           for (let i = 0; i < this.studlist.length; i += 1) {
             this.studlist[i].choices = '';
@@ -84,10 +84,12 @@ export default {
         mancheck: 1,
       };
       this.$store.dispatch('authrequestimg', { url: path, data: updat })
-        .then((res) => {
+        .then((response) => {
+          alert(response.data.result);
           console.log(res.data);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

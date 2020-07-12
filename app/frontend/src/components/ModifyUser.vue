@@ -99,13 +99,6 @@ export default {
   methods: {
     validate() {
       let f = 0;
-      let ad = -1;
-      for (let i = 0; i < this.roles.length; i += 1) {
-        if (this.roles[i].name === 'Admin') {
-          ad = this.roles[i].id;
-          break;
-        }
-      }
       if (this.moduser.username === null || this.moduser.username === '') {
         alert('Fill in user name');
         f = 1;
@@ -126,7 +119,7 @@ export default {
         alert('Choose a role');
         f = 1;
       }
-      if (this.moduser.rolec !== ad && (this.moduser.deptc === '' || this.moduser.deptc === null)) {
+      if (this.moduser.rolec !== 'Admin' && (this.moduser.deptc === '' || this.moduser.deptc === null)) {
         alert('Non admin must have a department');
         f = 1;
       }
@@ -139,8 +132,5 @@ export default {
       }
     },
   },
-  created() {
-    console.log(this.userrec);
-  }
 };
 </script>

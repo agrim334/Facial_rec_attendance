@@ -24,10 +24,12 @@ export default {
       const path = 'dept/modify_dept_json';
       const updat = { old: this.dept, new: deptdat };
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then(() => {
-          console.log('done');
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

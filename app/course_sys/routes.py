@@ -30,9 +30,9 @@ def checkcoursejson():
 @token_required(Permission.ADMIN)
 def addcoursejson():
 	jsdat = request.json
-	check_course = Course.query.filter_by(ID = jsdat.get('id'),name = jsdat.get('name')).all()
+	check_course = Course.query.filter_by(ID = jsdat.get('id'),name = jsdat.get('name')).first()
 
-	if check_course and check_course.count() != 0:
+	if check_course:
 		return jsonify({ 'result' : 'Course already in database'})
 
 	if jsdat.get('id') == '' or jsdat.get('id') is None:
@@ -43,7 +43,7 @@ def addcoursejson():
 
 	course = Course.from_json(jsdat)
 	if course is None:
-		return jsonify({ 'result' : 'couldn\'t create course record'})
+		return jsonify({ "result" : "couldn't create course record"})
 
 	try:
 		db.session.add(course)
@@ -58,7 +58,7 @@ def modifycoursejson():
 	oldjs = request.json['old']
 	newjs = request.json['new']
 	
-	course = Course.query.filter_by(ID=oldjs.get('id'),name=oldjs.get('name')).all()
+	course = Course.query.filter_by(ID=oldjs.get('id'),name=oldjs.get('name')).first()
 
 	if not course:
 		return jsonify({ 'result' : 'No course {} in database'.format(oldjs.get('id'))})
@@ -68,16 +68,14 @@ def modifycoursejson():
 	if newjs.get('name') == '' or newjs.get('name') is None:
 		return jsonify({ 'result' : 'empty course name'})
 
-	check_course = Course.query.filter_by(ID = newjs.get('id'),name = newjs.get('name')).all()
+	check_course = Course.query.filter_by(ID = newjs.get('id'),name = newjs.get('name')).first()
 
 	if check_course:
 		return jsonify({ 'result' : 'Course already in database'})
 
-	course.ID = newjs.get('id') or course.ID
-	course.name = newjs.get('name') or course.name
-
 	try:
-
+		course.ID = newjs.get('id') or course.ID
+		course.name = newjs.get('name') or course.name
 		db.session.commit()
 		return jsonify({ 'result' : 'Course modify success'})
 	except:
@@ -89,7 +87,7 @@ def delcoursejson():
 	if not request.get_data('id'):
 		return jsonify({ 'result' : 'No id given'})
 
-	course = Course.query.filter_by(ID=request.get_data('id')).all()
+	course = Course.query.filter_by(ID=request.get_data('id')).first()
 	if not course:
 		return jsonify({ 'result' : 'No such course in database'})
 	try:

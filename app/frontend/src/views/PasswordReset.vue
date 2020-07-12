@@ -30,10 +30,12 @@ export default {
         path = path.concat(this.$route.path);
         console.log(path);
         this.$store.dispatch('noauthroutrereq', { url: path, data: userdat })
-          .then((res) => {
-            console.log(res.data.status);
+          .then((response) => {
+            alert(response.data.result);
+            console.log(response);
           })
           .catch((error) => {
+            alert(error.response.data.result);
             console.error(error);
           });
       }

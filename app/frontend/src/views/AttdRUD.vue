@@ -30,14 +30,15 @@ export default {
           this.getAttd();
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
     getAttd() {
       const path = 'attd/check_attd_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          this.attds = res.data.records;
+        .then((response) => {
+          this.attds = response.data.records;
           const role = this.$store.state.userrole || '';
           if (role === 'Admin' || role === 'TA' || role === 'Prof') {
             for (let i = 0; i < this.attds.length; i += 1) {
@@ -46,6 +47,7 @@ export default {
           }
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

@@ -25,8 +25,8 @@ export default {
     getDept() {
       const path = 'dept/check_dept_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          this.depts = res.data.records;
+        .then((response) => {
+          this.depts = response.data.records;
           console.log(this.depts);
         })
         .catch((error) => {
@@ -36,8 +36,8 @@ export default {
     getRole() {
       const path = 'roles/check_role_json';
       this.$store.dispatch('authrequest', { url: path, data: '' })
-        .then((res) => {
-          this.roles = res.data.records;
+        .then((response) => {
+          this.roles = response.data.records;
           console.log(this.roles);
         })
         .catch((error) => {
@@ -48,10 +48,12 @@ export default {
       const path = 'users/add_log_json';
       const updat = data;
       this.$store.dispatch('authrequest', { url: path, data: updat })
-        .then((res) => {
-          alert(res.data.status);
+        .then((response) => {
+          alert(response.data.result);
+          console.log(response);
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

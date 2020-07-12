@@ -165,6 +165,7 @@ def addlogjson():
 		return jsonify({ 'result' : 'role info not given'})
 
 	check_role = Role.query.filter_by(ID=jsdat.get('rolec')).first()
+
 	if not check_role:
 		return jsonify({ 'result' : 'not valid role'})
 
@@ -182,6 +183,8 @@ def addlogjson():
 		return jsonify({ 'result' : 'password not match'})
 
 	user = User.from_json(jsdat)
+	print(user)
+
 	user.set_password(jsdat.get('pass'))
 	if not user or user is None:
 		return jsonify({ 'result' : 'can\'t create user'})
@@ -257,12 +260,11 @@ def modifylogjson():
 	if newjs.get('rolec') == '' or newjs.get('rolec') is None:
 		return jsonify({ 'result' : 'empty role'})
 	
-	admin_role = Role.query.filter_by(name="Admin").first()
-	check_role = Role.query.filter_by(ID=newjs.get('rolec')).first()
+	check_role = Role.query.filter_by(name=newjs.get('rolec')).first()
 	if not check_role:
 		return jsonify({ 'result' : 'No such role exists'})
 
-	if newjs.get('rolec') != admin_role.ID:
+	if newjs.get('rolec') != "Admin":
 		if newjs.get('deptc') == '' or newjs.get('deptc') is None:
 			return jsonify({ 'result' : 'Non admin must have a department'})
 
@@ -278,8 +280,7 @@ def modifylogjson():
 		user.fname = newjs.get('fname') or user.fname 
 		user.lname = newjs.get('lname') or user.lname 
 		user.email = newjs.get('email') or user.email
-		t = Role.query.filter_by(name=newjs.get('rolec')).first()
-		user.role_id = t.id or user.role_id
+		user.role_id =  check_role.ID or user.role_id
 		user.dept = newjs.get('deptc') or user.dept
 		user.set_password(newjs.get('pass'))
 

@@ -27,8 +27,8 @@ export default {
     updaterec(userdat) {
       const path = 'users/change_pwd';
       this.$store.dispatch('authrequest', { url: path, data: userdat })
-        .then((res) => {
-          if (res.data.message === 'Invalid token') {
+        .then((response) => {
+          if (response.data.message === 'Invalid token') {
             alert("Bad session logging out");
             this.logout();
           }
@@ -37,10 +37,18 @@ export default {
             this.logout();
           }
           else {
-            alert(res.data);
+            alert(response.data);
           }
         })
         .catch((error) => {
+          if (error.response.data.message === 'Invalid token') {
+            alert("Bad session logging out");
+            this.logout();
+          }
+          else if (error.response.data.message === 'Expired token') {
+            alert("Session expired. You have to login again");
+            this.logout();
+          }
           console.error(error);
         });
     },

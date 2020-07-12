@@ -26,10 +26,12 @@ export default {
     deleterec(coursedat) {
       const path = 'courses/delete_course_json';
       this.$store.dispatch('authrequest', { url: path, data: coursedat.id })
-        .then(() => {
+        .then((response) => {
+          alert(response.data.result);
           this.getCourse();
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },
@@ -45,6 +47,7 @@ export default {
           }
         })
         .catch((error) => {
+          alert(error.response.data.result);
           console.error(error);
         });
     },

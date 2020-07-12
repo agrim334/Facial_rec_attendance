@@ -37,8 +37,9 @@ const actions = {
     const userdat = userData.data;
     return noauthroute(path, userdat)
       .then((response) => {
-        alert(response.data);
+        alert(response.data.result);
       }).catch((error) => {
+        alert(error.response.data.message);
         console.log('Error Authenticating: ', error);
         EventBus.$emit('failedauthentication', error);
       });
