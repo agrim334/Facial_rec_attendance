@@ -4,6 +4,9 @@ click
 Pillow
 opencv-python
 flask
+flask-mail
+flask-email
+flask-cors
 flask-sqlalchemy
 flask-migrate
 flask-uploads
